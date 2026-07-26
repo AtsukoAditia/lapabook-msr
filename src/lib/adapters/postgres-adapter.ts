@@ -25,13 +25,37 @@ import type {
   LoyaltyTransactionType,
   Reward,
   RewardRedemption,
-  Area,
+  Province,
+  City,
+  District,
+  Village,
+  RegionOption,
   VenueOwner,
   VenueOwnerStatus,
   Review,
   ReviewWithDetails,
   CourtPhoto,
   Holiday,
+  PickupGame,
+  PickupGameParticipant,
+  PickupGameMessage,
+  TeamWallet,
+  TeamWalletMember,
+  TeamWalletDeposit,
+  TeamWalletTransaction,
+  TeamWalletSplit,
+  TeamWalletSplitMember,
+  PlayerProfile,
+  PlayerSkillRating,
+  MatchRequest,
+  Achievement,
+  PlayerAchievement,
+  PlayerStreak,
+  FlashDeal,
+  VenueCamera,
+  VenueVerification,
+  VenueVerificationPhoto,
+  LoyaltyTier,
 } from "@/lib/types/domain";
 
 // ── Singleton Pool ──
@@ -155,20 +179,47 @@ export class PostgresAdapter implements DatabaseAdapter {
     return rows.map((r) => ({ id: r.id as string, name: r.name as string, slug: r.slug as string, isActive: (r.isActive ?? r.is_active) as boolean }));
   }
 
-  // ── Areas ──
-  async getAreas(): Promise<Area[]> {
-    const rows = await query<Record<string, unknown>>("SELECT * FROM areas WHERE is_active = true ORDER BY province, city");
-    return rows.map((r) => {
-      const a = snakeToCamel(r);
-      return { id: a.id as string, province: a.province as string, city: a.city as string, district: a.district as string, village: (a.village as string) || "", slug: a.slug as string, label: (a.label as string) || "", isActive: a.isActive as boolean, createdAt: fmtTs(a.createdAt), updatedAt: fmtTs(a.updatedAt) };
-    });
+  // ── Regions ──
+  async getProvinces(): Promise<Province[]> {
+    const rows = await query<Record<string, unknown>>("SELECT * FROM provinces WHERE is_active = true ORDER BY name");
+    return rows.map((r) => { const a = snakeToCamel(r); return { id: a.id as string, name: a.name as string, slug: a.slug as string, isActive: a.isActive as boolean, createdAt: fmtTs(a.createdAt), updatedAt: fmtTs(a.updatedAt) }; });
   }
 
-  async getAreaById(id: string): Promise<Area | null> {
-    const r = await queryOne<Record<string, unknown>>("SELECT * FROM areas WHERE id = $1", [id]);
-    if (!r) return null;
-    const a = snakeToCamel(r);
-    return { id: a.id as string, province: a.province as string, city: a.city as string, district: a.district as string, village: (a.village as string) || "", slug: a.slug as string, label: (a.label as string) || "", isActive: a.isActive as boolean, createdAt: fmtTs(a.createdAt), updatedAt: fmtTs(a.updatedAt) };
+  async getCities(provinceId: string): Promise<City[]> {
+    const rows = await query<Record<string, unknown>>("SELECT * FROM cities WHERE province_id = $1 AND is_active = true ORDER BY name", [provinceId]);
+    return rows.map((r) => { const a = snakeToCamel(r); return { id: a.id as string, provinceId: a.provinceId as string, name: a.name as string, slug: a.slug as string, isActive: a.isActive as boolean, createdAt: fmtTs(a.createdAt), updatedAt: fmtTs(a.updatedAt) }; });
+  }
+
+  async getDistricts(cityId: string): Promise<District[]> {
+    const rows = await query<Record<string, unknown>>("SELECT * FROM districts WHERE city_id = $1 AND is_active = true ORDER BY name", [cityId]);
+    return rows.map((r) => { const a = snakeToCamel(r); return { id: a.id as string, cityId: a.cityId as string, name: a.name as string, slug: a.slug as string, isActive: a.isActive as boolean, createdAt: fmtTs(a.createdAt), updatedAt: fmtTs(a.updatedAt) }; });
+  }
+
+  async getVillages(districtId: string): Promise<Village[]> {
+    const rows = await query<Record<string, unknown>>("SELECT * FROM villages WHERE district_id = $1 AND is_active = true ORDER BY name", [districtId]);
+    return rows.map((r) => { const a = snakeToCamel(r); return { id: a.id as string, districtId: a.districtId as string, name: a.name as string, slug: a.slug as string, isActive: a.isActive as boolean, createdAt: fmtTs(a.createdAt), updatedAt: fmtTs(a.updatedAt) }; });
+  }
+
+  async getRegionOptions(): Promise<RegionOption[]> {
+    const rows = await query<Record<string, unknown>>(`
+      SELECT
+        p.id AS province_id, p.name AS province_name,
+        c.id AS city_id, c.name AS city_name,
+        d.id AS district_id, d.name AS district_name
+      FROM districts d
+      JOIN cities c ON c.id = d.city_id
+      JOIN provinces p ON p.id = c.province_id
+      WHERE d.is_active = true AND c.is_active = true AND p.is_active = true
+      ORDER BY p.name, c.name, d.name
+    `);
+    return rows.map((r) => ({
+      provinceId: r.province_id as string,
+      provinceName: r.province_name as string,
+      cityId: r.city_id as string,
+      cityName: r.city_name as string,
+      districtId: r.district_id as string,
+      districtName: r.district_name as string,
+    }));
   }
 
   // ── Venue Owners ──
@@ -197,8 +248,8 @@ export class PostgresAdapter implements DatabaseAdapter {
     return rows.map((r) => mapRow<Venue>(r));
   }
 
-  async getVenuesByArea(areaId: string): Promise<Venue[]> {
-    const rows = await query<Record<string, unknown>>("SELECT * FROM venues WHERE area_id = $1 AND is_active = true AND approval_status = 'active'", [areaId]);
+  async getVenuesByDistrict(districtId: string): Promise<Venue[]> {
+    const rows = await query<Record<string, unknown>>("SELECT * FROM venues WHERE district_id = $1 AND is_active = true AND approval_status = 'active'", [districtId]);
     return rows.map((r) => mapRow<Venue>(r));
   }
 
@@ -852,5 +903,745 @@ export class PostgresAdapter implements DatabaseAdapter {
 
   async deleteCourtPhoto(id: string): Promise<void> {
     await pool.query("DELETE FROM court_photos WHERE id = $1", [id]);
+  }
+
+  // ── Pickup Games ──
+
+  async getPickupGames(filters?: { sport?: string; status?: string; date?: string; skillLevel?: string }): Promise<PickupGame[]> {
+    let sql = `SELECT pg.*, v.name as venue_name, c.name as court_name
+      FROM pickup_games pg LEFT JOIN venues v ON v.id = pg.venue_id LEFT JOIN courts c ON c.id = pg.court_id WHERE 1=1`;
+    const p: (string | number)[] = [];
+    if (filters?.sport) { p.push(filters.sport); sql += ` AND pg.sport_type = $${p.length}`; }
+    if (filters?.status) { p.push(filters.status); sql += ` AND pg.status = $${p.length}`; }
+    if (filters?.date) { p.push(filters.date); sql += ` AND DATE(pg.scheduled_at) = $${p.length}`; }
+    if (filters?.skillLevel) { p.push(filters.skillLevel); sql += ` AND pg.skill_level = $${p.length}`; }
+    sql += " ORDER BY pg.scheduled_at ASC";
+    const { rows } = await pool.query(sql, p);
+    return rows.map((r) => this.mapPickupGame(r));
+  }
+
+  async getPickupGameById(id: string): Promise<PickupGame | null> {
+    const { rows } = await pool.query(
+      `SELECT pg.*, v.name as venue_name, c.name as court_name FROM pickup_games pg
+       LEFT JOIN venues v ON v.id = pg.venue_id LEFT JOIN courts c ON c.id = pg.court_id WHERE pg.id = $1`, [id]);
+    return rows[0] ? this.mapPickupGame(rows[0]) : null;
+  }
+
+  async createPickupGame(data: Omit<PickupGame, "id" | "createdAt" | "updatedAt" | "currentPlayers">): Promise<PickupGame> {
+    const id = crypto.randomUUID();
+    const { rows } = await pool.query(
+      `INSERT INTO pickup_games (id, court_id, host_customer_id, venue_id, title, sport_type, scheduled_at,
+       duration_minutes, max_players, current_players, price_per_person, total_price, status, description,
+       skill_level, is_recurring, recurring_pattern, recurring_until, location_name, latitude, longitude)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21) RETURNING *`,
+      [id, data.courtId, data.hostCustomerId, data.venueId, data.title, data.sportType,
+       data.scheduledAt, data.durationMinutes, data.maxPlayers, 0, // currentPlayers = 0
+       data.pricePerPerson, data.totalPrice, data.status, data.description, data.skillLevel,
+       data.isRecurring, data.recurringPattern, data.recurringUntil, data.locationName,
+       data.latitude, data.longitude]
+    );
+    return this.mapPickupGame(rows[0]);
+  }
+
+  async updatePickupGame(id: string, data: Partial<PickupGame>): Promise<PickupGame> {
+    const fields: string[] = []; const p: unknown[] = [];
+    if (data.title !== undefined) { p.push(data.title); fields.push(`title = $${p.length}`); }
+    if (data.scheduledAt !== undefined) { p.push(data.scheduledAt); fields.push(`scheduled_at = $${p.length}`); }
+    if (data.durationMinutes !== undefined) { p.push(data.durationMinutes); fields.push(`duration_minutes = $${p.length}`); }
+    if (data.maxPlayers !== undefined) { p.push(data.maxPlayers); fields.push(`max_players = $${p.length}`); }
+    if (data.pricePerPerson !== undefined) { p.push(data.pricePerPerson); fields.push(`price_per_person = $${p.length}`); }
+    if (data.totalPrice !== undefined) { p.push(data.totalPrice); fields.push(`total_price = $${p.length}`); }
+    if (data.status !== undefined) { p.push(data.status); fields.push(`status = $${p.length}`); }
+    if (data.description !== undefined) { p.push(data.description); fields.push(`description = $${p.length}`); }
+    if (data.skillLevel !== undefined) { p.push(data.skillLevel); fields.push(`skill_level = $${p.length}`); }
+    if (fields.length === 0) return (await this.getPickupGameById(id))!;
+    p.push(id);
+    const { rows } = await pool.query(`UPDATE pickup_games SET ${fields.join(",")}, updated_at = NOW() WHERE id = $${p.length} RETURNING *`, p);
+    return this.mapPickupGame(rows[0]);
+  }
+
+  async deletePickupGame(id: string): Promise<void> {
+    await pool.query("UPDATE pickup_games SET status = 'cancelled' WHERE id = $1", [id]);
+  }
+
+  async joinPickupGame(pickupGameId: string, customerId: string, splitAmount: number, skillLevel?: string): Promise<PickupGameParticipant> {
+    const { rows } = await pool.query(
+      `INSERT INTO pickup_game_participants (id, pickup_game_id, customer_id, split_amount, skill_level, is_host)
+       VALUES ($1,$2,$3,$4,$5,false) RETURNING *`,
+      [crypto.randomUUID(), pickupGameId, customerId, splitAmount, skillLevel]
+    );
+    await pool.query("UPDATE pickup_games SET current_players = current_players + 1 WHERE id = $1", [pickupGameId]);
+    return this.mapPickupParticipant(rows[0]);
+  }
+
+  async leavePickupGame(pickupGameId: string, customerId: string): Promise<void> {
+    await pool.query("DELETE FROM pickup_game_participants WHERE pickup_game_id = $1 AND customer_id = $2", [pickupGameId, customerId]);
+    await pool.query("UPDATE pickup_games SET current_players = current_players - 1 WHERE id = $1", [pickupGameId]);
+  }
+
+  async getPickupGameParticipants(pickupGameId: string): Promise<PickupGameParticipant[]> {
+    const { rows } = await pool.query(
+      `SELECT pp.*, cu.name as customer_name, cu.email as customer_email
+       FROM pickup_game_participants pp LEFT JOIN customers cu ON cu.id = pp.customer_id
+       WHERE pp.pickup_game_id = $1 ORDER BY pp.is_host DESC, pp.joined_at ASC`, [pickupGameId]);
+    return rows.map((r) => this.mapPickupParticipant(r));
+  }
+
+  async getPickupGamesByCustomer(customerId: string): Promise<PickupGame[]> {
+    const { rows } = await pool.query(
+      `SELECT pg.*, v.name as venue_name FROM pickup_games pg
+       LEFT JOIN venues v ON v.id = pg.venue_id
+       WHERE pg.host_customer_id = $1 OR pg.id IN (
+         SELECT pickup_game_id FROM pickup_game_participants WHERE customer_id = $1)
+       ORDER BY pg.scheduled_at DESC`, [customerId]);
+    return rows.map((r) => this.mapPickupGame(r));
+  }
+
+  async sendPickupGameMessage(pickupGameId: string, senderId: string, message: string): Promise<PickupGameMessage> {
+    const { rows } = await pool.query(
+      `INSERT INTO pickup_game_messages (id, pickup_game_id, sender_id, message) VALUES ($1,$2,$3,$4) RETURNING *`,
+      [crypto.randomUUID(), pickupGameId, senderId, message]);
+    return this.mapPickupMessage(rows[0]);
+  }
+
+  async getPickupGameMessages(pickupGameId: string): Promise<PickupGameMessage[]> {
+    const { rows } = await pool.query(
+      `SELECT pm.*, cu.name as sender_name FROM pickup_game_messages pm
+       LEFT JOIN customers cu ON cu.id = pm.sender_id WHERE pm.pickup_game_id = $1 ORDER BY pm.created_at ASC`, [pickupGameId]);
+    return rows.map((r) => this.mapPickupMessage(r));
+  }
+
+  // ── Team Wallets ──
+
+  async getTeamWalletsByCustomer(customerId: string): Promise<TeamWallet[]> {
+    const { rows } = await pool.query(
+      `SELECT tw.* FROM team_wallets tw
+       WHERE tw.owner_customer_id = $1 OR tw.id IN (
+         SELECT wallet_id FROM team_wallet_members WHERE customer_id = $1) ORDER BY tw.created_at DESC`, [customerId]);
+    return rows.map((r) => this.mapTeamWallet(r));
+  }
+
+  async getTeamWalletById(id: string): Promise<TeamWallet | null> {
+    const { rows } = await pool.query("SELECT * FROM team_wallets WHERE id = $1", [id]);
+    return rows[0] ? this.mapTeamWallet(rows[0]) : null;
+  }
+
+  async createTeamWallet(data: Omit<TeamWallet, "id" | "balance" | "totalSpent" | "memberCount" | "createdAt" | "updatedAt">): Promise<TeamWallet> {
+    const id = crypto.randomUUID();
+    const { rows } = await pool.query(
+      `INSERT INTO team_wallets (id, owner_customer_id, name, sport_type, avatar_url)
+       VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+      [id, data.ownerCustomerId, data.name, data.sportType, data.avatarUrl]);
+    return this.mapTeamWallet(rows[0]);
+  }
+
+  async updateTeamWallet(id: string, data: Partial<TeamWallet>): Promise<TeamWallet> {
+    const fields: string[] = []; const p: unknown[] = [];
+    if (data.name !== undefined) { p.push(data.name); fields.push(`name = $${p.length}`); }
+    if (data.sportType !== undefined) { p.push(data.sportType); fields.push(`sport_type = $${p.length}`); }
+    if (data.avatarUrl !== undefined) { p.push(data.avatarUrl); fields.push(`avatar_url = $${p.length}`); }
+    if (data.balance !== undefined) { p.push(data.balance); fields.push(`balance = $${p.length}`); }
+    if (data.totalSpent !== undefined) { p.push(data.totalSpent); fields.push(`total_spent = $${p.length}`); }
+    if (fields.length === 0) return (await this.getTeamWalletById(id))!;
+    p.push(id);
+    const { rows } = await pool.query(`UPDATE team_wallets SET ${fields.join(",")}, updated_at = NOW() WHERE id = $${p.length} RETURNING *`, p);
+    return this.mapTeamWallet(rows[0]);
+  }
+
+  async deleteTeamWallet(id: string): Promise<void> {
+    await pool.query("DELETE FROM team_wallets WHERE id = $1", [id]);
+  }
+
+  async getTeamWalletMembers(walletId: string): Promise<TeamWalletMember[]> {
+    const { rows } = await pool.query(
+      `SELECT twm.*, cu.name as customer_name, cu.email as customer_email
+       FROM team_wallet_members twm LEFT JOIN customers cu ON cu.id = twm.customer_id
+       WHERE twm.wallet_id = $1 ORDER BY twm.joined_at ASC`, [walletId]);
+    return rows.map((r) => this.mapTeamWalletMember(r));
+  }
+
+  async addTeamWalletMember(walletId: string, customerId: string, role = "member"): Promise<TeamWalletMember> {
+    const { rows } = await pool.query(
+      `INSERT INTO team_wallet_members (id, wallet_id, customer_id, role) VALUES ($1,$2,$3,$4) RETURNING *`,
+      [crypto.randomUUID(), walletId, customerId, role]);
+    await pool.query("UPDATE team_wallets SET member_count = member_count + 1 WHERE id = $1", [walletId]);
+    return this.mapTeamWalletMember(rows[0]);
+  }
+
+  async removeTeamWalletMember(walletId: string, customerId: string): Promise<void> {
+    await pool.query("DELETE FROM team_wallet_members WHERE wallet_id = $1 AND customer_id = $2", [walletId, customerId]);
+    await pool.query("UPDATE team_wallets SET member_count = GREATEST(member_count - 1, 1) WHERE id = $1", [walletId]);
+  }
+
+  async updateTeamWalletMemberRole(walletId: string, customerId: string, role: string): Promise<TeamWalletMember> {
+    const { rows } = await pool.query(
+      `UPDATE team_wallet_members SET role = $1 WHERE wallet_id = $2 AND customer_id = $3 RETURNING *`,
+      [role, walletId, customerId]);
+    return this.mapTeamWalletMember(rows[0]);
+  }
+
+  async createTeamWalletDeposit(walletId: string, fromCustomerId: string, amount: number, paymentMethod?: string, notes?: string): Promise<TeamWalletDeposit> {
+    const { rows } = await pool.query(
+      `INSERT INTO team_wallet_deposits (id, wallet_id, from_customer_id, amount, payment_method, notes)
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+      [crypto.randomUUID(), walletId, fromCustomerId, amount, paymentMethod, notes]);
+    return this.mapTeamWalletDeposit(rows[0]);
+  }
+
+  async confirmTeamWalletDeposit(depositId: string): Promise<TeamWalletDeposit> {
+    const { rows } = await pool.query(
+      `UPDATE team_wallet_deposits SET status = 'confirmed', confirmed_at = NOW() WHERE id = $1 RETURNING *`, [depositId]);
+    const d = rows[0];
+    await pool.query(
+      `UPDATE team_wallets SET balance = balance + $1 WHERE id = $2;
+       UPDATE team_wallet_members SET balance = balance + $1, total_contributed = total_contributed + $1
+       WHERE wallet_id = $2 AND customer_id = $3`,
+      [d.amount, d.wallet_id, d.from_customer_id]);
+    return this.mapTeamWalletDeposit(rows[0]);
+  }
+
+  async getTeamWalletDeposits(walletId: string): Promise<TeamWalletDeposit[]> {
+    const { rows } = await pool.query(
+      `SELECT td.*, cu.name as customer_name FROM team_wallet_deposits td
+       LEFT JOIN customers cu ON cu.id = td.from_customer_id WHERE td.wallet_id = $1 ORDER BY td.created_at DESC`, [walletId]);
+    return rows.map((r) => this.mapTeamWalletDeposit(r));
+  }
+
+  async getTeamWalletTransactions(walletId: string): Promise<TeamWalletTransaction[]> {
+    const { rows } = await pool.query(
+      `SELECT * FROM team_wallet_transactions WHERE wallet_id = $1 ORDER BY created_at DESC`, [walletId]);
+    return rows.map((r) => this.mapTeamWalletTransaction(r));
+  }
+
+  async createTeamWalletTransaction(data: Omit<TeamWalletTransaction, "id" | "createdAt">): Promise<TeamWalletTransaction> {
+    const id = crypto.randomUUID();
+    const { rows } = await pool.query(
+      `INSERT INTO team_wallet_transactions (id, wallet_id, type, amount, description, reference_id, customer_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+      [id, data.walletId, data.type, data.amount, data.description, data.referenceId, data.customerId]);
+    return this.mapTeamWalletTransaction(rows[0]);
+  }
+
+  async payBookingFromWallet(walletId: string, bookingId: string, amount: number): Promise<TeamWalletTransaction> {
+    const tx = await this.createTeamWalletTransaction({
+      walletId, type: "booking_payment", amount, description: "Booking payment",
+      referenceId: bookingId, customerId: undefined,
+    });
+    await pool.query("UPDATE team_wallets SET balance = balance - $1, total_spent = total_spent + $1 WHERE id = $2", [amount, walletId]);
+    return tx;
+  }
+
+  async createWalletSplit(walletId: string, bookingId: string, totalAmount: number, splitType: string, members: { customerId: string; amount: number }[]): Promise<TeamWalletSplit> {
+    const splitId = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO team_wallet_splits (id, wallet_id, booking_id, total_amount, split_type) VALUES ($1,$2,$3,$4,$5)`,
+      [splitId, walletId, bookingId, totalAmount, splitType]);
+    for (const m of members) {
+      await pool.query(
+        `INSERT INTO team_wallet_split_members (id, split_id, customer_id, amount) VALUES ($1,$2,$3,$4)`,
+        [crypto.randomUUID(), splitId, m.customerId, m.amount]);
+    }
+    const { rows } = await pool.query("SELECT * FROM team_wallet_splits WHERE id = $1", [splitId]);
+    return this.mapTeamWalletSplit(rows[0]);
+  }
+
+  async getWalletSplits(walletId: string): Promise<TeamWalletSplit[]> {
+    const { rows } = await pool.query("SELECT * FROM team_wallet_splits WHERE wallet_id = $1 ORDER BY created_at DESC", [walletId]);
+    return rows.map((r) => this.mapTeamWalletSplit(r));
+  }
+
+  async getWalletSplitMembers(splitId: string): Promise<TeamWalletSplitMember[]> {
+    const { rows } = await pool.query(
+      `SELECT sm.*, cu.name as customer_name FROM team_wallet_split_members sm
+       LEFT JOIN customers cu ON cu.id = sm.customer_id WHERE sm.split_id = $1`, [splitId]);
+    return rows.map((r) => this.mapTeamWalletSplitMember(r));
+  }
+
+  // ── Player Profiles (Sprint 12) ──
+
+  async getPlayerProfile(customerId: string): Promise<PlayerProfile | null> {
+    const { rows } = await pool.query("SELECT * FROM player_profiles WHERE customer_id = $1", [customerId]);
+    return rows[0] ? this.mapPlayerProfile(rows[0]) : null;
+  }
+
+  async upsertPlayerProfile(data: Partial<PlayerProfile> & { customerId: string }): Promise<PlayerProfile> {
+    const { rows } = await pool.query(
+      `INSERT INTO player_profiles (customer_id, preferred_position, preferred_sport, dominant_foot, play_style,
+       bio, height_cm, weight_kg, availability, preferred_play_time, skill_level_overall, total_games_played,
+       win_rate, joined_teams, avatar_sport_url, is_public)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+       ON CONFLICT (customer_id) DO UPDATE SET
+       preferred_position = EXCLUDED.preferred_position, preferred_sport = EXCLUDED.preferred_sport,
+       dominant_foot = EXCLUDED.dominant_foot, play_style = EXCLUDED.play_style, bio = EXCLUDED.bio,
+       height_cm = EXCLUDED.height_cm, weight_kg = EXCLUDED.weight_kg, availability = EXCLUDED.availability,
+       preferred_play_time = EXCLUDED.preferred_play_time, skill_level_overall = EXCLUDED.skill_level_overall,
+       total_games_played = EXCLUDED.total_games_played, win_rate = EXCLUDED.win_rate,
+       joined_teams = EXCLUDED.joined_teams, avatar_sport_url = EXCLUDED.avatar_sport_url,
+       is_public = EXCLUDED.is_public, updated_at = NOW() RETURNING *`,
+      [data.customerId, data.preferredPosition, data.preferredSport, data.dominantFoot, data.playStyle,
+       data.bio, data.heightCm, data.weightKg, JSON.stringify(data.availability ?? []),
+       JSON.stringify(data.preferredPlayTime ?? []), data.skillLevelOverall, data.totalGamesPlayed ?? 0,
+       data.winRate ?? 0, data.joinedTeams ?? 0, data.avatarSportUrl, data.isPublic ?? true]);
+    return this.mapPlayerProfile(rows[0]);
+  }
+
+  async searchPlayers(filters?: { sport?: string; skillLevel?: string; location?: string }): Promise<PlayerProfile[]> {
+    let sql = `SELECT pp.*, cu.name as customer_name FROM player_profiles pp
+               LEFT JOIN customers cu ON cu.id = pp.customer_id WHERE pp.is_public = true`;
+    const p: string[] = [];
+    if (filters?.sport) { p.push(filters.sport); sql += ` AND pp.preferred_sport = $${p.length}`; }
+    if (filters?.skillLevel) { p.push(filters.skillLevel); sql += ` AND pp.skill_level_overall = $${p.length}`; }
+    const { rows } = await pool.query(sql + " ORDER BY pp.total_games_played DESC LIMIT 50", p);
+    return rows.map((r) => this.mapPlayerProfile(r));
+  }
+
+  async createPlayerSkillRating(data: Omit<PlayerSkillRating, "id" | "createdAt">): Promise<PlayerSkillRating> {
+    const id = crypto.randomUUID();
+    const { rows } = await pool.query(
+      `INSERT INTO player_skill_ratings (id, customer_id, rated_by_customer_id, pickup_game_id,
+       skill_score, attitude_score, punctuality_score, review_text)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [id, data.customerId, data.ratedByCustomerId, data.pickupGameId,
+       data.skillScore, data.attitudeScore, data.punctualityScore, data.reviewText]);
+    return this.mapPlayerSkillRating(rows[0]);
+  }
+
+  async getPlayerSkillRatings(customerId: string): Promise<PlayerSkillRating[]> {
+    const { rows } = await pool.query("SELECT * FROM player_skill_ratings WHERE customer_id = $1 ORDER BY created_at DESC", [customerId]);
+    return rows.map((r) => this.mapPlayerSkillRating(r));
+  }
+
+  // ── Match Requests (Sprint 12) ──
+
+  async createMatchRequest(data: Omit<MatchRequest, "id" | "status" | "respondedAt" | "createdAt">): Promise<MatchRequest> {
+    const id = crypto.randomUUID();
+    const { rows } = await pool.query(
+      `INSERT INTO match_requests (id, requester_id, target_customer_id, sport_type, proposed_date,
+       proposed_location, message, pickup_game_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [id, data.requesterId, data.targetCustomerId, data.sportType, data.proposedDate,
+       data.proposedLocation, data.message, data.pickupGameId]);
+    return this.mapMatchRequest(rows[0]);
+  }
+
+  async getMatchRequests(customerId: string): Promise<MatchRequest[]> {
+    const { rows } = await pool.query(
+      `SELECT mr.*, cu.name as requester_name, cu2.name as target_name FROM match_requests mr
+       LEFT JOIN customers cu ON cu.id = mr.requester_id LEFT JOIN customers cu2 ON cu2.id = mr.target_customer_id
+       WHERE mr.requester_id = $1 OR mr.target_customer_id = $1 ORDER BY mr.created_at DESC`, [customerId]);
+    return rows.map((r) => this.mapMatchRequest(r));
+  }
+
+  async updateMatchRequest(id: string, status: "accepted" | "declined"): Promise<MatchRequest> {
+    const { rows } = await pool.query(
+      `UPDATE match_requests SET status = $1, responded_at = NOW() WHERE id = $2 RETURNING *`, [status, id]);
+    return this.mapMatchRequest(rows[0]);
+  }
+
+  // ── Achievements (Sprint 12) ──
+
+  async getAchievements(): Promise<Achievement[]> {
+    const { rows } = await pool.query("SELECT * FROM achievements ORDER BY points_reward ASC");
+    return rows.map((r) => this.mapAchievement(r));
+  }
+
+  async getPlayerAchievements(customerId: string): Promise<(PlayerAchievement & { achievement: Achievement })[]> {
+    const { rows } = await pool.query(
+      `SELECT pa.*, a.code, a.name, a.name_en, a.description, a.description_en, a.category,
+       a.icon, a.points_reward, a.badge_tier, a.criteria FROM player_achievements pa
+       JOIN achievements a ON a.id = pa.achievement_id WHERE pa.customer_id = $1 ORDER BY pa.is_unlocked DESC, a.points_reward DESC`,
+      [customerId]);
+    return rows.map((r) => ({ ...this.mapPlayerAchievement(r), achievement: this.mapAchievement(r) }));
+  }
+
+  async upsertPlayerAchievement(customerId: string, achievementId: string, progress: number): Promise<PlayerAchievement> {
+    const { rows } = await pool.query(
+      `INSERT INTO player_achievements (id, customer_id, achievement_id, progress_current, progress_target)
+       VALUES ($1,$2,$3,$4, (SELECT criteria->>'target' FROM achievements WHERE id = $3)::int)
+       ON CONFLICT (customer_id, achievement_id) DO UPDATE SET progress_current = $4,
+       is_unlocked = CASE WHEN $4 >= player_achievements.progress_target THEN true ELSE is_unlocked END,
+       unlocked_at = CASE WHEN $4 >= player_achievements.progress_target AND NOT player_achievements.is_unlocked THEN NOW() ELSE unlocked_at END
+       RETURNING *`, [crypto.randomUUID(), customerId, achievementId, progress]);
+    return this.mapPlayerAchievement(rows[0]);
+  }
+
+  async getLeaderboard(limit = 20): Promise<{ customerId: string; name: string; totalPoints: number; totalGames: number }[]> {
+    const { rows } = await pool.query(
+      `SELECT c.id as customer_id, c.name, COALESCE(SUM(lt.points), 0) as total_points,
+       COUNT(DISTINCT CASE WHEN lt.type = 'earned' THEN lt.id END) as total_games
+       FROM customers c LEFT JOIN loyalty_transactions lt ON lt.customer_id = c.id
+       GROUP BY c.id ORDER BY total_points DESC LIMIT $1`, [limit]);
+    return rows.map((r) => ({
+      customerId: r.customer_id, name: r.name,
+      totalPoints: parseInt(r.total_points) || 0, totalGames: parseInt(r.total_games) || 0,
+    }));
+  }
+
+  // ── Streaks (Sprint 12) ──
+
+  async getPlayerStreaks(customerId: string): Promise<PlayerStreak[]> {
+    const { rows } = await pool.query("SELECT * FROM player_streaks WHERE customer_id = $1", [customerId]);
+    return rows.map((r) => this.mapPlayerStreak(r));
+  }
+
+  async updatePlayerStreak(customerId: string, streakType: string): Promise<PlayerStreak> {
+    const { rows } = await pool.query(
+      `INSERT INTO player_streaks (id, customer_id, streak_type, current_streak, longest_streak, last_activity_at)
+       VALUES ($1,$2,$3,1,1,NOW())
+       ON CONFLICT (customer_id, streak_type) DO UPDATE SET
+       current_streak = CASE WHEN player_streaks.last_activity_at >= NOW() - INTERVAL '1 day'
+         THEN player_streaks.current_streak + 1 ELSE 1 END,
+       longest_streak = GREATEST(player_streaks.longest_streak,
+         CASE WHEN player_streaks.last_activity_at >= NOW() - INTERVAL '1 day' THEN player_streaks.current_streak + 1 ELSE 1 END),
+       last_activity_at = NOW()
+       RETURNING *`,
+      [crypto.randomUUID(), customerId, streakType]);
+    return this.mapPlayerStreak(rows[0]);
+  }
+
+  // ── Flash Deals (Sprint 13) ──
+
+  async getFlashDeals(filters?: { status?: string; courtId?: string }): Promise<FlashDeal[]> {
+    let sql = `SELECT fd.*, v.name as venue_name, c.name as court_name FROM flash_deals fd
+               LEFT JOIN venues v ON v.id = (SELECT venue_id FROM courts WHERE id = fd.court_id)
+               LEFT JOIN courts c ON c.id = fd.court_id WHERE 1=1`;
+    const p: string[] = [];
+    if (filters?.status) { p.push(filters.status); sql += ` AND fd.status = $${p.length}`; }
+    if (filters?.courtId) { p.push(filters.courtId); sql += ` AND fd.court_id = $${p.length}`; }
+    sql += " ORDER BY fd.expires_at ASC";
+    const { rows } = await pool.query(sql, p);
+    return rows.map((r) => this.mapFlashDeal(r));
+  }
+
+  async getFlashDealById(id: string): Promise<FlashDeal | null> {
+    const { rows } = await pool.query(
+      `SELECT fd.*, v.name as venue_name, c.name as court_name FROM flash_deals fd
+       LEFT JOIN courts c ON c.id = fd.court_id LEFT JOIN venues v ON v.id = c.venue_id WHERE fd.id = $1`, [id]);
+    return rows[0] ? this.mapFlashDeal(rows[0]) : null;
+  }
+
+  async createFlashDeal(data: Omit<FlashDeal, "id" | "claimedBy" | "claimedAt" | "createdAt">): Promise<FlashDeal> {
+    const id = crypto.randomUUID();
+    const { rows } = await pool.query(
+      `INSERT INTO flash_deals (id, court_id, slot_date, start_time, end_time, original_price, deal_price,
+       discount_percent, min_players, max_players, status, deal_type, starts_at, expires_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
+      [id, data.courtId, data.slotDate, data.startTime, data.endTime, data.originalPrice,
+       data.dealPrice, data.discountPercent, data.minPlayers, data.maxPlayers, data.status,
+       data.dealType, data.startsAt, data.expiresAt]);
+    return this.mapFlashDeal(rows[0]);
+  }
+
+  async claimFlashDeal(id: string, customerId: string): Promise<FlashDeal> {
+    const { rows } = await pool.query(
+      `UPDATE flash_deals SET status = 'claimed', claimed_by = $1, claimed_at = NOW() WHERE id = $2 RETURNING *`,
+      [customerId, id]);
+    return this.mapFlashDeal(rows[0]);
+  }
+
+  // ── Venue Cameras (Sprint 14) ──
+
+  async getVenueCameras(venueId: string): Promise<VenueCamera[]> {
+    const { rows } = await pool.query("SELECT * FROM venue_cameras WHERE venue_id = $1 ORDER BY created_at ASC", [venueId]);
+    return rows.map((r) => this.mapVenueCamera(r));
+  }
+
+  async createVenueCamera(data: Omit<VenueCamera, "id" | "lastUpdated" | "createdAt">): Promise<VenueCamera> {
+    const id = crypto.randomUUID();
+    const { rows } = await pool.query(
+      `INSERT INTO venue_cameras (id, venue_id, court_id, name, camera_url, snapshot_url, camera_type, is_public, crowd_level, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
+      [id, data.venueId, data.courtId, data.name, data.cameraUrl, data.snapshotUrl,
+       data.cameraType, data.isPublic, data.crowdLevel, data.status]);
+    return this.mapVenueCamera(rows[0]);
+  }
+
+  async updateVenueCamera(id: string, data: Partial<VenueCamera>): Promise<VenueCamera> {
+    const fields: string[] = []; const p: unknown[] = [];
+    if (data.name !== undefined) { p.push(data.name); fields.push(`name = $${p.length}`); }
+    if (data.cameraUrl !== undefined) { p.push(data.cameraUrl); fields.push(`camera_url = $${p.length}`); }
+    if (data.snapshotUrl !== undefined) { p.push(data.snapshotUrl); fields.push(`snapshot_url = $${p.length}`); }
+    if (data.crowdLevel !== undefined) { p.push(data.crowdLevel); fields.push(`crowd_level = $${p.length}`); }
+    if (data.status !== undefined) { p.push(data.status); fields.push(`status = $${p.length}`); }
+    if (data.isPublic !== undefined) { p.push(data.isPublic); fields.push(`is_public = $${p.length}`); }
+    if (fields.length === 0) {
+      const { rows } = await pool.query("SELECT * FROM venue_cameras WHERE id = $1", [id]);
+      return rows[0] ? this.mapVenueCamera(rows[0]) : null!;
+    }
+    p.push(id);
+    const { rows } = await pool.query(
+      `UPDATE venue_cameras SET ${fields.join(",")}, last_updated = NOW() WHERE id = $${p.length} RETURNING *`, p);
+    return this.mapVenueCamera(rows[0]);
+  }
+
+  async deleteVenueCamera(id: string): Promise<void> {
+    await pool.query("DELETE FROM venue_cameras WHERE id = $1", [id]);
+  }
+
+  // ── Venue Verification (Sprint 14) ──
+
+  async getVenueVerification(venueId: string): Promise<VenueVerification | null> {
+    const { rows } = await pool.query("SELECT * FROM venue_verifications WHERE venue_id = $1", [venueId]);
+    return rows[0] ? this.mapVenueVerification(rows[0]) : null;
+  }
+
+  async createVenueVerification(data: Omit<VenueVerification, "id" | "overallScore" | "verifiedAt" | "createdAt">): Promise<VenueVerification> {
+    const id = crypto.randomUUID();
+    const { rows } = await pool.query(
+      `INSERT INTO venue_verifications (id, venue_id, requested_by, status)
+       VALUES ($1,$2,$3,'pending') RETURNING *`,
+      [id, data.venueId, data.requestedBy]);
+    return this.mapVenueVerification(rows[0]);
+  }
+
+  async updateVenueVerification(id: string, data: Partial<VenueVerification>): Promise<VenueVerification> {
+    const fields: string[] = []; const p: unknown[] = [];
+    if (data.status !== undefined) { p.push(data.status); fields.push(`status = $${p.length}`); }
+    if (data.overallScore !== undefined) { p.push(data.overallScore); fields.push(`overall_score = $${p.length}`); }
+    if (data.fieldConditionScore !== undefined) { p.push(data.fieldConditionScore); fields.push(`field_condition_score = $${p.length}`); }
+    if (data.lightingScore !== undefined) { p.push(data.lightingScore); fields.push(`lighting_score = $${p.length}`); }
+    if (data.cleanlinessScore !== undefined) { p.push(data.cleanlinessScore); fields.push(`cleanliness_score = $${p.length}`); }
+    if (data.parkingScore !== undefined) { p.push(data.parkingScore); fields.push(`parking_score = $${p.length}`); }
+    if (data.accessibilityScore !== undefined) { p.push(data.accessibilityScore); fields.push(`accessibility_score = $${p.length}`); }
+    if (data.amenitiesScore !== undefined) { p.push(data.amenitiesScore); fields.push(`amenities_score = $${p.length}`); }
+    if (data.notes !== undefined) { p.push(data.notes); fields.push(`notes = $${p.length}`); }
+    if (data.verifiedBy !== undefined) { p.push(data.verifiedBy); fields.push(`verified_by = $${p.length}`); }
+    if (data.status === "approved") { fields.push(`verified_at = NOW()`); }
+    if (fields.length === 0) {
+      const { rows } = await pool.query("SELECT * FROM venue_verifications WHERE id = $1", [id]);
+      return rows[0] ? this.mapVenueVerification(rows[0]) : null!;
+    }
+    p.push(id);
+    const { rows } = await pool.query(`UPDATE venue_verifications SET ${fields.join(",")} WHERE id = $${p.length} RETURNING *`, p);
+    return this.mapVenueVerification(rows[0]);
+  }
+
+  async getVenueVerificationPhotos(verificationId: string): Promise<VenueVerificationPhoto[]> {
+    const { rows } = await pool.query("SELECT * FROM venue_verification_photos WHERE verification_id = $1", [verificationId]);
+    return rows.map((r) => this.mapVenueVerificationPhoto(r));
+  }
+
+  async createVenueVerificationPhoto(data: Omit<VenueVerificationPhoto, "id" | "createdAt">): Promise<VenueVerificationPhoto> {
+    const id = crypto.randomUUID();
+    const { rows } = await pool.query(
+      `INSERT INTO venue_verification_photos (id, verification_id, category, photo_url, caption) VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+      [id, data.verificationId, data.category, data.photoUrl, data.caption]);
+    return this.mapVenueVerificationPhoto(rows[0]);
+  }
+
+  // ── Loyalty Tiers (Sprint 15) ──
+
+  async getLoyaltyTiers(): Promise<LoyaltyTier[]> {
+    const { rows } = await pool.query("SELECT * FROM loyalty_tiers WHERE is_active = true ORDER BY min_points ASC");
+    return rows.map((r) => this.mapLoyaltyTier(r));
+  }
+
+  // ── Mappers ──
+
+  private mapPickupGame(r: Record<string, unknown>): PickupGame {
+    return {
+      id: r.id as string, courtId: r.court_id as string, hostCustomerId: r.host_customer_id as string,
+      venueId: r.venue_id as string, title: r.title as string, sportType: r.sport_type as string,
+      scheduledAt: (r.scheduled_at as string), durationMinutes: r.duration_minutes as number,
+      maxPlayers: r.max_players as number, currentPlayers: r.current_players as number,
+      pricePerPerson: parseFloat(String(r.price_per_person)),
+      totalPrice: parseFloat(String(r.total_price)), status: r.status as PickupGame["status"],
+      description: r.description as string, skillLevel: r.skill_level as PickupGame["skillLevel"],
+      isRecurring: r.is_recurring as boolean, recurringPattern: r.recurring_pattern as string,
+      recurringUntil: r.recurring_until as string, locationName: r.location_name as string,
+      latitude: parseFloat(String(r.latitude ?? 0)), longitude: parseFloat(String(r.longitude ?? 0)),
+      createdAt: (r.created_at as string), updatedAt: (r.updated_at as string),
+    };
+  }
+
+  private mapPickupParticipant(r: Record<string, unknown>): PickupGameParticipant {
+    return {
+      id: r.id as string, pickupGameId: r.pickup_game_id as string, customerId: r.customer_id as string,
+      splitAmount: parseFloat(String(r.split_amount)),
+      paymentStatus: r.payment_status as PickupGameParticipant["paymentStatus"],
+      joinedAt: (r.joined_at as string), skillLevel: r.skill_level as string | undefined,
+      position: r.position as string | undefined, isHost: r.is_host as boolean,
+    };
+  }
+
+  private mapPickupMessage(r: Record<string, unknown>): PickupGameMessage {
+    return {
+      id: r.id as string, pickupGameId: r.pickup_game_id as string, senderId: r.sender_id as string | undefined,
+      message: r.message as string, createdAt: (r.created_at as string),
+    };
+  }
+
+  private mapTeamWallet(r: Record<string, unknown>): TeamWallet {
+    return {
+      id: r.id as string, ownerCustomerId: r.owner_customer_id as string, name: r.name as string,
+      sportType: r.sport_type as string, avatarUrl: r.avatar_url as string,
+      balance: parseFloat(String(r.balance)), totalSpent: parseFloat(String(r.total_spent)),
+      memberCount: r.member_count as number, createdAt: (r.created_at as string), updatedAt: (r.updated_at as string),
+    };
+  }
+
+  private mapTeamWalletMember(r: Record<string, unknown>): TeamWalletMember {
+    return {
+      id: r.id as string, walletId: r.wallet_id as string, customerId: r.customer_id as string,
+      role: r.role as TeamWalletMember["role"], balance: parseFloat(String(r.balance)),
+      totalContributed: parseFloat(String(r.total_contributed)), joinedAt: (r.joined_at as string),
+      };
+  }
+
+  private mapTeamWalletDeposit(r: Record<string, unknown>): TeamWalletDeposit {
+    return {
+      id: r.id as string, walletId: r.wallet_id as string, fromCustomerId: r.from_customer_id as string,
+      amount: parseFloat(String(r.amount)), paymentMethod: r.payment_method as string,
+      paymentProofUrl: r.payment_proof_url as string, status: r.status as TeamWalletDeposit["status"],
+      notes: r.notes as string, createdAt: (r.created_at as string), confirmedAt: r.confirmed_at as string,
+      };
+  }
+
+  private mapTeamWalletTransaction(r: Record<string, unknown>): TeamWalletTransaction {
+    return {
+      id: r.id as string, walletId: r.wallet_id as string, type: r.type as TeamWalletTransaction["type"],
+      amount: parseFloat(String(r.amount)), description: r.description as string,
+      referenceId: r.reference_id as string, customerId: r.customer_id as string,
+      createdAt: (r.created_at as string),
+    };
+  }
+
+  private mapTeamWalletSplit(r: Record<string, unknown>): TeamWalletSplit {
+    return {
+      id: r.id as string, walletId: r.wallet_id as string, bookingId: r.booking_id as string,
+      totalAmount: parseFloat(String(r.total_amount)),
+      splitType: r.split_type as TeamWalletSplit["splitType"], settledAt: r.settled_at as string,
+      createdAt: (r.created_at as string),
+    };
+  }
+
+  private mapTeamWalletSplitMember(r: Record<string, unknown>): TeamWalletSplitMember {
+    return {
+      id: r.id as string, splitId: r.split_id as string, customerId: r.customer_id as string,
+      amount: parseFloat(String(r.amount)), paid: r.paid as boolean, paidAt: r.paid_at as string,
+      };
+  }
+
+  private mapPlayerProfile(r: Record<string, unknown>): PlayerProfile {
+    return {
+      customerId: r.customer_id as string, preferredPosition: r.preferred_position as string,
+      preferredSport: r.preferred_sport as string, dominantFoot: r.dominant_foot as PlayerProfile["dominantFoot"],
+      playStyle: r.play_style as PlayerProfile["playStyle"], bio: r.bio as string,
+      heightCm: r.height_cm as number, weightKg: r.weight_kg as number,
+      availability: Array.isArray(r.availability) ? r.availability : [],
+      preferredPlayTime: Array.isArray(r.preferred_play_time) ? r.preferred_play_time : [],
+      skillLevelOverall: r.skill_level_overall as PlayerProfile["skillLevelOverall"],
+      totalGamesPlayed: r.total_games_played as number, winRate: parseFloat(String(r.win_rate ?? 0)),
+      joinedTeams: r.joined_teams as number, avatarSportUrl: r.avatar_sport_url as string,
+      isPublic: r.is_public as boolean, createdAt: (r.created_at as string), updatedAt: (r.updated_at as string),
+    };
+  }
+
+  private mapPlayerSkillRating(r: Record<string, unknown>): PlayerSkillRating {
+    return {
+      id: r.id as string, customerId: r.customer_id as string,
+      ratedByCustomerId: r.rated_by_customer_id as string, pickupGameId: r.pickup_game_id as string,
+      skillScore: r.skill_score as number, attitudeScore: r.attitude_score as number,
+      punctualityScore: r.punctuality_score as number, reviewText: r.review_text as string,
+      createdAt: (r.created_at as string),
+    };
+  }
+
+  private mapMatchRequest(r: Record<string, unknown>): MatchRequest {
+    return {
+      id: r.id as string, requesterId: r.requester_id as string,
+      targetCustomerId: r.target_customer_id as string, sportType: r.sport_type as string,
+      proposedDate: r.proposed_date as string, proposedLocation: r.proposed_location as string,
+      message: r.message as string, status: r.status as MatchRequest["status"],
+      pickupGameId: r.pickup_game_id as string, respondedAt: r.responded_at as string,
+      createdAt: (r.created_at as string),
+    };
+  }
+
+  private mapAchievement(r: Record<string, unknown>): Achievement {
+    return {
+      id: r.id as string, code: r.code as string, name: r.name as string, nameEn: r.name_en as string,
+      description: r.description as string, descriptionEn: r.description_en as string,
+      category: r.category as Achievement["category"], icon: r.icon as string,
+      pointsReward: r.points_reward as number, badgeTier: r.badge_tier as Achievement["badgeTier"],
+      criteria: typeof r.criteria === "object" ? r.criteria as Record<string, unknown> : {},
+      createdAt: (r.created_at as string),
+    };
+  }
+
+  private mapPlayerAchievement(r: Record<string, unknown>): PlayerAchievement {
+    return {
+      id: r.id as string, customerId: r.customer_id as string, achievementId: r.achievement_id as string,
+      progressCurrent: r.progress_current as number, progressTarget: r.progress_target as number,
+      isUnlocked: r.is_unlocked as boolean, unlockedAt: r.unlocked_at as string,
+      createdAt: (r.created_at as string),
+    };
+  }
+
+  private mapPlayerStreak(r: Record<string, unknown>): PlayerStreak {
+    return {
+      id: r.id as string, customerId: r.customer_id as string, streakType: r.streak_type as string,
+      currentStreak: r.current_streak as number, longestStreak: r.longest_streak as number,
+      lastActivityAt: r.last_activity_at as string,
+      streakData: typeof r.streak_data === "object" ? r.streak_data as Record<string, unknown> : {},
+      createdAt: (r.created_at as string), updatedAt: (r.updated_at as string),
+    };
+  }
+
+  private mapFlashDeal(r: Record<string, unknown>): FlashDeal {
+    return {
+      id: r.id as string, courtId: r.court_id as string, slotDate: r.slot_date as string,
+      startTime: r.start_time as string, endTime: r.end_time as string,
+      originalPrice: parseFloat(String(r.original_price)),
+      dealPrice: parseFloat(String(r.deal_price)),
+      discountPercent: r.discount_percent as number, minPlayers: r.min_players as number,
+      maxPlayers: r.max_players as number,
+      status: r.status as FlashDeal["status"], dealType: r.deal_type as FlashDeal["dealType"],
+      startsAt: (r.starts_at as string), expiresAt: (r.expires_at as string),
+      claimedBy: r.claimed_by as string, claimedAt: r.claimed_at as string,
+      createdAt: (r.created_at as string),
+    };
+  }
+
+  private mapVenueCamera(r: Record<string, unknown>): VenueCamera {
+    return {
+      id: r.id as string, venueId: r.venue_id as string, courtId: r.court_id as string,
+      name: r.name as string, cameraUrl: r.camera_url as string, snapshotUrl: r.snapshot_url as string,
+      cameraType: r.camera_type as VenueCamera["cameraType"], isPublic: r.is_public as boolean,
+      crowdLevel: r.crowd_level as VenueCamera["crowdLevel"],
+      lastUpdated: r.last_updated as string, status: r.status as VenueCamera["status"],
+      createdAt: (r.created_at as string),
+    };
+  }
+
+  private mapVenueVerification(r: Record<string, unknown>): VenueVerification {
+    return {
+      id: r.id as string, venueId: r.venue_id as string, requestedBy: r.requested_by as string,
+      verifiedBy: r.verified_by as string, status: r.status as VenueVerification["status"],
+      overallScore: parseFloat(String(r.overall_score ?? 0)),
+      fieldConditionScore: parseFloat(String(r.field_condition_score ?? 0)),
+      lightingScore: parseFloat(String(r.lighting_score ?? 0)),
+      cleanlinessScore: parseFloat(String(r.cleanliness_score ?? 0)),
+      parkingScore: parseFloat(String(r.parking_score ?? 0)),
+      accessibilityScore: parseFloat(String(r.accessibility_score ?? 0)),
+      amenitiesScore: parseFloat(String(r.amenities_score ?? 0)),
+      verifiedAt: r.verified_at as string, notes: r.notes as string, reportUrl: r.report_url as string,
+      createdAt: (r.created_at as string),
+    };
+  }
+
+  private mapVenueVerificationPhoto(r: Record<string, unknown>): VenueVerificationPhoto {
+    return {
+      id: r.id as string, verificationId: r.verification_id as string, category: r.category as string,
+      photoUrl: r.photo_url as string, caption: r.caption as string, createdAt: (r.created_at as string),
+    };
+  }
+
+  private mapLoyaltyTier(r: Record<string, unknown>): LoyaltyTier {
+    return {
+      id: r.id as string, name: r.name as string, minPoints: r.min_points as number,
+      multiplier: parseFloat(String(r.multiplier)),
+      benefits: typeof r.benefits === "object" ? r.benefits as Record<string, unknown> : {},
+      isActive: r.is_active as boolean, createdAt: (r.created_at as string),
+    };
   }
 }

@@ -16,13 +16,37 @@ import type {
   LoyaltyTransaction,
   Reward,
   RewardRedemption,
-  Area,
+  Province,
+  City,
+  District,
+  Village,
+  RegionOption,
   VenueOwner,
   VenueOwnerStatus,
   Review,
   ReviewWithDetails,
   CourtPhoto,
   Holiday,
+  PickupGame,
+  PickupGameParticipant,
+  PickupGameMessage,
+  TeamWallet,
+  TeamWalletMember,
+  TeamWalletDeposit,
+  TeamWalletTransaction,
+  TeamWalletSplit,
+  TeamWalletSplitMember,
+  PlayerProfile,
+  PlayerSkillRating,
+  MatchRequest,
+  Achievement,
+  PlayerAchievement,
+  PlayerStreak,
+  FlashDeal,
+  VenueCamera,
+  VenueVerification,
+  VenueVerificationPhoto,
+  LoyaltyTier,
 } from "@/lib/types/domain";
 
 export interface CreateBookingInput {
@@ -82,8 +106,12 @@ export interface DatabaseAdapter {
   // Sports
   getSports(): Promise<Sport[]>;
 
-  // Areas
-  getAreas(): Promise<Area[]>;
+  // Regions
+  getProvinces(): Promise<Province[]>;
+  getCities(provinceId: string): Promise<City[]>;
+  getDistricts(cityId: string): Promise<District[]>;
+  getVillages(districtId: string): Promise<Village[]>;
+  getRegionOptions(): Promise<RegionOption[]>;
 
   // Venue Owners
   getVenueOwners(): Promise<VenueOwner[]>;
@@ -92,7 +120,7 @@ export interface DatabaseAdapter {
 
   // Venues
   getVenues(): Promise<Venue[]>;
-  getVenuesByArea(areaId: string): Promise<Venue[]>;
+  getVenuesByDistrict(districtId: string): Promise<Venue[]>;
   getVenuesByOwner(ownerId: string): Promise<Venue[]>;
   getVenueById(id: string): Promise<Venue | null>;
 
@@ -202,4 +230,81 @@ export interface DatabaseAdapter {
   getCourtPhotos(courtId: string): Promise<CourtPhoto[]>;
   createCourtPhoto(photo: CourtPhoto): Promise<CourtPhoto>;
   deleteCourtPhoto(id: string): Promise<void>;
+
+  // Pickup Games
+  getPickupGames(filters?: { sport?: string; status?: string; date?: string }): Promise<PickupGame[]>;
+  getPickupGameById(id: string): Promise<PickupGame | null>;
+  createPickupGame(data: Omit<PickupGame, "id" | "createdAt" | "updatedAt" | "currentPlayers">): Promise<PickupGame>;
+  updatePickupGame(id: string, data: Partial<PickupGame>): Promise<PickupGame>;
+  deletePickupGame(id: string): Promise<void>;
+  joinPickupGame(gameId: string, customerId: string, splitAmount: number, skillLevel?: string, position?: string): Promise<PickupGameParticipant>;
+  leavePickupGame(gameId: string, customerId: string): Promise<void>;
+  getPickupGameParticipants(gameId: string): Promise<PickupGameParticipant[]>;
+  getPickupGamesByCustomer(customerId: string): Promise<PickupGame[]>;
+  sendPickupGameMessage(gameId: string, senderId: string, message: string): Promise<PickupGameMessage>;
+  getPickupGameMessages(gameId: string, since?: string): Promise<PickupGameMessage[]>;
+
+  // Team Wallets
+  getTeamWalletsByCustomer(customerId: string): Promise<TeamWallet[]>;
+  getTeamWalletById(id: string): Promise<TeamWallet | null>;
+  createTeamWallet(data: Omit<TeamWallet, "id" | "balance" | "totalSpent" | "memberCount" | "createdAt" | "updatedAt">): Promise<TeamWallet>;
+  updateTeamWallet(id: string, data: Partial<TeamWallet>): Promise<TeamWallet>;
+  deleteTeamWallet(id: string): Promise<void>;
+  getTeamWalletMembers(walletId: string): Promise<TeamWalletMember[]>;
+  addTeamWalletMember(walletId: string, customerId: string, role?: string): Promise<TeamWalletMember>;
+  removeTeamWalletMember(walletId: string, customerId: string): Promise<void>;
+  updateTeamWalletMemberRole(walletId: string, customerId: string, role: string): Promise<TeamWalletMember>;
+  createTeamWalletDeposit(walletId: string, fromCustomerId: string, amount: number, paymentMethod?: string, notes?: string): Promise<TeamWalletDeposit>;
+  confirmTeamWalletDeposit(depositId: string): Promise<TeamWalletDeposit>;
+  getTeamWalletDeposits(walletId: string): Promise<TeamWalletDeposit[]>;
+  getTeamWalletTransactions(walletId: string): Promise<TeamWalletTransaction[]>;
+  createTeamWalletTransaction(data: Omit<TeamWalletTransaction, "id" | "createdAt">): Promise<TeamWalletTransaction>;
+  payBookingFromWallet(walletId: string, bookingId: string, amount: number): Promise<TeamWalletTransaction>;
+  createWalletSplit(walletId: string, bookingId: string, totalAmount: number, splitType: string, members: { customerId: string; amount: number }[]): Promise<TeamWalletSplit>;
+  getWalletSplits(walletId: string): Promise<TeamWalletSplit[]>;
+  getWalletSplitMembers(splitId: string): Promise<TeamWalletSplitMember[]>;
+
+  // Player Profiles (Sprint 12)
+  getPlayerProfile(customerId: string): Promise<PlayerProfile | null>;
+  upsertPlayerProfile(data: Partial<PlayerProfile> & { customerId: string }): Promise<PlayerProfile>;
+  searchPlayers(filters?: { sport?: string; skillLevel?: string; location?: string }): Promise<PlayerProfile[]>;
+  createPlayerSkillRating(data: Omit<PlayerSkillRating, "id" | "createdAt">): Promise<PlayerSkillRating>;
+  getPlayerSkillRatings(customerId: string): Promise<PlayerSkillRating[]>;
+
+  // Match Requests (Sprint 12)
+  createMatchRequest(data: Omit<MatchRequest, "id" | "status" | "respondedAt" | "createdAt">): Promise<MatchRequest>;
+  getMatchRequests(customerId: string): Promise<MatchRequest[]>;
+  updateMatchRequest(id: string, status: "accepted" | "declined"): Promise<MatchRequest>;
+
+  // Achievements (Sprint 12)
+  getAchievements(): Promise<Achievement[]>;
+  getPlayerAchievements(customerId: string): Promise<(PlayerAchievement & { achievement: Achievement })[]>;
+  upsertPlayerAchievement(customerId: string, achievementId: string, progress: number): Promise<PlayerAchievement>;
+  getLeaderboard(limit?: number): Promise<{ customerId: string; name: string; totalPoints: number; totalGames: number }[]>;
+
+  // Streaks (Sprint 12)
+  getPlayerStreaks(customerId: string): Promise<PlayerStreak[]>;
+  updatePlayerStreak(customerId: string, streakType: string): Promise<PlayerStreak>;
+
+  // Flash Deals (Sprint 13)
+  getFlashDeals(filters?: { status?: string; courtId?: string }): Promise<FlashDeal[]>;
+  getFlashDealById(id: string): Promise<FlashDeal | null>;
+  createFlashDeal(data: Omit<FlashDeal, "id" | "claimedBy" | "claimedAt" | "createdAt">): Promise<FlashDeal>;
+  claimFlashDeal(id: string, customerId: string): Promise<FlashDeal>;
+
+  // Venue Cameras (Sprint 14)
+  getVenueCameras(venueId: string): Promise<VenueCamera[]>;
+  createVenueCamera(data: Omit<VenueCamera, "id" | "lastUpdated" | "createdAt">): Promise<VenueCamera>;
+  updateVenueCamera(id: string, data: Partial<VenueCamera>): Promise<VenueCamera>;
+  deleteVenueCamera(id: string): Promise<void>;
+
+  // Venue Verification (Sprint 14)
+  getVenueVerification(venueId: string): Promise<VenueVerification | null>;
+  createVenueVerification(data: Omit<VenueVerification, "id" | "overallScore" | "verifiedAt" | "createdAt">): Promise<VenueVerification>;
+  updateVenueVerification(id: string, data: Partial<VenueVerification>): Promise<VenueVerification>;
+  getVenueVerificationPhotos(verificationId: string): Promise<VenueVerificationPhoto[]>;
+  createVenueVerificationPhoto(data: Omit<VenueVerificationPhoto, "id" | "createdAt">): Promise<VenueVerificationPhoto>;
+
+  // Loyalty Tiers (Sprint 15)
+  getLoyaltyTiers(): Promise<LoyaltyTier[]>;
 }

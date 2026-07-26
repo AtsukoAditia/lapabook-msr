@@ -3,16 +3,50 @@
 -- Aligned with schema.sql
 -- ==========================================================
 
--- ==================== AREAS ====================
-INSERT INTO areas (id, province, city, district, slug, is_active, created_at, updated_at) VALUES
-  ('area-bdg-kota',    'Jawa Barat',  'Bandung',        'Kota Bandung',        'bandung-kota',        true, NOW(), NOW()),
-  ('area-bdg-kab',     'Jawa Barat',  'Bandung',        'Kabupaten Bandung',   'bandung-kabupaten',   true, NOW(), NOW()),
-  ('area-jkt-selatan', 'DKI Jakarta', 'Jakarta Selatan', 'Jakarta Selatan',    'jakarta-selatan',     true, NOW(), NOW()),
-  ('area-sby-kota',    'Jawa Timur',  'Surabaya',       'Kota Surabaya',       'surabaya-kota',       true, NOW(), NOW()),
-  ('area-yog-kota',    'DI Yogyakarta','Yogyakarta',    'Kota Yogyakarta',     'yogyakarta-kota',     true, NOW(), NOW()),
-  ('area-smg-kota',    'Jawa Tengah', 'Semarang',       'Kota Semarang',       'semarang-kota',       true, NOW(), NOW()),
-  ('area-mdn-kota',    'Sumatera Utara','Medan',         'Kota Medan',          'medan-kota',          true, NOW(), NOW()),
-  ('area-blp-kota',    'Bali',        'Denpasar',       'Kota Denpasar',       'denpasar-kota',       true, NOW(), NOW())
+-- ==================== PROVINCES ====================
+INSERT INTO provinces (id, name, slug, is_active, created_at, updated_at) VALUES
+  ('prov-jabar',      'Jawa Barat',      'jawa-barat',       true, NOW(), NOW()),
+  ('prov-dki',        'DKI Jakarta',     'dki-jakarta',      true, NOW(), NOW()),
+  ('prov-jatim',      'Jawa Timur',      'jawa-timur',       true, NOW(), NOW()),
+  ('prov-diy',        'DI Yogyakarta',   'di-yogyakarta',    true, NOW(), NOW()),
+  ('prov-jateng',     'Jawa Tengah',     'jawa-tengah',      true, NOW(), NOW()),
+  ('prov-sumut',      'Sumatera Utara',  'sumatera-utara',   true, NOW(), NOW()),
+  ('prov-bali',       'Bali',            'bali',             true, NOW(), NOW())
+ON CONFLICT (id) DO NOTHING;
+
+-- ==================== CITIES ====================
+INSERT INTO cities (id, province_id, name, slug, is_active, created_at, updated_at) VALUES
+  ('city-bdg',       'prov-jabar', 'Bandung',        'bandung',         true, NOW(), NOW()),
+  ('city-jaksel',    'prov-dki',   'Jakarta Selatan', 'jakarta-selatan', true, NOW(), NOW()),
+  ('city-sby',       'prov-jatim', 'Surabaya',       'surabaya',        true, NOW(), NOW()),
+  ('city-yog',       'prov-diy',   'Yogyakarta',     'yogyakarta',      true, NOW(), NOW()),
+  ('city-smg',       'prov-jateng','Semarang',       'semarang',        true, NOW(), NOW()),
+  ('city-mdn',       'prov-sumut', 'Medan',          'medan',           true, NOW(), NOW()),
+  ('city-dps',       'prov-bali',  'Denpasar',       'denpasar',        true, NOW(), NOW())
+ON CONFLICT (id) DO NOTHING;
+
+-- ==================== DISTRICTS ====================
+INSERT INTO districts (id, city_id, name, slug, is_active, created_at, updated_at) VALUES
+  ('dist-bdg-kota',     'city-bdg',    'Kota Bandung',        'kota-bandung',         true, NOW(), NOW()),
+  ('dist-bdg-kab',      'city-bdg',    'Kabupaten Bandung',   'kabupaten-bandung',    true, NOW(), NOW()),
+  ('dist-jaksel',       'city-jaksel', 'Jakarta Selatan',     'jakarta-selatan',      true, NOW(), NOW()),
+  ('dist-sby',          'city-sby',    'Kota Surabaya',       'kota-surabaya',        true, NOW(), NOW()),
+  ('dist-yog',          'city-yog',    'Kota Yogyakarta',     'kota-yogyakarta',      true, NOW(), NOW()),
+  ('dist-smg',          'city-smg',    'Kota Semarang',       'kota-semarang',        true, NOW(), NOW()),
+  ('dist-mdn',          'city-mdn',    'Kota Medan',          'kota-medan',           true, NOW(), NOW()),
+  ('dist-dps',          'city-dps',    'Kota Denpasar',       'kota-denpasar',        true, NOW(), NOW())
+ON CONFLICT (id) DO NOTHING;
+
+-- ==================== VILLAGES (optional, 1 placeholder per district) ====================
+INSERT INTO villages (id, district_id, name, slug, is_active, created_at, updated_at) VALUES
+  ('vil-bdg-pusat',   'dist-bdg-kota', 'Bandung Kota Pusat', 'bandung-kota-pusat', true, NOW(), NOW()),
+  ('vil-bdg-kab-1',   'dist-bdg-kab',  'Soreang',           'soreang',            true, NOW(), NOW()),
+  ('vil-jaksel-1',    'dist-jaksel',   'Kebayoran Baru',    'kebayoran-baru',     true, NOW(), NOW()),
+  ('vil-sby-1',       'dist-sby',      'Tegalsari',         'tegalsari',          true, NOW(), NOW()),
+  ('vil-yog-1',       'dist-yog',      'Gedongtengen',      'gedongtengen',       true, NOW(), NOW()),
+  ('vil-smg-1',       'dist-smg',      'Semarang Tengah',   'semarang-tengah',    true, NOW(), NOW()),
+  ('vil-mdn-1',       'dist-mdn',      'Medan Baru',        'medan-baru',         true, NOW(), NOW()),
+  ('vil-dps-1',       'dist-dps',      'Denpasar Barat',    'denpasar-barat',     true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- ==================== ADMINS (before venue_owners) ====================
@@ -39,8 +73,8 @@ INSERT INTO sports (id, name, slug, icon, is_active, created_at, updated_at) VAL
 ON CONFLICT (id) DO NOTHING;
 
 -- ==================== VENUES ====================
-INSERT INTO venues (id, owner_id, area_id, name, slug, address, phone, email, description, open_time, close_time, facilities, images, is_active, approval_status, rain_discount_config, created_at, updated_at) VALUES
-  ('venue-greenfield', 'owner-greenfield', 'area-bdg-kota',
+INSERT INTO venues (id, owner_id, district_id, name, slug, address, phone, email, description, open_time, close_time, facilities, images, is_active, approval_status, rain_discount_config, created_at, updated_at) VALUES
+  ('venue-greenfield', 'owner-greenfield', 'dist-bdg-kota',
    'Greenfield Sports Club', 'greenfield-sports-club',
    'Jl. Golf No. 10, Bandung', '022-1234567', 'info@greenfield.id',
    'Venue olahraga lengkap di pusat kota Bandung.',
@@ -49,7 +83,7 @@ INSERT INTO venues (id, owner_id, area_id, name, slug, address, phone, email, de
    NULL, true, 'active',
    '{"enabled":true,"levels":{"light":{"discountPercent":10},"moderate":{"discountPercent":20},"heavy":{"discountPercent":30}}}'::jsonb,
    NOW(), NOW()),
-  ('venue-rahasian', 'owner-rahasian', 'area-jkt-selatan',
+  ('venue-rahasian', 'owner-rahasian', 'dist-jaksel',
    'Rahasia Badminton Arena', 'rahasian-badminton',
    'Jl. Kemang Raya No. 25, Jakarta Selatan', '021-9876543', 'info@rahasian.id',
    'Arena badminton premium ber-AC dengan 8 lapangan.',
@@ -58,7 +92,7 @@ INSERT INTO venues (id, owner_id, area_id, name, slug, address, phone, email, de
    NULL, true, 'active',
    '{"enabled":false}'::jsonb,
    NOW(), NOW()),
-  ('venue-arena-futsal', 'owner-arena-futsal', 'area-bdg-kota',
+  ('venue-arena-futsal', 'owner-arena-futsal', 'dist-bdg-kota',
    'Arena Futsal Bandung', 'arena-futsal-bandung',
    'Jl. Setiabudhi No. 50, Bandung', '022-5551234', 'info@arenafutsal.id',
    'Lapangan futsal standar FIFA dengan rumput sintetis.',

@@ -6,23 +6,53 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;
 CREATE EXTENSION IF NOT EXISTS citext;
 
 -- ============================================================
--- Areas
+-- Regions (4-level hierarchy)
 -- ============================================================
 
-CREATE TABLE IF NOT EXISTS areas (
+CREATE TABLE IF NOT EXISTS provinces (
   id VARCHAR(50) PRIMARY KEY,
-  province VARCHAR(100) NOT NULL,
-  city VARCHAR(100) NOT NULL,
-  district VARCHAR(100) NOT NULL,
-  village VARCHAR(100) NOT NULL DEFAULT '',
-  slug VARCHAR(150) UNIQUE NOT NULL,
-  label VARCHAR(500) NOT NULL DEFAULT '',
+  name VARCHAR(100) NOT NULL,
+  slug VARCHAR(100) UNIQUE NOT NULL,
   is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS areas_slug_idx ON areas (slug);
+CREATE TABLE IF NOT EXISTS cities (
+  id VARCHAR(50) PRIMARY KEY,
+  province_id VARCHAR(50) NOT NULL REFERENCES provinces(id) ON DELETE CASCADE,
+  name VARCHAR(100) NOT NULL,
+  slug VARCHAR(100) UNIQUE NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS cities_province_idx ON cities (province_id);
+
+CREATE TABLE IF NOT EXISTS districts (
+  id VARCHAR(50) PRIMARY KEY,
+  city_id VARCHAR(50) NOT NULL REFERENCES cities(id) ON DELETE CASCADE,
+  name VARCHAR(100) NOT NULL,
+  slug VARCHAR(100) UNIQUE NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS districts_city_idx ON districts (city_id);
+
+CREATE TABLE IF NOT EXISTS villages (
+  id VARCHAR(50) PRIMARY KEY,
+  district_id VARCHAR(50) NOT NULL REFERENCES districts(id) ON DELETE CASCADE,
+  name VARCHAR(100) NOT NULL,
+  slug VARCHAR(100) UNIQUE NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS villages_district_idx ON villages (district_id);
 
 -- ============================================================
 -- Sports
@@ -80,7 +110,7 @@ CREATE TABLE IF NOT EXISTS venues (
   name TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
   owner_id VARCHAR(50) REFERENCES venue_owners(id) ON DELETE SET NULL,
-  area_id VARCHAR(50) REFERENCES areas(id) ON DELETE SET NULL,
+  district_id VARCHAR(50) REFERENCES districts(id) ON DELETE SET NULL,
   address TEXT NOT NULL DEFAULT '',
   phone TEXT NOT NULL DEFAULT '',
   email TEXT NOT NULL DEFAULT '',
@@ -97,7 +127,7 @@ CREATE TABLE IF NOT EXISTS venues (
 );
 
 CREATE INDEX IF NOT EXISTS venues_owner_idx ON venues (owner_id);
-CREATE INDEX IF NOT EXISTS venues_area_idx ON venues (area_id);
+CREATE INDEX IF NOT EXISTS venues_district_idx ON venues (district_id);
 ALTER TABLE venues ADD COLUMN IF NOT EXISTS avg_rating NUMERIC(3,2) NOT NULL DEFAULT 0;
 ALTER TABLE venues ADD COLUMN IF NOT EXISTS review_count INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE venues ADD COLUMN IF NOT EXISTS rain_discount_config JSONB DEFAULT '{"enabled":false}';

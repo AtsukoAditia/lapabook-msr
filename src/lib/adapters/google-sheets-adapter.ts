@@ -30,6 +30,26 @@ import type {
   Reward,
   RewardRedemption,
   CourtPhoto,
+  PickupGame,
+  PickupGameParticipant,
+  PickupGameMessage,
+  TeamWallet,
+  TeamWalletMember,
+  TeamWalletDeposit,
+  TeamWalletTransaction,
+  TeamWalletSplit,
+  TeamWalletSplitMember,
+  PlayerProfile,
+  PlayerSkillRating,
+  MatchRequest,
+  Achievement,
+  PlayerAchievement,
+  PlayerStreak,
+  FlashDeal,
+  VenueCamera,
+  VenueVerification,
+  VenueVerificationPhoto,
+  LoyaltyTier,
 } from "@/lib/types/domain";
 
 function getJwtClient(): JWT {
@@ -912,4 +932,64 @@ export class GoogleSheetsAdapter implements DatabaseAdapter {
   async addFavorite(): Promise<void> {}
   async removeFavorite(): Promise<void> {}
   async getFavoriteVenueIds(): Promise<never[]> { return []; }
+
+  // === Sprint 12-15 stubs (GoogleSheets not used in prod) ===
+  async getPickupGames(filters?: { sport?: string; status?: string; date?: string }): Promise<PickupGame[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async getPickupGameById(id: string): Promise<PickupGame | null> { throw new Error('Not implemented in GoogleSheets'); }
+  async createPickupGame(data: Omit<PickupGame, "id" | "createdAt" | "updatedAt" | "currentPlayers">): Promise<PickupGame> { throw new Error('Not implemented in GoogleSheets'); }
+  async updatePickupGame(id: string, data: Partial<PickupGame>): Promise<PickupGame> { throw new Error('Not implemented in GoogleSheets'); }
+  async deletePickupGame(id: string): Promise<void> { throw new Error('Not implemented in GoogleSheets'); }
+  async joinPickupGame(gameId: string, customerId: string, splitAmount: number, skillLevel?: string, position?: string): Promise<PickupGameParticipant> { throw new Error('Not implemented in GoogleSheets'); }
+  async leavePickupGame(gameId: string, customerId: string): Promise<void> { throw new Error('Not implemented in GoogleSheets'); }
+  async getPickupGameParticipants(gameId: string): Promise<PickupGameParticipant[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async getPickupGamesByCustomer(customerId: string): Promise<PickupGame[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async sendPickupGameMessage(gameId: string, senderId: string, message: string): Promise<PickupGameMessage> { throw new Error('Not implemented in GoogleSheets'); }
+  async getPickupGameMessages(gameId: string, since?: string): Promise<PickupGameMessage[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async getTeamWalletsByCustomer(customerId: string): Promise<TeamWallet[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async getTeamWalletById(id: string): Promise<TeamWallet | null> { throw new Error('Not implemented in GoogleSheets'); }
+  async createTeamWallet(data: Omit<TeamWallet, "id" | "balance" | "totalSpent" | "memberCount" | "createdAt" | "updatedAt">): Promise<TeamWallet> { throw new Error('Not implemented in GoogleSheets'); }
+  async updateTeamWallet(id: string, data: Partial<TeamWallet>): Promise<TeamWallet> { throw new Error('Not implemented in GoogleSheets'); }
+  async deleteTeamWallet(id: string): Promise<void> { throw new Error('Not implemented in GoogleSheets'); }
+  async getTeamWalletMembers(walletId: string): Promise<TeamWalletMember[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async addTeamWalletMember(walletId: string, customerId: string, role?: string): Promise<TeamWalletMember> { throw new Error('Not implemented in GoogleSheets'); }
+  async removeTeamWalletMember(walletId: string, customerId: string): Promise<void> { throw new Error('Not implemented in GoogleSheets'); }
+  async updateTeamWalletMemberRole(walletId: string, customerId: string, role: string): Promise<TeamWalletMember> { throw new Error('Not implemented in GoogleSheets'); }
+  async createTeamWalletDeposit(walletId: string, fromCustomerId: string, amount: number, paymentMethod?: string, notes?: string): Promise<TeamWalletDeposit> { throw new Error('Not implemented in GoogleSheets'); }
+  async confirmTeamWalletDeposit(depositId: string): Promise<TeamWalletDeposit> { throw new Error('Not implemented in GoogleSheets'); }
+  async getTeamWalletDeposits(walletId: string): Promise<TeamWalletDeposit[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async getTeamWalletTransactions(walletId: string): Promise<TeamWalletTransaction[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async createTeamWalletTransaction(data: Omit<TeamWalletTransaction, "id" | "createdAt">): Promise<TeamWalletTransaction> { throw new Error('Not implemented in GoogleSheets'); }
+  async payBookingFromWallet(walletId: string, bookingId: string, amount: number): Promise<TeamWalletTransaction> { throw new Error('Not implemented in GoogleSheets'); }
+  async createWalletSplit(walletId: string, bookingId: string, totalAmount: number, splitType: string, members: { customerId: string; amount: number }[]): Promise<TeamWalletSplit> { throw new Error('Not implemented in GoogleSheets'); }
+  async getWalletSplits(walletId: string): Promise<TeamWalletSplit[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async getWalletSplitMembers(splitId: string): Promise<TeamWalletSplitMember[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async getPlayerProfile(customerId: string): Promise<PlayerProfile | null> { throw new Error('Not implemented in GoogleSheets'); }
+  async upsertPlayerProfile(data: Partial<PlayerProfile> & { customerId: string }): Promise<PlayerProfile> { throw new Error('Not implemented in GoogleSheets'); }
+  async searchPlayers(filters?: { sport?: string; skillLevel?: string; location?: string }): Promise<PlayerProfile[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async createPlayerSkillRating(data: Omit<PlayerSkillRating, "id" | "createdAt">): Promise<PlayerSkillRating> { throw new Error('Not implemented in GoogleSheets'); }
+  async getPlayerSkillRatings(customerId: string): Promise<PlayerSkillRating[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async createMatchRequest(data: Omit<MatchRequest, "id" | "status" | "respondedAt" | "createdAt">): Promise<MatchRequest> { throw new Error('Not implemented in GoogleSheets'); }
+  async getMatchRequests(customerId: string): Promise<MatchRequest[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async updateMatchRequest(id: string, status: "accepted" | "declined"): Promise<MatchRequest> { throw new Error('Not implemented in GoogleSheets'); }
+  async getAchievements(): Promise<Achievement[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async getPlayerAchievements(customerId: string): Promise<(PlayerAchievement & { achievement: Achievement })[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async upsertPlayerAchievement(customerId: string, achievementId: string, progress: number): Promise<PlayerAchievement> { throw new Error('Not implemented in GoogleSheets'); }
+  async getLeaderboard(limit?: number): Promise<{ customerId: string; name: string; totalPoints: number; totalGames: number }[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async getPlayerStreaks(customerId: string): Promise<PlayerStreak[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async updatePlayerStreak(customerId: string, streakType: string): Promise<PlayerStreak> { throw new Error('Not implemented in GoogleSheets'); }
+  async getFlashDeals(filters?: { status?: string; courtId?: string }): Promise<FlashDeal[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async getFlashDealById(id: string): Promise<FlashDeal | null> { throw new Error('Not implemented in GoogleSheets'); }
+  async createFlashDeal(data: Omit<FlashDeal, "id" | "claimedBy" | "claimedAt" | "createdAt">): Promise<FlashDeal> { throw new Error('Not implemented in GoogleSheets'); }
+  async claimFlashDeal(id: string, customerId: string): Promise<FlashDeal> { throw new Error('Not implemented in GoogleSheets'); }
+  async getVenueCameras(venueId: string): Promise<VenueCamera[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async createVenueCamera(data: Omit<VenueCamera, "id" | "lastUpdated" | "createdAt">): Promise<VenueCamera> { throw new Error('Not implemented in GoogleSheets'); }
+  async updateVenueCamera(id: string, data: Partial<VenueCamera>): Promise<VenueCamera> { throw new Error('Not implemented in GoogleSheets'); }
+  async deleteVenueCamera(id: string): Promise<void> { throw new Error('Not implemented in GoogleSheets'); }
+  async getVenueVerification(venueId: string): Promise<VenueVerification | null> { throw new Error('Not implemented in GoogleSheets'); }
+  async createVenueVerification(data: Omit<VenueVerification, "id" | "overallScore" | "verifiedAt" | "createdAt">): Promise<VenueVerification> { throw new Error('Not implemented in GoogleSheets'); }
+  async updateVenueVerification(id: string, data: Partial<VenueVerification>): Promise<VenueVerification> { throw new Error('Not implemented in GoogleSheets'); }
+  async getVenueVerificationPhotos(verificationId: string): Promise<VenueVerificationPhoto[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async createVenueVerificationPhoto(data: Omit<VenueVerificationPhoto, "id" | "createdAt">): Promise<VenueVerificationPhoto> { throw new Error('Not implemented in GoogleSheets'); }
+  async getLoyaltyTiers(): Promise<LoyaltyTier[]> { throw new Error('Not implemented in GoogleSheets'); }
+
 }

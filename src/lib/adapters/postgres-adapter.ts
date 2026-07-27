@@ -56,6 +56,7 @@ import type {
   VenueVerification,
   VenueVerificationPhoto,
   LoyaltyTier,
+  Area,
 } from "@/lib/types/domain";
 
 // ── Singleton Pool ──
@@ -301,6 +302,32 @@ export class PostgresAdapter implements DatabaseAdapter {
     const r = await queryOne<Record<string, unknown>>(`UPDATE courts SET ${sets.join(", ")} WHERE id = $${i} RETURNING *`, vals);
     if (!r) throw new Error(`Court not found: ${id}`);
     return mapCourt(r);
+  }
+
+  // ── Areas ──
+  async getAreas(): Promise<Area[]> {
+    return [];
+  }
+
+  async getAreasBySport(_sportId: string): Promise<Area[]> {
+    return [];
+  }
+
+  async getVenuesByArea(areaId: string, sportId?: string): Promise<Venue[]> {
+    if (sportId) {
+      const rows = await query<Record<string, unknown>>(
+        `SELECT DISTINCT v.* FROM venues v
+         JOIN courts c ON c.venue_id = v.id
+         WHERE v.area_id = $1 AND c.sport_id = $2 AND v.is_active = true AND v.approval_status = 'active'`,
+        [areaId, sportId]
+      );
+      return rows.map((r) => mapRow<Venue>(r));
+    }
+    const rows = await query<Record<string, unknown>>(
+      "SELECT * FROM venues WHERE area_id = $1 AND is_active = true AND approval_status = 'active'",
+      [areaId]
+    );
+    return rows.map((r) => mapRow<Venue>(r));
   }
 
   // ── Bookings ──

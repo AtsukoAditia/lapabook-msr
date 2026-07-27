@@ -23,6 +23,11 @@ import type {
   AdminUser,
   CustomerPublic,
   Area,
+  Province,
+  City,
+  District,
+  Village,
+  RegionOption,
   VenueOwner,
   VenueOwnerStatus,
   LoyaltyTransaction,
@@ -185,6 +190,14 @@ function rowToBlockedSlot(row: Record<string, unknown>): BlockedSlot {
 }
 
 export class GoogleSheetsAdapter implements DatabaseAdapter {
+  // ── Regions (stubs) ──
+  async getProvinces(): Promise<Province[]> { return []; }
+  async getCities(_provinceId: string): Promise<City[]> { return []; }
+  async getDistricts(_cityId: string): Promise<District[]> { return []; }
+  async getVillages(_districtId: string): Promise<Village[]> { return []; }
+  async getRegionOptions(): Promise<RegionOption[]> { return []; }
+  async getVenuesByDistrict(_districtId: string): Promise<Venue[]> { return []; }
+
   async getSports(): Promise<Sport[]> {
     const doc = await getSpreadsheet();
     const sheet = doc.sheetsByTitle["sports"];
@@ -900,6 +913,7 @@ export class GoogleSheetsAdapter implements DatabaseAdapter {
 
   // Area methods
   async getAreas(): Promise<Area[]> { return []; }
+  async getAreasBySport(_sportId: string): Promise<Area[]> { return []; }
   async getAreaById(_id: string): Promise<Area | null> { return null; }
 
   // Venue owner methods

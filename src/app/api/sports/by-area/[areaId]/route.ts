@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabaseAdapter } from "@/lib/adapters";
+import type { Venue, Sport } from "@/lib/types/domain";
 
 export async function GET(
   request: NextRequest,
@@ -17,8 +18,8 @@ export async function GET(
     ]);
 
     // Filter active venues in this area
-    const activeVenues = venues.filter((v) => v.isActive);
-    const venueIds = new Set(activeVenues.map((v) => v.id));
+    const activeVenues = venues.filter((v: Venue) => v.isActive);
+    const venueIds = new Set(activeVenues.map((v: Venue) => v.id));
 
     // Get unique sport IDs from courts in those venues
     const sportIds = new Set<string>();
@@ -30,7 +31,7 @@ export async function GET(
 
     // Filter sports to only those available
     const availableSports = sports.filter(
-      (s) => s.isActive && sportIds.has(s.id)
+      (s: Sport) => s.isActive && sportIds.has(s.id)
     );
 
     return NextResponse.json({ sports: availableSports });

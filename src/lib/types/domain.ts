@@ -48,6 +48,20 @@ export interface Village {
   updatedAt: string;
 }
 
+// ── Areas ──
+export interface Area {
+  id: string;
+  city: string;
+  province: string;
+  district?: string;
+  village?: string;
+  slug?: string;
+  label?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Merged region payload for UI cascade (province + city + district selected = venue match)
 export interface RegionOption {
   provinceId: string;
@@ -114,6 +128,7 @@ export interface Venue {
   commissionRate?: number;
   platformFeeType?: 'percentage' | 'fixed';
   platformFeeValue?: number;
+  areaId?: string;
 }
 
 export interface Court {

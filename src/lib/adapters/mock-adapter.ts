@@ -7,6 +7,7 @@ import type {
   CreateBlockedSlotInput,
 } from "./database-adapter";
 import type {
+  Area,
   Booking,
   BlockedSlot,
   Court,
@@ -190,7 +191,7 @@ function getRedemptions(): RewardRedemption[] {
   return g.__lapanginRedemptions;
 }
 function getAreas(): Area[] {
-  if (!g.__lapanginAreas) g.__lapanginAreas = mockAreas.map(a => ({ ...a }));
+  if (!g.__lapanginAreas) g.__lapanginAreas = mockAreas.map((a: Area) => ({ ...a }));
   return g.__lapanginAreas;
 }
 function getVenueOwners(): VenueOwner[] {
@@ -285,11 +286,31 @@ export class MockAdapter implements DatabaseAdapter {
   }
 
   // ── Regions ──
-  async getProvinces(): Promise<Province[]> { return getProvinces(); }
-  async getCities(provinceId: string): Promise<City[]> { return getCities().filter(c => c.provinceId === provinceId); }
-  async getDistricts(cityId: string): Promise<District[]> { return getDistricts().filter(d => d.cityId === cityId); }
-  async getVillages(districtId: string): Promise<Village[]> { return getVillages().filter(v => v.districtId === districtId); }
-  async getRegionOptions(): Promise<RegionOption[]> { return getRegionOptions(); }
+  async getProvinces(): Promise<Province[]> { return this._getProvinces(); }
+  async getCities(provinceId: string): Promise<City[]> { return this._getCities().filter((c: City) => c.provinceId === provinceId); }
+  async getDistricts(cityId: string): Promise<District[]> { return this._getDistricts().filter((d: District) => d.cityId === cityId); }
+  async getVillages(districtId: string): Promise<Village[]> { return this._getVillages().filter((v: Village) => v.districtId === districtId); }
+  async getRegionOptions(): Promise<RegionOption[]> { return this._getRegionOptions(); }
+  private _getProvinces(): Province[] { return []; }
+  private _getCities(): City[] { return []; }
+  private _getDistricts(): District[] { return []; }
+  private _getVillages(): Village[] { return []; }
+  private _getRegionOptions(): RegionOption[] { return []; }
+
+  // ── Areas ──
+  async getAreas(): Promise<Area[]> {
+    return [...getAreas()];
+  }
+
+  async getAreasBySport(sportId: string): Promise<Area[]> {
+    const venueIds = new Set(
+      mockCourts.filter((c) => c.sportId === sportId && c.isActive).map((c) => c.venueId)
+    );
+    const areaIds = new Set(
+      mockVenues.filter((v) => venueIds.has(v.id) && v.isActive && v.approvalStatus === "active").map((v) => v.areaId)
+    );
+    return getAreas().filter((a) => areaIds.has(a.id));
+  }
 
   // ── Venue Owners ──
   async getVenueOwners(): Promise<VenueOwner[]> {
@@ -311,6 +332,15 @@ export class MockAdapter implements DatabaseAdapter {
 
   async getVenuesByDistrict(districtId: string): Promise<Venue[]> {
     return mockVenues.filter((v) => v.districtId === districtId && v.isActive && v.approvalStatus === "active");
+  }
+
+  async getVenuesByArea(areaId: string, sportId?: string): Promise<Venue[]> {
+    let venues = mockVenues.filter((v) => v.areaId === areaId && v.isActive && v.approvalStatus === "active");
+    if (sportId) {
+      const venueIds = new Set(mockCourts.filter((c) => c.sportId === sportId && c.isActive).map((c) => c.venueId));
+      venues = venues.filter((v) => venueIds.has(v.id));
+    }
+    return venues;
   }
 
   async getVenueById(id: string): Promise<Venue | null> {

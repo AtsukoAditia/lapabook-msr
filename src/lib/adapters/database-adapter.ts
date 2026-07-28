@@ -1,4 +1,5 @@
 import type {
+  Area,
   Booking,
   BlockedSlot,
   Court,
@@ -121,12 +122,17 @@ export interface DatabaseAdapter {
   // Venues
   getVenues(): Promise<Venue[]>;
   getVenuesByDistrict(districtId: string): Promise<Venue[]>;
+  getVenuesByArea(areaId: string, sportId?: string): Promise<Venue[]>;
   getVenuesByOwner(ownerId: string): Promise<Venue[]>;
   getVenueById(id: string): Promise<Venue | null>;
 
   // Courts
   getCourts(): Promise<Court[]>;
   getCourtsByVenue(venueId: string): Promise<Court[]>;
+
+  // Areas
+  getAreas(): Promise<Area[]>;
+  getAreasBySport(sportId: string): Promise<Area[]>;
 
   // Holidays
   getHolidays(): Promise<Holiday[]>;

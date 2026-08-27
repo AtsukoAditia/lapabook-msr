@@ -30,7 +30,7 @@ export async function GET(request: Request) {
     const courtIds = new Set(ownerCourts.map(c => c.id));
 
     // Get all bookings for owner's courts
-    let allBookings = await adapter.getBookings();
+    const allBookings = await adapter.getBookings();
     let ownerBookings = allBookings.filter(b => courtIds.has(b.courtId));
 
     // Filter by status

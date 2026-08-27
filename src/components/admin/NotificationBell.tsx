@@ -28,7 +28,7 @@ export default function NotificationBell() {
   useEffect(() => {
     if (!open || notifications.length > 0) return;
     const ac = new AbortController();
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- loading state for async fetch
+     
     setLoading(true);
     fetch("/api/admin/notifications", { signal: ac.signal })
       .then((r) => r.json())

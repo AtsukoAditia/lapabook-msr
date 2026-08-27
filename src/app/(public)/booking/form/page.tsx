@@ -64,7 +64,7 @@ function BookingFormContent() {
   useEffect(() => {
     if (!courtId || !date || !startTime || !endTime) return;
     let cancelled = false;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- loading state before async fetch
+     
     setPricingLoading(true);
     fetch(`/api/pricing/calculate?courtId=${courtId}&date=${date}&startTime=${startTime}&endTime=${endTime}`)
       .then((r) => r.json())

@@ -56,6 +56,12 @@ import type {
   VenueVerification,
   VenueVerificationPhoto,
   LoyaltyTier,
+  GroupBooking,
+  GroupBookingParticipant,
+  GroupBookingTimeSlot,
+  GroupBookingDetail,
+  GroupBookingStatus,
+  GroupBookingParticipantStatus,
   Area,
 } from "@/lib/types/domain";
 
@@ -1462,6 +1468,145 @@ export class PostgresAdapter implements DatabaseAdapter {
     return rows.map((r) => this.mapLoyaltyTier(r));
   }
 
+  // ── Group Bookings (Sprint 16) ──
+
+  async createGroupBooking(data: {
+    organizerId: string; venueId: string; courtId: string; sportId: string;
+    title: string; description?: string; minParticipants: number; maxParticipants: number;
+    pricePerSlot: number; deadline?: string;
+  }): Promise<GroupBooking> {
+    const id = crypto.randomUUID();
+    const { rows } = await pool.query(
+      `INSERT INTO group_bookings (id, organizer_id, venue_id, court_id, sport_id, title, description, min_participants, max_participants, price_per_slot, status, deadline)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'draft',$11) RETURNING *`,
+      [id, data.organizerId, data.venueId, data.courtId, data.sportId, data.title, data.description || "", data.minParticipants, data.maxParticipants, data.pricePerSlot || 0, data.deadline || null],
+    );
+    return this.mapGroupBooking(rows[0]);
+  }
+
+  async getGroupBookingById(id: string): Promise<GroupBooking | null> {
+    const { rows } = await pool.query(`SELECT * FROM group_bookings WHERE id = $1`, [id]);
+    return rows[0] ? this.mapGroupBooking(rows[0]) : null;
+  }
+
+  async getGroupBookingDetail(id: string): Promise<GroupBookingDetail | null> {
+    const booking = await this.getGroupBookingById(id);
+    if (!booking) return null;
+    const [participants, timeSlots] = await Promise.all([
+      this.getGroupBookingParticipants(id),
+      this.getGroupBookingTimeSlots(id),
+    ]);
+    return { ...booking, participants, timeSlots };
+  }
+
+  async getGroupBookingsByOrganizer(organizerId: string): Promise<GroupBooking[]> {
+    const { rows } = await pool.query(`SELECT * FROM group_bookings WHERE organizer_id = $1 ORDER BY created_at DESC`, [organizerId]);
+    return rows.map((r) => this.mapGroupBooking(r));
+  }
+
+  async updateGroupBookingStatus(id: string, status: GroupBooking["status"], bookingId?: string): Promise<GroupBooking> {
+    const fields: string[] = [`status = $1`, `updated_at = NOW()`]; const p: unknown[] = [status];
+    if (bookingId) { p.push(bookingId); fields.push(`final_booking_id = $${p.length}`); }
+    p.push(id);
+    const { rows } = await pool.query(`UPDATE group_bookings SET ${fields.join(", ")} WHERE id = $${p.length} RETURNING *`, p);
+    if (!rows[0]) throw new Error("Group booking not found");
+    return this.mapGroupBooking(rows[0]);
+  }
+
+  async deleteGroupBooking(id: string): Promise<void> { await pool.query(`DELETE FROM group_bookings WHERE id = $1`, [id]); }
+
+  async getGroupBookingParticipants(groupBookingId: string): Promise<GroupBookingParticipant[]> {
+    const { rows } = await pool.query(
+      `SELECT gbp.*, c.name as customer_name, c.phone as customer_phone FROM group_booking_participants gbp LEFT JOIN customers c ON c.id = gbp.customer_id WHERE gbp.group_booking_id = $1 ORDER BY gbp.joined_at`, [groupBookingId],
+    );
+    return rows.map((r) => this.mapGroupBookingParticipant(r));
+  }
+
+  async addGroupBookingParticipant(groupBookingId: string, customerId: string, isOrganizer = false): Promise<GroupBookingParticipant> {
+    const id = crypto.randomUUID();
+    const { rows } = await pool.query(
+      `INSERT INTO group_booking_participants (id, group_booking_id, customer_id, is_organizer, status) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (group_booking_id, customer_id) DO NOTHING RETURNING *`,
+      [id, groupBookingId, customerId, isOrganizer, isOrganizer ? "accepted" : "invited"],
+    );
+    if (!rows[0]) { const existing = await this.getGroupBookingParticipant(groupBookingId, customerId); if (!existing) throw new Error("Failed to add participant"); return existing; }
+    const enriched = await pool.query(`SELECT gbp.*, c.name as customer_name, c.phone as customer_phone FROM group_booking_participants gbp LEFT JOIN customers c ON c.id = gbp.customer_id WHERE gbp.id = $1`, [id]);
+    return this.mapGroupBookingParticipant(enriched.rows[0] ?? rows[0]);
+  }
+
+  async getGroupBookingParticipant(groupBookingId: string, customerId: string): Promise<GroupBookingParticipant | null> {
+    const { rows } = await pool.query(
+      `SELECT gbp.*, c.name as customer_name, c.phone as customer_phone FROM group_booking_participants gbp LEFT JOIN customers c ON c.id = gbp.customer_id WHERE gbp.group_booking_id = $1 AND gbp.customer_id = $2`, [groupBookingId, customerId],
+    );
+    return rows[0] ? this.mapGroupBookingParticipant(rows[0]) : null;
+  }
+
+  async updateGroupBookingParticipantStatus(groupBookingId: string, customerId: string, status: GroupBookingParticipant["status"], availability?: string[]): Promise<GroupBookingParticipant> {
+    const sets: string[] = ["status = $1"]; const p: unknown[] = [status];
+    if (availability) { p.push(JSON.stringify(availability)); sets.push(`availability_json = $${p.length}`); }
+    if (status === "accepted" || status === "confirmed") sets.push("confirmed_at = NOW()");
+    p.push(groupBookingId, customerId);
+    const { rows } = await pool.query(`UPDATE group_booking_participants SET ${sets.join(", ")} WHERE group_booking_id = $${p.length - 1} AND customer_id = $${p.length} RETURNING *`, p);
+    if (!rows[0]) throw new Error("Participant not found");
+    const enriched = await pool.query(`SELECT gbp.*, c.name as customer_name, c.phone as customer_phone FROM group_booking_participants gbp LEFT JOIN customers c ON c.id = gbp.customer_id WHERE gbp.id = $1`, [rows[0].id]);
+    return this.mapGroupBookingParticipant(enriched.rows[0] ?? rows[0]);
+  }
+
+  async getGroupBookingParticipantById(id: string): Promise<GroupBookingParticipant | null> {
+    const { rows } = await pool.query(`SELECT gbp.*, c.name as customer_name, c.phone as customer_phone FROM group_booking_participants gbp LEFT JOIN customers c ON c.id = gbp.customer_id WHERE gbp.id = $1`, [id]);
+    return rows[0] ? this.mapGroupBookingParticipant(rows[0]) : null;
+  }
+
+  async getGroupBookingTimeSlots(groupBookingId: string): Promise<GroupBookingTimeSlot[]> {
+    const { rows } = await pool.query(`SELECT * FROM group_booking_time_slots WHERE group_booking_id = $1 ORDER BY vote_count DESC, created_at`, [groupBookingId]);
+    return rows.map((r) => this.mapGroupBookingTimeSlot(r));
+  }
+
+  async addGroupBookingTimeSlot(data: { groupBookingId: string; slotDate: string; startTime: string; endTime: string }): Promise<GroupBookingTimeSlot> {
+    const id = crypto.randomUUID();
+    const { rows } = await pool.query(`INSERT INTO group_booking_time_slots (id, group_booking_id, slot_date, start_time, end_time) VALUES ($1,$2,$3,$4,$5) RETURNING *`, [id, data.groupBookingId, data.slotDate, data.startTime, data.endTime]);
+    return this.mapGroupBookingTimeSlot(rows[0]);
+  }
+
+  async getGroupBookingTimeSlotById(id: string): Promise<GroupBookingTimeSlot | null> {
+    const { rows } = await pool.query(`SELECT * FROM group_booking_time_slots WHERE id = $1`, [id]);
+    return rows[0] ? this.mapGroupBookingTimeSlot(rows[0]) : null;
+  }
+
+  async voteGroupBookingTimeSlot(timeSlotId: string, customerId: string): Promise<GroupBookingTimeSlot> {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const { rows: partRows } = await client.query(
+        `SELECT gbp.id, gbp.vote_slot_id FROM group_booking_participants gbp JOIN group_booking_time_slots ts ON ts.group_booking_id = gbp.group_booking_id WHERE gbp.customer_id = $1 AND ts.id = $2 LIMIT 1`,
+        [customerId, timeSlotId],
+      );
+      if (partRows[0]?.vote_slot_id && partRows[0].vote_slot_id !== timeSlotId) {
+        await client.query(`UPDATE group_booking_time_slots SET vote_count = GREATEST(vote_count - 1, 0) WHERE id = $1`, [partRows[0].vote_slot_id]);
+      }
+      if (partRows[0]) await client.query(`UPDATE group_booking_participants SET vote_slot_id = $1 WHERE id = $2`, [timeSlotId, partRows[0].id]);
+      const { rows } = await client.query(`UPDATE group_booking_time_slots SET vote_count = vote_count + 1 WHERE id = $1 RETURNING *`, [timeSlotId]);
+      await client.query("COMMIT");
+      if (!rows[0]) throw new Error("Time slot not found");
+      return this.mapGroupBookingTimeSlot(rows[0]);
+    } catch (e) { await client.query("ROLLBACK"); throw e; } finally { client.release(); }
+  }
+
+  async markGroupBookingWinner(groupBookingId: string, timeSlotId: string): Promise<GroupBookingTimeSlot> {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query(`UPDATE group_booking_time_slots SET is_winner = false WHERE group_booking_id = $1`, [groupBookingId]);
+      const { rows } = await client.query(`UPDATE group_booking_time_slots SET is_winner = true WHERE id = $1 AND group_booking_id = $2 RETURNING *`, [timeSlotId, groupBookingId]);
+      if (rows[0]) {
+        await client.query(`UPDATE group_bookings SET booking_date = $1, start_time = $2, end_time = $3, updated_at = NOW() WHERE id = $4`, [rows[0].slot_date, rows[0].start_time, rows[0].end_time, groupBookingId]);
+      }
+      await client.query("COMMIT");
+      if (!rows[0]) throw new Error("Time slot not found");
+      return this.mapGroupBookingTimeSlot(rows[0]);
+    } catch (e) { await client.query("ROLLBACK"); throw e; } finally { client.release(); }
+  }
+
+
   // ── Mappers ──
 
   private mapPickupGame(r: Record<string, unknown>): PickupGame {
@@ -1669,6 +1814,61 @@ export class PostgresAdapter implements DatabaseAdapter {
       multiplier: parseFloat(String(r.multiplier)),
       benefits: typeof r.benefits === "object" ? r.benefits as Record<string, unknown> : {},
       isActive: r.is_active as boolean, createdAt: (r.created_at as string),
+    };
+  }
+
+  private mapGroupBooking(r: Record<string, unknown>): GroupBooking {
+    const fmtDate = (d: unknown): string | undefined => {
+      if (!d) return undefined;
+      if (d instanceof Date) return d.toISOString().slice(0, 10);
+      if (typeof d === "string") {
+        const m = d.match(/^\d{4}-\d{2}-\d{2}/);
+        return m ? m[0] : new Date(d).toISOString().slice(0, 10);
+      }
+      return String(d).slice(0, 10);
+    };
+    return {
+      id: r.id as string, organizerId: r.organizer_id as string, venueId: r.venue_id as string, courtId: r.court_id as string,
+      sportId: r.sport_id as string, title: r.title as string, description: (r.description as string) || undefined,
+      bookingDate: fmtDate(r.booking_date),
+      startTime: r.start_time ? String(r.start_time).slice(0, 5) : undefined,
+      endTime: r.end_time ? String(r.end_time).slice(0, 5) : undefined,
+      durationMinutes: (r.duration_minutes as number) ?? 60,
+      minParticipants: r.min_participants as number, maxParticipants: r.max_participants as number,
+      pricePerSlot: parseFloat(String(r.price_per_slot ?? 0)),
+      status: r.status as GroupBookingStatus, deadline: r.deadline as string || undefined,
+      finalBookingId: r.final_booking_id as string || undefined,
+      createdAt: r.created_at as string, updatedAt: r.updated_at as string,
+    };
+  }
+
+  private mapGroupBookingParticipant(r: Record<string, unknown>): GroupBookingParticipant {
+    const avail: string[] = Array.isArray(r.availability_json) ? r.availability_json as string[] : (typeof r.availability_json === "string" ? JSON.parse(r.availability_json as string) : []);
+    return {
+      id: r.id as string, groupBookingId: r.group_booking_id as string, customerId: r.customer_id as string,
+      status: r.status as GroupBookingParticipantStatus, availabilityJson: avail,
+      voteSlotId: r.vote_slot_id as string || undefined,
+      splitAmount: parseFloat(String(r.split_amount ?? 0)), isOrganizer: (r.is_organizer as boolean) ?? false,
+      joinedAt: r.joined_at as string, confirmedAt: r.confirmed_at as string || undefined,
+      customerName: r.customer_name as string || undefined, customerPhone: r.customer_phone as string || undefined,
+    };
+  }
+
+  private mapGroupBookingTimeSlot(r: Record<string, unknown>): GroupBookingTimeSlot {
+    let sd = r.slot_date as unknown;
+    let slotDateStr: string;
+    if (sd instanceof Date) slotDateStr = sd.toISOString().slice(0, 10);
+    else if (typeof sd === "string") {
+      // Handles "2026-09-10", "2026-09-10T00:00:00.000Z", or "Thu Sep 10 2026"
+      const iso = sd.match(/^\d{4}-\d{2}-\d{2}/);
+      slotDateStr = iso ? iso[0] : new Date(sd).toISOString().slice(0, 10);
+    } else slotDateStr = String(sd).slice(0, 10);
+    return {
+      id: r.id as string, groupBookingId: r.group_booking_id as string,
+      slotDate: slotDateStr,
+      startTime: String(r.start_time).slice(0, 5), endTime: String(r.end_time).slice(0, 5),
+      voteCount: (r.vote_count as number) ?? 0, isWinner: (r.is_winner as boolean) ?? false,
+      createdAt: r.created_at as string,
     };
   }
 }

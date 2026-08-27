@@ -1,35 +1,27 @@
-# version: "3.9"
-
 services:
   postgres:
     image: postgres:16
-
     container_name: lapangin-postgres
-
     restart: unless-stopped
-
     environment:
       POSTGRES_DB: lapangin
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-
-    # ports:
-    #   - "5432:5432"  # Tidak expose ke publik — app akses via internal network
-
+      POSTGRES_USER: brodit
+      POSTGRES_PASSWORD: TYtB39f5FBO5UTJEiaFr6vj76MpS7llm
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    # Keep internal only (no ports) - app accesses via docker network
 
   app:
     build: .
-
     container_name: lapangin-app
-
     depends_on:
       - postgres
-
     env_file:
       - .env.local
-
+    environment:
+      # Override host for docker network (localhost inside container -> postgres service)
+      DATABASE_URL: postgresql://brodit:TYtB39f5FBO5UTJEiaFr6vj76MpS7llm@postgres:5432/lapangin
+      POSTGRES_URL: postgresql://brodit:TYtB39f5FBO5UTJEiaFr6vj76MpS7llm@postgres:5432/lapangin
     ports:
       - "3000:3000"
 

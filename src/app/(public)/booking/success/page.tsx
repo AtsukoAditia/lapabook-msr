@@ -239,7 +239,7 @@ function SuccessContent() {
   useEffect(() => {
     if (!booking?.expiresAt || booking.bookingStatus !== "waiting_payment") {
       expiryRefreshRef.current = false;
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- countdown is derived from booking status
+       
       setCountdown(null);
       return;
     }

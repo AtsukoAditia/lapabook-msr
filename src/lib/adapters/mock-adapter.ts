@@ -7,6 +7,7 @@ import type {
   CreateBlockedSlotInput,
 } from "./database-adapter";
 import type {
+  Area,
   Booking,
   BlockedSlot,
   Court,
@@ -24,13 +25,37 @@ import type {
   LoyaltyTransactionType,
   Reward,
   RewardRedemption,
-  Area,
+  Province,
+  City,
+  District,
+  Village,
+  RegionOption,
   VenueOwner,
   Review,
   ReviewWithDetails,
   CourtPhoto,
   ReviewPhoto,
   VenueOwnerStatus,
+  PickupGame,
+  PickupGameParticipant,
+  PickupGameMessage,
+  TeamWallet,
+  TeamWalletMember,
+  TeamWalletDeposit,
+  TeamWalletTransaction,
+  TeamWalletSplit,
+  TeamWalletSplitMember,
+  PlayerProfile,
+  PlayerSkillRating,
+  MatchRequest,
+  Achievement,
+  PlayerAchievement,
+  PlayerStreak,
+  FlashDeal,
+  VenueCamera,
+  VenueVerification,
+  VenueVerificationPhoto,
+  LoyaltyTier,
 } from "@/lib/types/domain";
 import {
   mockSports,
@@ -166,7 +191,7 @@ function getRedemptions(): RewardRedemption[] {
   return g.__lapanginRedemptions;
 }
 function getAreas(): Area[] {
-  if (!g.__lapanginAreas) g.__lapanginAreas = mockAreas.map(a => ({ ...a }));
+  if (!g.__lapanginAreas) g.__lapanginAreas = mockAreas.map((a: Area) => ({ ...a }));
   return g.__lapanginAreas;
 }
 function getVenueOwners(): VenueOwner[] {
@@ -260,9 +285,31 @@ export class MockAdapter implements DatabaseAdapter {
     return mockSports.filter((s) => s.isActive);
   }
 
+  // ── Regions ──
+  async getProvinces(): Promise<Province[]> { return this._getProvinces(); }
+  async getCities(provinceId: string): Promise<City[]> { return this._getCities().filter((c: City) => c.provinceId === provinceId); }
+  async getDistricts(cityId: string): Promise<District[]> { return this._getDistricts().filter((d: District) => d.cityId === cityId); }
+  async getVillages(districtId: string): Promise<Village[]> { return this._getVillages().filter((v: Village) => v.districtId === districtId); }
+  async getRegionOptions(): Promise<RegionOption[]> { return this._getRegionOptions(); }
+  private _getProvinces(): Province[] { return []; }
+  private _getCities(): City[] { return []; }
+  private _getDistricts(): District[] { return []; }
+  private _getVillages(): Village[] { return []; }
+  private _getRegionOptions(): RegionOption[] { return []; }
+
   // ── Areas ──
   async getAreas(): Promise<Area[]> {
-    return getAreas().filter(a => a.isActive);
+    return [...getAreas()];
+  }
+
+  async getAreasBySport(sportId: string): Promise<Area[]> {
+    const venueIds = new Set(
+      mockCourts.filter((c) => c.sportId === sportId && c.isActive).map((c) => c.venueId)
+    );
+    const areaIds = new Set(
+      mockVenues.filter((v) => venueIds.has(v.id) && v.isActive && v.approvalStatus === "active").map((v) => v.areaId)
+    );
+    return getAreas().filter((a) => areaIds.has(a.id));
   }
 
   // ── Venue Owners ──
@@ -283,8 +330,17 @@ export class MockAdapter implements DatabaseAdapter {
     return mockVenues.filter((v) => v.isActive && v.approvalStatus === "active");
   }
 
-  async getVenuesByArea(areaId: string): Promise<Venue[]> {
-    return mockVenues.filter((v) => v.areaId === areaId && v.isActive && v.approvalStatus === "active");
+  async getVenuesByDistrict(districtId: string): Promise<Venue[]> {
+    return mockVenues.filter((v) => v.districtId === districtId && v.isActive && v.approvalStatus === "active");
+  }
+
+  async getVenuesByArea(areaId: string, sportId?: string): Promise<Venue[]> {
+    let venues = mockVenues.filter((v) => v.areaId === areaId && v.isActive && v.approvalStatus === "active");
+    if (sportId) {
+      const venueIds = new Set(mockCourts.filter((c) => c.sportId === sportId && c.isActive).map((c) => c.venueId));
+      venues = venues.filter((v) => venueIds.has(v.id));
+    }
+    return venues;
   }
 
   async getVenueById(id: string): Promise<Venue | null> {
@@ -797,4 +853,63 @@ export class MockAdapter implements DatabaseAdapter {
   async getCourtPhotos(_courtId: string): Promise<CourtPhoto[]> { return []; }
   async createCourtPhoto(photo: CourtPhoto): Promise<CourtPhoto> { return photo; }
   async deleteCourtPhoto(_id: string): Promise<void> {}
+
+  // Sprint 12-15 stubs
+  async getPickupGames(): Promise<PickupGame[]> { throw new Error('Not implemented in MockAdapter'); }
+  async getPickupGameById(): Promise<PickupGame | null> { throw new Error('Not implemented in MockAdapter'); }
+  async createPickupGame(): Promise<PickupGame> { throw new Error('Not implemented in MockAdapter'); }
+  async updatePickupGame(): Promise<PickupGame> { throw new Error('Not implemented in MockAdapter'); }
+  async deletePickupGame(): Promise<void> { throw new Error('Not implemented in MockAdapter'); }
+  async joinPickupGame(): Promise<PickupGameParticipant> { throw new Error('Not implemented in MockAdapter'); }
+  async leavePickupGame(): Promise<void> { throw new Error('Not implemented in MockAdapter'); }
+  async getPickupGameParticipants(): Promise<PickupGameParticipant[]> { throw new Error('Not implemented in MockAdapter'); }
+  async getPickupGamesByCustomer(): Promise<PickupGame[]> { throw new Error('Not implemented in MockAdapter'); }
+  async sendPickupGameMessage(): Promise<PickupGameMessage> { throw new Error('Not implemented in MockAdapter'); }
+  async getPickupGameMessages(): Promise<PickupGameMessage[]> { throw new Error('Not implemented in MockAdapter'); }
+  async getTeamWalletsByCustomer(): Promise<TeamWallet[]> { throw new Error('Not implemented in MockAdapter'); }
+  async getTeamWalletById(): Promise<TeamWallet | null> { throw new Error('Not implemented in MockAdapter'); }
+  async createTeamWallet(): Promise<TeamWallet> { throw new Error('Not implemented in MockAdapter'); }
+  async updateTeamWallet(): Promise<TeamWallet> { throw new Error('Not implemented in MockAdapter'); }
+  async deleteTeamWallet(): Promise<void> { throw new Error('Not implemented in MockAdapter'); }
+  async getTeamWalletMembers(): Promise<TeamWalletMember[]> { throw new Error('Not implemented in MockAdapter'); }
+  async addTeamWalletMember(): Promise<TeamWalletMember> { throw new Error('Not implemented in MockAdapter'); }
+  async removeTeamWalletMember(): Promise<void> { throw new Error('Not implemented in MockAdapter'); }
+  async updateTeamWalletMemberRole(): Promise<TeamWalletMember> { throw new Error('Not implemented in MockAdapter'); }
+  async createTeamWalletDeposit(): Promise<TeamWalletDeposit> { throw new Error('Not implemented in MockAdapter'); }
+  async confirmTeamWalletDeposit(): Promise<TeamWalletDeposit> { throw new Error('Not implemented in MockAdapter'); }
+  async getTeamWalletDeposits(): Promise<TeamWalletDeposit[]> { throw new Error('Not implemented in MockAdapter'); }
+  async getTeamWalletTransactions(): Promise<TeamWalletTransaction[]> { throw new Error('Not implemented in MockAdapter'); }
+  async createTeamWalletTransaction(): Promise<TeamWalletTransaction> { throw new Error('Not implemented in MockAdapter'); }
+  async payBookingFromWallet(): Promise<TeamWalletTransaction> { throw new Error('Not implemented in MockAdapter'); }
+  async createWalletSplit(): Promise<TeamWalletSplit> { throw new Error('Not implemented in MockAdapter'); }
+  async getWalletSplits(): Promise<TeamWalletSplit[]> { throw new Error('Not implemented in MockAdapter'); }
+  async getWalletSplitMembers(): Promise<TeamWalletSplitMember[]> { throw new Error('Not implemented in MockAdapter'); }
+  async getPlayerProfile(): Promise<PlayerProfile | null> { throw new Error('Not implemented in MockAdapter'); }
+  async upsertPlayerProfile(): Promise<PlayerProfile> { throw new Error('Not implemented in MockAdapter'); }
+  async searchPlayers(): Promise<PlayerProfile[]> { throw new Error('Not implemented in MockAdapter'); }
+  async createPlayerSkillRating(): Promise<PlayerSkillRating> { throw new Error('Not implemented in MockAdapter'); }
+  async getPlayerSkillRatings(): Promise<PlayerSkillRating[]> { throw new Error('Not implemented in MockAdapter'); }
+  async createMatchRequest(): Promise<MatchRequest> { throw new Error('Not implemented in MockAdapter'); }
+  async getMatchRequests(): Promise<MatchRequest[]> { throw new Error('Not implemented in MockAdapter'); }
+  async updateMatchRequest(): Promise<MatchRequest> { throw new Error('Not implemented in MockAdapter'); }
+  async getAchievements(): Promise<Achievement[]> { throw new Error('Not implemented in MockAdapter'); }
+  async getPlayerAchievements(): Promise<(PlayerAchievement & { achievement: Achievement })[]> { throw new Error('Not implemented in MockAdapter'); }
+  async upsertPlayerAchievement(): Promise<PlayerAchievement> { throw new Error('Not implemented in MockAdapter'); }
+  async getLeaderboard(): Promise<{ customerId: string; name: string; totalPoints: number; totalGames: number }[]> { throw new Error('Not implemented in MockAdapter'); }
+  async getPlayerStreaks(): Promise<PlayerStreak[]> { throw new Error('Not implemented in MockAdapter'); }
+  async updatePlayerStreak(): Promise<PlayerStreak> { throw new Error('Not implemented in MockAdapter'); }
+  async getFlashDeals(): Promise<FlashDeal[]> { throw new Error('Not implemented in MockAdapter'); }
+  async getFlashDealById(): Promise<FlashDeal | null> { throw new Error('Not implemented in MockAdapter'); }
+  async createFlashDeal(): Promise<FlashDeal> { throw new Error('Not implemented in MockAdapter'); }
+  async claimFlashDeal(): Promise<FlashDeal> { throw new Error('Not implemented in MockAdapter'); }
+  async getVenueCameras(): Promise<VenueCamera[]> { throw new Error('Not implemented in MockAdapter'); }
+  async createVenueCamera(): Promise<VenueCamera> { throw new Error('Not implemented in MockAdapter'); }
+  async updateVenueCamera(): Promise<VenueCamera> { throw new Error('Not implemented in MockAdapter'); }
+  async deleteVenueCamera(): Promise<void> { throw new Error('Not implemented in MockAdapter'); }
+  async getVenueVerification(): Promise<VenueVerification | null> { throw new Error('Not implemented in MockAdapter'); }
+  async createVenueVerification(): Promise<VenueVerification> { throw new Error('Not implemented in MockAdapter'); }
+  async updateVenueVerification(): Promise<VenueVerification> { throw new Error('Not implemented in MockAdapter'); }
+  async getVenueVerificationPhotos(): Promise<VenueVerificationPhoto[]> { throw new Error('Not implemented in MockAdapter'); }
+  async createVenueVerificationPhoto(): Promise<VenueVerificationPhoto> { throw new Error('Not implemented in MockAdapter'); }
+  async getLoyaltyTiers(): Promise<LoyaltyTier[]> { throw new Error('Not implemented in MockAdapter'); }
 }

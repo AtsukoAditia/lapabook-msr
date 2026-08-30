@@ -25,11 +25,20 @@ export const TEST_VENUES = {
 // ── Auth Helpers ──
 
 export async function loginCustomer(page: Page, email = TEST_USERS.customer.email, password = TEST_USERS.customer.password) {
-  await page.goto("/login", { waitUntil: "networkidle" });
+  await page.goto("/login", { waitUntil: "domcontentloaded" });
   await page.locator('input[type="email"]').fill(email);
   await page.locator('input[type="password"]').fill(password);
   await page.locator('button[type="submit"]').click();
-  await page.waitForURL((url) => !url.pathname.includes("/login"), { timeout: 15_000 });
+  await page.waitForTimeout(2_000);
+  const url = page.url();
+  if (url.includes("/login")) {
+    const errorVisible = await page.locator("text=Email atau password salah, text=Login gagal").first().isVisible().catch(() => false);
+    if (errorVisible) {
+      const errText = await page.locator("text=Email atau password salah, text=Login gagal").first().textContent().catch(() => "unknown");
+      throw new Error(`Login failed for ${email}: ${errText} (url: ${url})`);
+    }
+    await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 10_000 });
+  }
   await page.waitForTimeout(1_000);
 }
 

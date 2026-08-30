@@ -8,7 +8,10 @@ This document is the single reference for the current implementation state.
 - PostgreSQL 16: fully implemented, primary database
 - Google Sheets support: available for demo data, not recommended for production
 - Notification delivery: log-only MVP + WhatsApp wwebjs prep (uncomment when service ready)
-- Payment proof upload: file upload via `/api/uploads/proof` (multipart/form-data, 5MB max)
+- Payment proof upload: file upload via `/api/uploads/proof` (multipart/form-data, 5MB max, requires customer auth, magic-bytes validated)
+- Expiry: lazy cleanup on availability/booking lookup + cron `GET /api/cron/expire-bookings` (Bearer CRON_SECRET) + `bookings_expires_idx`
+- Rate limiting: active in all env except `IS_TESTING_ENV` (no VERCEL_ENV bypass)
+- Admin secret: fail-closed in production, no broad hex matcher
 
 ## Product direction
 

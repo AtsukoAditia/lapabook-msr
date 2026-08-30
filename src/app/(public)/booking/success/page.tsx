@@ -55,6 +55,13 @@ function getHeader(booking: PublicBooking | null) {
     };
   }
 
+  if (booking.bookingStatus === "completed") {
+    return {
+      title: "Selesai Bermain! 🎉",
+      subtitle: "Terima kasih sudah bermain di Lapangin. Jangan lupa beri review!",
+    };
+  }
+
   if (booking.bookingStatus === "waiting_payment") {
     return {
       title: "Booking Sementara Dibuat",
@@ -109,6 +116,13 @@ function getStatusCard(
         icon: "✅",
         title: "Booking Dikonfirmasi",
         body: "Pembayaran sudah diverifikasi. Jadwal sudah valid.",
+        className: "border-emerald-200 bg-emerald-50 text-emerald-800",
+      };
+    case "completed":
+      return {
+        icon: "🎉",
+        title: "Selesai Bermain!",
+        body: "Booking selesai. Terima kasih sudah bermain! Poin loyalty sudah masuk. Ajak teman pakai referral untuk bonus poin.",
         className: "border-emerald-200 bg-emerald-50 text-emerald-800",
       };
     case "expired":
@@ -405,6 +419,7 @@ function SuccessContent() {
   const canSubmitProof = booking.bookingStatus === "waiting_payment";
   const isFinalOrInactive = [
     "confirmed",
+    "completed",
     "expired",
     "rejected",
     "cancelled",

@@ -6,12 +6,13 @@ import {
   TEST_USERS,
 } from "./fixtures/test-data";
 
-test.describe("Customer Flow", () => {
+test.describe.serial("Customer Flow", () => {
   const email = createUniqueEmail();
   const password = TEST_USERS.customer.password;
 
-  test("customer can register", async ({ page }) => {
-    await page.goto("/register", { waitUntil: "networkidle" });
+  test("customer can register and full basket flow", async ({ page }) => {
+    // Register
+    await page.goto("/register", { waitUntil: "domcontentloaded" });
     await page.locator('input[type="text"]').first().fill(TEST_USERS.customer.name);
     await page.locator('input[type="email"]').fill(email);
     await page.locator('input[type="tel"]').fill(TEST_USERS.customer.phone);
@@ -23,41 +24,26 @@ test.describe("Customer Flow", () => {
     await page.locator('button[type="submit"]').click();
     await page.waitForURL("**/login**", { timeout: 15_000 });
     await shot(page, "customer-register-done");
-  });
 
-  test("customer can login", async ({ page }) => {
+    // Login (same page context, no new page)
     await loginCustomer(page, email, password);
     await shot(page, "customer-logged-in");
     expect(page.url()).not.toContain("/login");
-  });
 
-  test("customer can search courts", async ({ page }) => {
-    await loginCustomer(page, email, password);
-    await page.goto("/cari", { waitUntil: "networkidle" });
+    // Search basket courts
+    await page.goto("/cari/basket", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1_000);
     await expect(page.locator("body")).toBeVisible();
-    await shot(page, "customer-search");
-  });
+    await shot(page, "customer-search-basket");
 
-  test("customer can create booking", async ({ page }) => {
-    await loginCustomer(page, email, password);
-    await page.goto("/booking/form", { waitUntil: "networkidle" });
+    // Booking form
+    await page.goto("/booking/form?courtId=court-bsk1&date=2026-08-28&startTime=08:00&endTime=09:00", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1_000);
     await expect(page.locator("body")).toBeVisible();
     await shot(page, "customer-booking-form");
-  });
 
-  test("customer can view bookings", async ({ page }) => {
-    await loginCustomer(page, email, password);
-    await page.goto("/profile", { waitUntil: "networkidle" });
-    await page.waitForTimeout(1_000);
-    await expect(page.locator("body")).toBeVisible();
-    await shot(page, "customer-bookings");
-  });
-
-  test("customer can edit profile", async ({ page }) => {
-    await loginCustomer(page, email, password);
-    await page.goto("/profile", { waitUntil: "networkidle" });
+    // Profile / bookings
+    await page.goto("/profile", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1_000);
     await expect(page.locator("body")).toBeVisible();
     await shot(page, "customer-profile");

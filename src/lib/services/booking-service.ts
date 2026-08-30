@@ -56,6 +56,7 @@ export class BookingService {
     }
 
     // ── 2. Check for conflicts (first pass — fast rejection) ──
+    await this.adapter.expireBookings();
     const [existingBookings, blockedSlots, pricingRules, courts] = await Promise.all([
       this.adapter.getBookingsByCourtAndDate(input.courtId, input.bookingDate),
       this.adapter.getBlockedSlots(input.courtId, input.bookingDate),
@@ -191,19 +192,12 @@ export class BookingService {
     );
     try { await sendBookingConfirmation(result); } catch { /* non-blocking */ }
 
-    // Award loyalty points if booking is linked to a customer
+    // Award loyalty points via LoyaltyService (idempotent)
     if (booking.userId) {
       try {
-        const pointsEarned = Math.floor(booking.totalPrice / 10000);
-        if (pointsEarned > 0) {
-          await this.adapter.addLoyaltyPoints(
-            booking.userId,
-            pointsEarned,
-            booking.id,
-            `Poin dari booking ${booking.bookingCode} - Rp ${booking.totalPrice.toLocaleString("id-ID")}`,
-            "earned"
-          );
-        }
+        const { LoyaltyService } = await import("./loyalty-service");
+        const loyalty = new LoyaltyService(this.adapter);
+        await loyalty.awardBookingPoints(booking.userId, booking.id, booking.totalPrice, booking.bookingCode);
       } catch {
         console.error(`[Loyalty] Failed to award points for booking ${booking.bookingCode}`);
       }

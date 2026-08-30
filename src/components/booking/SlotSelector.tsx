@@ -79,7 +79,8 @@ export default function SlotSelector({
   closeTime,
 }: Props) {
   const router = useRouter();
-  const dates = getNext7Days();
+  const dates = (() => { const d = getNext7Days(); return d; })();
+  // memoize dates once
   const [selectedDate, setSelectedDate] = useState(dates[0].date);
   const [selectedSlots, setSelectedSlots] = useState<Slot[]>([]);
   const [slots, setSlots] = useState<Slot[]>(() =>
@@ -235,14 +236,16 @@ export default function SlotSelector({
   return (
     <div>
       {/* Date pills */}
-      <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+      <div className="mb-4 flex gap-2 overflow-x-auto snap-x pb-1">
         {dates.map((d) => (
           <button
             key={d.date}
+            aria-pressed={selectedDate === d.date}
+            aria-label={`Pilih tanggal ${d.label} ${d.dayName}`}
             onClick={() => {
               setSelectedDate(d.date);
             }}
-            className={`flex min-w-[64px] flex-col items-center rounded-xl px-3 py-2 text-sm font-medium transition ${
+            className={`flex min-h-[44px] min-w-[64px] snap-start flex-col items-center rounded-xl px-3 py-2 text-sm font-medium transition ${
               selectedDate === d.date
                 ? "bg-emerald-600 text-white shadow"
                 : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -264,7 +267,7 @@ export default function SlotSelector({
       )}
 
       {/* Live indicator */}
-      <div className="mb-3 flex items-center gap-2">
+      <div aria-live="polite" className="mb-3 flex items-center gap-2">
         <span className={`inline-block h-2 w-2 rounded-full ${isConnected ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
         <span className="text-xs text-slate-500">
           {isConnected ? "Live — slot diperbarui otomatis" : "Menghubungkan..."}
@@ -305,8 +308,11 @@ export default function SlotSelector({
             <button
               key={slotKey}
               disabled={isDisabled}
+              aria-pressed={isSelected}
+              aria-disabled={isDisabled}
+              aria-label={`${label} ${isDisabled ? "tidak tersedia" : isSelected ? "dipilih" : "tersedia"}`}
               onClick={() => handleSlotClick(slot)}
-              className={`rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+              className={`min-h-[44px] rounded-lg px-3 py-2.5 text-sm font-medium transition ${
                 isDisabled
                   ? "cursor-not-allowed bg-slate-100 text-slate-400 line-through"
                   : isSelected

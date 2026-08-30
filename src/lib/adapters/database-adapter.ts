@@ -48,6 +48,10 @@ import type {
   VenueVerification,
   VenueVerificationPhoto,
   LoyaltyTier,
+  GroupBooking,
+  GroupBookingParticipant,
+  GroupBookingTimeSlot,
+  GroupBookingDetail,
 } from "@/lib/types/domain";
 
 export interface CreateBookingInput {
@@ -106,6 +110,10 @@ export interface CreateBlockedSlotInput {
 export interface DatabaseAdapter {
   // Sports
   getSports(): Promise<Sport[]>;
+  getAllSports(): Promise<Sport[]>;
+  createSport(input: { name: string; slug: string; isActive?: boolean }): Promise<Sport>;
+  updateSport(id: string, input: { name?: string; slug?: string; isActive?: boolean }): Promise<Sport>;
+  deleteSport(id: string): Promise<void>;
 
   // Regions
   getProvinces(): Promise<Province[]>;
@@ -313,4 +321,68 @@ export interface DatabaseAdapter {
 
   // Loyalty Tiers (Sprint 15)
   getLoyaltyTiers(): Promise<LoyaltyTier[]>;
+
+  // Group Bookings (Sprint 16)
+  createGroupBooking(data: {
+    organizerId: string;
+    venueId: string;
+    courtId: string;
+    sportId: string;
+    title: string;
+    description?: string;
+    minParticipants: number;
+    maxParticipants: number;
+    pricePerSlot: number;
+    deadline?: string;
+  }): Promise<GroupBooking>;
+  getGroupBookingById(id: string): Promise<GroupBooking | null>;
+  getGroupBookingDetail(id: string): Promise<GroupBookingDetail | null>;
+  getGroupBookingsByOrganizer(organizerId: string): Promise<GroupBooking[]>;
+  updateGroupBookingStatus(
+    id: string,
+    status: GroupBooking["status"],
+    bookingId?: string,
+  ): Promise<GroupBooking>;
+  deleteGroupBooking(id: string): Promise<void>;
+
+  // Group Booking Participants
+  getGroupBookingParticipants(
+    groupBookingId: string,
+  ): Promise<GroupBookingParticipant[]>;
+  addGroupBookingParticipant(
+    groupBookingId: string,
+    customerId: string,
+    isOrganizer?: boolean,
+  ): Promise<GroupBookingParticipant>;
+  getGroupBookingParticipant(
+    groupBookingId: string,
+    customerId: string,
+  ): Promise<GroupBookingParticipant | null>;
+  updateGroupBookingParticipantStatus(
+    groupBookingId: string,
+    customerId: string,
+    status: GroupBookingParticipant["status"],
+    availability?: string[],
+  ): Promise<GroupBookingParticipant>;
+  getGroupBookingParticipantById(id: string): Promise<GroupBookingParticipant | null>;
+
+  // Group Booking Time Slots
+  getGroupBookingTimeSlots(
+    groupBookingId: string,
+  ): Promise<GroupBookingTimeSlot[]>;
+  addGroupBookingTimeSlot(data: {
+    groupBookingId: string;
+    slotDate: string;
+    startTime: string;
+    endTime: string;
+  }): Promise<GroupBookingTimeSlot>;
+  getGroupBookingTimeSlotById(id: string): Promise<GroupBookingTimeSlot | null>;
+  voteGroupBookingTimeSlot(
+    timeSlotId: string,
+    customerId: string,
+  ): Promise<GroupBookingTimeSlot>;
+  markGroupBookingWinner(
+    groupBookingId: string,
+    timeSlotId: string,
+  ): Promise<GroupBookingTimeSlot>;
 }

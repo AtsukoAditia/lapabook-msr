@@ -29,14 +29,19 @@ INSERT INTO venue_owners (id, admin_id, business_name, pic_name, phone, email, s
   ('owner-arena-futsal', NULL,     'Arena Futsal Bandung',   'Charlie Putra', '083456789012', 'charlie@arenafutsal.id','active', '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z')
 ON CONFLICT (id) DO NOTHING;
 
--- ==================== SPORTS ====================
+-- ==================== SPORTS (6 canonical) ====================
 INSERT INTO sports (id, name, slug, is_active, created_at, updated_at) VALUES
   ('sport-futsal',      'Futsal',       'futsal',       true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z'),
-  ('sport-bulu-tangkis','Bulu Tangkis', 'bulu-tangkis', true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z'),
-  ('sport-mini-soccer', 'Mini Soccer',  'mini-soccer',   true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z'),
+  ('sport-minisoccer',  'Minisoccer',   'minisoccer',   true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z'),
+  ('sport-badminton',   'Badminton',    'badminton',    true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z'),
   ('sport-padel',       'Padel',        'padel',        true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z'),
   ('sport-tenis',       'Tenis',        'tenis',        true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z'),
   ('sport-basket',      'Basket',       'basket',       true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z')
+ON CONFLICT (id) DO NOTHING;
+-- Legacy slugs kept for backward compat (inactive aliases not needed; courts migrated below)
+INSERT INTO sports (id, name, slug, is_active, created_at, updated_at) VALUES
+  ('sport-bulu-tangkis','Bulu Tangkis', 'bulu-tangkis', true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z'),
+  ('sport-mini-soccer', 'Mini Soccer',  'mini-soccer',   true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z')
 ON CONFLICT (id) DO NOTHING;
 
 -- ==================== VENUES ====================

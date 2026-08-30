@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/ui/Navbar";
+import Footer from "@/components/ui/Footer";
 import ServiceWorkerRegistration from "@/components/pwa/ServiceWorkerRegistration";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 
@@ -47,6 +48,7 @@ export default function RootLayout({
         <InstallPrompt />
         <Navbar />
         {children}
+        <Footer />
       </body>
     </html>
   );

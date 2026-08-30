@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!bookingCode && !bookingId) {
+    if (!bookingCode) {
       return NextResponse.json(
         { error: "bookingCode is required" },
         { status: 400 },
@@ -40,16 +40,11 @@ export async function POST(request: NextRequest) {
     const adapter = getDatabaseAdapter();
     const service = new BookingService(adapter);
 
-    // Prefer public-safe lookup by booking code. `bookingId` is kept only as a
-    // temporary compatibility path for the current success page and should be
-    // removed after the UI sends bookingCode + phone verification consistently.
-    const booking = bookingCode
-      ? await service.submitPaymentProofByCode({
-          bookingCode,
-          phone,
-          proofUrl,
-        })
-      : await service.submitPaymentProof(bookingId, proofUrl);
+    const booking = await service.submitPaymentProofByCode({
+      bookingCode,
+      phone,
+      proofUrl,
+    });
 
     return NextResponse.json({ success: true, booking: toPublicPaymentBooking(booking) });
   } catch (error) {

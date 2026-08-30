@@ -69,4 +69,50 @@ Attempt 6:   HTTP 429 (rate limit exceeded)
 
 ---
 
-*Next test run: After next feature change*
+---
+
+## Test Run #3 — Customer Basket Flow (2026-08-27 21:30)
+
+### Environment
+- Server: localhost:3000 (Next.js dev, mock adapter)
+- Basket venue: Greenfield Sports Club / Basket Court 1 (court-bsk1, Rp100.000/jam)
+- Test via: API (`/tmp/test-basket.sh`) + Playwright (`e2e/customer-flow.spec.ts`)
+
+### API Flow (basket-1787837438@test.com → BK-260827-408A)
+
+| # | Step | Request | Expected | Result |
+|---|------|---------|----------|--------|
+| 1 | Register | `POST /api/auth/customer/register` | 200 success | ✅ PASS — userId 8f8874af... |
+| 2 | Login | `POST /api/auth/customer/login` | 200 + cookie | ✅ PASS — customer_token set |
+| 3 | Browse basket | `GET /api/search/courts?sport=basket` | 1 court | ✅ PASS — court-bsk1 Greenfield |
+| 4 | Court detail | `GET /api/search/courts/court-bsk1` | venue + pricing | ✅ PASS — open 06:00-23:00 |
+| 5 | Availability | `GET /api/availability?courtId=court-bsk1&date=2026-08-28` | slots | ✅ PASS — 06:00 false (booked), 07:00 true |
+| 6 | Create booking | `POST /api/bookings` 07:00-08:00 | 201 waiting_payment | ✅ PASS — BK-260827-408A, Rp81.517, expires 15m |
+| 7 | Verify status | `GET /api/bookings/BK-260827-408A` | waiting_payment | ✅ PASS |
+| 8 | Availability after | `GET /api/availability` | 07:00 false | ✅ PASS — slot terblokir |
+| 9 | Double booking | `POST /api/bookings` same slot | 409 CONFLICT | ✅ PASS — "Slot sudah dipesan" |
+| 10 | Upload proof | `POST /api/uploads/proof` (jpg, auth) | 200 url | ✅ PASS — /uploads/payments/...jpg |
+| 11 | Submit proof | `POST /api/payments/proof` code+phone | waiting_verification | ✅ PASS |
+| 12 | Verify after proof | `GET /api/bookings/BK-260827-408A` | waiting_verification | ✅ PASS |
+| 13 | History | `GET /api/customer/bookings` | 1 booking | ✅ PASS — venue_name, court_name |
+| 14 | Loyalty before confirm | `GET /api/customer/loyalty` | 0 points | ✅ PASS — 0 (belum confirmed) |
+| 15 | Referral generate | `POST /api/referrals` | REF-xxx | ✅ PASS — REF-7UP8JF |
+| 16 | Register user2 | `POST /api/auth/customer/register` | 200 | ✅ PASS — basket2@test.com |
+| 17 | Apply referral | `PATCH /api/referrals` | 50000/25000 | ✅ PASS — referrer 50k, referee 25k |
+| 18 | Loyalty after referral | `GET /api/customer/loyalty` | 50000 | ✅ PASS — bonus referral |
+| 19 | Profile | `GET /api/auth/session` | user | ✅ PASS |
+
+### Playwright E2E
+
+| Test | Result |
+|------|--------|
+| customer can register and full basket flow (register → login → /cari/basket → /booking/form → /profile) | ✅ PASS (11.7s) |
+
+Fix: `e2e/customer-flow.spec.ts` digabung jadi 1 test serial (mock adapter globalThis, cookie tidak persist antar test), `waitUntil: domcontentloaded` (networkidle timeout), `/cari` → `/cari/basket`.
+
+### Catatan
+- Booking `waiting_payment` → `waiting_verification` → butuh owner/admin confirm untuk `confirmed` + loyalty 1 poin/Rp10.000. Owner confirm endpoint belum ada (`/api/owner/bookings/[id]/confirm` 404), admin confirm butuh auth. Loyalty booking belum ter-trigger di flow ini (hanya referral bonus).
+- Mock adapter: data tidak persist ke Postgres (hanya globalThis). Untuk persist, set `DATABASE_PROVIDER=postgres` dan restart server.
+- Sisa: tambah owner confirm endpoint, loyalty booking test setelah confirm, dan browser live testing untuk visual flow.
+
+*Next test run: Setelah owner confirm endpoint + loyalty booking*

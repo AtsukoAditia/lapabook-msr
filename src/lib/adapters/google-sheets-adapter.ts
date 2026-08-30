@@ -55,6 +55,10 @@ import type {
   VenueVerification,
   VenueVerificationPhoto,
   LoyaltyTier,
+  GroupBooking,
+  GroupBookingParticipant,
+  GroupBookingTimeSlot,
+  GroupBookingDetail,
 } from "@/lib/types/domain";
 
 function getJwtClient(): JWT {
@@ -202,10 +206,19 @@ export class GoogleSheetsAdapter implements DatabaseAdapter {
     const doc = await getSpreadsheet();
     const sheet = doc.sheetsByTitle["sports"];
     if (!sheet) return [];
-
     const rows = await sheet.getRows();
     return rows.map((row) => rowToSport(row.toObject())).filter((s) => s.isActive);
   }
+  async getAllSports(): Promise<Sport[]> {
+    const doc = await getSpreadsheet();
+    const sheet = doc.sheetsByTitle["sports"];
+    if (!sheet) return [];
+    const rows = await sheet.getRows();
+    return rows.map((row) => rowToSport(row.toObject()));
+  }
+  async createSport(): Promise<Sport> { throw new Error("Not supported in Google Sheets mode"); }
+  async updateSport(): Promise<Sport> { throw new Error("Not supported in Google Sheets mode"); }
+  async deleteSport(): Promise<void> { throw new Error("Not supported in Google Sheets mode"); }
 
   async getVenues(): Promise<Venue[]> {
     const doc = await getSpreadsheet();
@@ -283,13 +296,14 @@ export class GoogleSheetsAdapter implements DatabaseAdapter {
 
   async getBookingsByCourtAndDate(courtId: string, date: string): Promise<Booking[]> {
     const bookings = await this.getBookings();
-    const activeStatuses = ["pending", "waiting_payment", "paid", "confirmed"];
-
+    const activeStatuses = ["waiting_payment", "waiting_verification", "paid", "confirmed", "pending"];
+    const now = new Date();
     return bookings.filter(
       (booking) =>
         booking.courtId === courtId &&
         booking.bookingDate === date &&
-        activeStatuses.includes(booking.bookingStatus),
+        activeStatuses.includes(booking.bookingStatus) &&
+        !(booking.bookingStatus === "waiting_payment" && booking.expiresAt && new Date(booking.expiresAt) <= now),
     );
   }
 
@@ -339,7 +353,7 @@ export class GoogleSheetsAdapter implements DatabaseAdapter {
       const expiresAt = row.get("expires_at") as string | undefined;
       const bookingStatus = row.get("booking_status") as string;
 
-      if (bookingStatus === "waiting_payment" && expiresAt && expiresAt < now) {
+      if (bookingStatus === "waiting_payment" && expiresAt && new Date(expiresAt).toISOString() < now) {
         row.set("booking_status", "expired");
         row.set("payment_status", "unpaid");
         row.set("updated_at", now);
@@ -359,13 +373,15 @@ export class GoogleSheetsAdapter implements DatabaseAdapter {
     const now = new Date().toISOString();
     const bookingId = crypto.randomUUID();
     const bookingCode = `AB-${Date.now().toString(36).toUpperCase()}`;
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
     const booking: Booking = {
       id: bookingId,
       bookingCode,
       ...input,
-      bookingStatus: "pending",
+      bookingStatus: "waiting_payment",
       paymentStatus: "unpaid",
+      expiresAt,
       createdAt: now,
       updatedAt: now,
     };
@@ -388,6 +404,7 @@ export class GoogleSheetsAdapter implements DatabaseAdapter {
       payment_status: booking.paymentStatus,
       payment_proof_url: booking.paymentProofUrl ?? "",
       notes: booking.notes ?? "",
+      expires_at: booking.expiresAt ?? "",
       created_at: booking.createdAt,
       updated_at: booking.updatedAt,
     });
@@ -1005,5 +1022,21 @@ export class GoogleSheetsAdapter implements DatabaseAdapter {
   async getVenueVerificationPhotos(verificationId: string): Promise<VenueVerificationPhoto[]> { throw new Error('Not implemented in GoogleSheets'); }
   async createVenueVerificationPhoto(data: Omit<VenueVerificationPhoto, "id" | "createdAt">): Promise<VenueVerificationPhoto> { throw new Error('Not implemented in GoogleSheets'); }
   async getLoyaltyTiers(): Promise<LoyaltyTier[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async createGroupBooking(): Promise<GroupBooking> { throw new Error('Not implemented in GoogleSheets'); }
+  async getGroupBookingById(): Promise<GroupBooking | null> { throw new Error('Not implemented in GoogleSheets'); }
+  async getGroupBookingDetail(): Promise<GroupBookingDetail | null> { throw new Error('Not implemented in GoogleSheets'); }
+  async getGroupBookingsByOrganizer(): Promise<GroupBooking[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async updateGroupBookingStatus(): Promise<GroupBooking> { throw new Error('Not implemented in GoogleSheets'); }
+  async deleteGroupBooking(): Promise<void> { throw new Error('Not implemented in GoogleSheets'); }
+  async getGroupBookingParticipants(): Promise<GroupBookingParticipant[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async addGroupBookingParticipant(): Promise<GroupBookingParticipant> { throw new Error('Not implemented in GoogleSheets'); }
+  async getGroupBookingParticipant(): Promise<GroupBookingParticipant | null> { throw new Error('Not implemented in GoogleSheets'); }
+  async updateGroupBookingParticipantStatus(): Promise<GroupBookingParticipant> { throw new Error('Not implemented in GoogleSheets'); }
+  async getGroupBookingParticipantById(): Promise<GroupBookingParticipant | null> { throw new Error('Not implemented in GoogleSheets'); }
+  async getGroupBookingTimeSlots(): Promise<GroupBookingTimeSlot[]> { throw new Error('Not implemented in GoogleSheets'); }
+  async addGroupBookingTimeSlot(): Promise<GroupBookingTimeSlot> { throw new Error('Not implemented in GoogleSheets'); }
+  async getGroupBookingTimeSlotById(): Promise<GroupBookingTimeSlot | null> { throw new Error('Not implemented in GoogleSheets'); }
+  async voteGroupBookingTimeSlot(): Promise<GroupBookingTimeSlot> { throw new Error('Not implemented in GoogleSheets'); }
+  async markGroupBookingWinner(): Promise<GroupBookingTimeSlot> { throw new Error('Not implemented in GoogleSheets'); }
 
 }

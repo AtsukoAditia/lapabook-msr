@@ -1,14 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { mockSports, mockVenues, mockCourts } from "@/lib/mock-data";
 import { sportEmoji } from "@/lib/sport-icons";
 import { useScrollReveal, useStaggerReveal } from "@/lib/animations";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
+import type { Sport, Venue, Court } from "@/lib/types/domain";
+
+const CANONICAL_SLUGS = new Set(["futsal","minisoccer","badminton","padel","tenis","basket"]);
 
 export default function HomePage() {
-  const venueCount = mockVenues.length;
-  const courtCount = mockCourts.length;
+  const [sports, setSports] = useState<Sport[]>([]);
+  const [venues, setVenues] = useState<Venue[]>([]);
+  const [courts, setCourts] = useState<Court[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      fetch("/api/sports").then(r => r.json()).then(d => (d.sports ?? []) as Sport[]).catch(() => []),
+      fetch("/api/venues").then(r => r.json()).then(d => (d.venues ?? []) as Venue[]).catch(() => []),
+      fetch("/api/courts").then(r => r.json()).then(d => (d.courts ?? []) as Court[]).catch(() => []),
+    ]).then(([s, v, c]) => {
+      if (cancelled) return;
+      // filter to 6 canonical for homepage display
+      const filtered = s.filter(x => CANONICAL_SLUGS.has(x.slug) && x.isActive);
+      setSports(filtered.length ? filtered : s.filter(x => x.isActive).slice(0, 6));
+      setVenues(v); setCourts(c); setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, []);
+  const venueCount = venues.length;
+  const courtCount = courts.length;
   const sportsRef = useScrollReveal<HTMLDivElement>();
   const stepsRef = useScrollReveal<HTMLDivElement>();
   const loyaltyRef = useScrollReveal<HTMLDivElement>();
@@ -74,18 +95,45 @@ export default function HomePage() {
               </a>
             </div>
 
+            {/* Search bar - marketplace discovery */}
+            <div className="mt-8 mx-auto max-w-2xl">
+              <div className="flex flex-col sm:flex-row gap-2 rounded-2xl bg-white p-2 shadow-2xl">
+                <div className="flex-1 flex items-center gap-2 px-4 py-2">
+                  <span className="text-slate-400">🔍</span>
+                  <select id="hero-sport" defaultValue="futsal" className="w-full bg-transparent text-sm font-semibold text-slate-700 outline-none">
+                    {(sports.length ? sports : [{ id: "futsal", slug: "futsal", name: "Futsal" } as Sport]).map(s => <option key={s.id} value={s.slug}>{s.name}</option>)}
+                  </select>
+                </div>
+                <div className="hidden sm:block w-px bg-slate-200" />
+                <div className="flex-1 flex items-center gap-2 px-4 py-2">
+                  <span className="text-slate-400">📍</span>
+                  <input id="hero-area" placeholder="Cari area / venue (mis. Jakarta Selatan)" className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 outline-none" />
+                </div>
+                <button onClick={() => { const s = (document.getElementById('hero-sport') as HTMLSelectElement)?.value || 'futsal'; const q = (document.getElementById('hero-area') as HTMLInputElement)?.value; window.location.href = q ? `/cari/${s}?q=${encodeURIComponent(q)}` : `/cari/${s}`; }} className="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white hover:bg-emerald-700 transition">Cari</button>
+              </div>
+              <p className="mt-2 text-xs text-emerald-200 text-center">Coba: “futsal Jakarta Selatan” • “badminton Bandung” • “padel Surabaya”</p>
+            </div>
+
+            {/* Trust badges */}
+            <div className="mt-6 flex flex-wrap justify-center gap-2 text-xs">
+              <span className="rounded-full bg-white/15 backdrop-blur px-3 py-1.5 border border-white/20">🔒 Pembayaran Aman</span>
+              <span className="rounded-full bg-white/15 backdrop-blur px-3 py-1.5 border border-white/20">✓ Venue Terverifikasi</span>
+              <span className="rounded-full bg-white/15 backdrop-blur px-3 py-1.5 border border-white/20">⚡ Konfirmasi &lt;15 menit</span>
+              <span className="rounded-full bg-white/15 backdrop-blur px-3 py-1.5 border border-white/20">💬 CS 08:00-22:00</span>
+            </div>
+
             {/* Stats */}
             <div className="mt-14 grid grid-cols-3 gap-6 sm:gap-10 max-w-xl mx-auto">
               <div className="rounded-2xl bg-white/10 backdrop-blur-sm px-4 py-4">
-                <div className="text-3xl font-black text-yellow-300 sm:text-4xl">{mockSports.length}+</div>
+                <div className="text-3xl font-black text-yellow-300 sm:text-4xl">{loading ? "—" : `${sports.length}+`}</div>
                 <div className="mt-1 text-xs text-emerald-200 sm:text-sm font-medium">Jenis Olahraga</div>
               </div>
               <div className="rounded-2xl bg-white/10 backdrop-blur-sm px-4 py-4">
-                <div className="text-3xl font-black text-yellow-300 sm:text-4xl">{venueCount}</div>
+                <div className="text-3xl font-black text-yellow-300 sm:text-4xl">{loading ? "—" : venueCount}</div>
                 <div className="mt-1 text-xs text-emerald-200 sm:text-sm font-medium">Venue</div>
               </div>
               <div className="rounded-2xl bg-white/10 backdrop-blur-sm px-4 py-4">
-                <div className="text-3xl font-black text-yellow-300 sm:text-4xl">{courtCount}</div>
+                <div className="text-3xl font-black text-yellow-300 sm:text-4xl">{loading ? "—" : courtCount}</div>
                 <div className="mt-1 text-xs text-emerald-200 sm:text-sm font-medium">Lapangan</div>
               </div>
             </div>
@@ -115,7 +163,7 @@ export default function HomePage() {
         </div>
 
         <div ref={sportGridRef} className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 sm:gap-6">
-          {mockSports.map((sport) => (
+          {(loading ? [] : sports).map((sport) => (
             <Link
               key={sport.id}
               href={`/cari/${sport.slug}`}
@@ -133,6 +181,61 @@ export default function HomePage() {
               </div>
             </Link>
           ))}
+        </div>
+      </section>
+
+      {/* Featured venues */}
+      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <span className="inline-block rounded-full bg-emerald-100 px-4 py-1 text-xs font-bold text-emerald-700 uppercase">Rekomendasi</span>
+            <h2 className="mt-2 text-2xl font-black text-slate-900 sm:text-3xl">Venue Unggulan</h2>
+            <p className="text-sm text-slate-500 mt-1">Pilihan populer di berbagai kota — langsung booking.</p>
+          </div>
+          <Link href="/booking" className="hidden sm:inline-flex text-sm font-semibold text-emerald-600 hover:text-emerald-700">Lihat semua →</Link>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {(loading ? [] : venues.slice(0, 6)).map(v => {
+            const vCourts = courts.filter(c => c.venueId === v.id);
+            const minPrice = vCourts.length ? Math.min(...vCourts.map(c => c.basePrice)) : 0;
+            return (
+              <Link key={v.id} href={`/cari/futsal`} className="group rounded-2xl border border-slate-200 bg-white overflow-hidden hover:shadow-lg hover:border-emerald-300 transition">
+                <div className="h-28 bg-gradient-to-br from-emerald-500 to-teal-600 relative">
+                  <div className="absolute inset-0 bg-black/10" />
+                  <div className="absolute bottom-3 left-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-slate-800">{vCourts.length} lapangan • {v.openTime}-{v.closeTime}</div>
+                  <div className="absolute top-3 right-3 rounded-full bg-yellow-400 px-2.5 py-1 text-xs font-black text-slate-900">★ 4.8</div>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold text-slate-900 group-hover:text-emerald-700 line-clamp-1">{v.name}</h3>
+                  <p className="text-xs text-slate-500 line-clamp-1 mt-1">📍 {v.address}</p>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-sm font-black text-emerald-600">Mulai Rp {minPrice.toLocaleString('id-ID')}/jam</span>
+                    <span className="text-xs font-semibold text-emerald-600 group-hover:translate-x-0.5 transition">Booking →</span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="bg-white border-y border-slate-100">
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+          <h2 className="text-center text-xl font-black text-slate-900 sm:text-2xl">Apa kata pemain?</h2>
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            {[
+              { name: "Riko, Jakarta", text: "Booking futsal jadi 2 menit beres. Bayar, upload bukti, langsung confirmed.", stars: 5 },
+              { name: "Sinta, Bandung", text: "Suka fitur hold 15 menit. Nggak rebutan slot pas jam rame.", stars: 5 },
+              { name: "Owner Greenfield", text: "Sejak pakai Lapangin, okupansi naik 30%. Kelola harga weekday/weekend gampang.", stars: 5 },
+            ].map(t => (
+              <div key={t.name} className="rounded-2xl border border-slate-100 bg-slate-50 p-5">
+                <div className="text-amber-500 text-sm">{"★".repeat(t.stars)}</div>
+                <p className="mt-2 text-sm text-slate-700 leading-relaxed">“{t.text}”</p>
+                <p className="mt-3 text-xs font-bold text-slate-900">— {t.name}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -243,7 +346,7 @@ export default function HomePage() {
                     Daftarkan Venue Anda
                   </h2>
                   <p className="text-slate-600 mb-6 leading-relaxed">
-                    Punya lapangan futsal, badminton, basket, atau olahraga lainnya? 
+                    Punya lapangan futsal, badminton, basket, atau olahraga lainnya?
                     Daftarkan venue Anda di Lapangin dan dapatkan akses ke ribuan pemain potensial.
                     Kelola booking, atur harga, dan lihat statistik venue Anda semuanya di satu tempat.
                   </p>
@@ -279,6 +382,24 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+        <h2 className="text-center text-2xl font-black text-slate-900">FAQ</h2>
+        <div className="mt-6 space-y-3">
+          {[
+            { q: "Berapa lama hold booking?", a: "Booking ditahan 15 menit (waiting_payment). Upload bukti bayar sebelum expired, status jadi waiting_verification lalu confirmed setelah verifikasi owner/admin." },
+            { q: "Metode pembayaran apa saja?", a: "Transfer bank + upload bukti. Validasi magic-bytes, max 5MB. Poin loyalty hanya diberikan setelah confirmed." },
+            { q: "Bisa refund / reschedule?", a: "Hubungi CS atau owner venue. Kebijakan refund mengikuti syarat venue masing-masing." },
+            { q: "Bagaimana poin loyalty?", a: "Daftar gratis, kumpulkan poin tiap booking confirmed. Tier Bronze → Diamond dengan multiplier hingga 3x." },
+          ].map(f => (
+            <details key={f.q} className="group rounded-2xl border border-slate-200 bg-white p-4 open:shadow-sm">
+              <summary className="cursor-pointer list-none font-semibold text-slate-900 flex justify-between items-center">{f.q}<span className="text-slate-400 group-open:rotate-180 transition">⌄</span></summary>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">{f.a}</p>
+            </details>
+          ))}
         </div>
       </section>
 

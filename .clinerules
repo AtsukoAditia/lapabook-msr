@@ -1,306 +1,482 @@
-# CLINE RULES — Lapangin
+# CLINE RULES — Lapangin MSR
 
-You are developing Lapangin, a web-based PWA sports court booking marketplace and venue operations platform.
+You are developing **Lapangin**, a sports court booking marketplace and venue operations platform for Indonesia.
 
-## Main Goal
+## Project Overview
 
-Build a clean, maintainable, production-oriented MVP for booking sports courts such as futsal, minisoccer, badminton, padel, tennis, and basketball.
+Lapangin is a **booking-first marketplace** where:
+- **Customers** book sports courts (futsal, badminton, padel, tennis, basketball, minisoccer)
+- **Venue Owners** manage courts, schedules, pricing, and bookings
+- **Admins** oversee the entire platform
 
-The app must:
+**Current State:** PostgreSQL primary database, Sprint 11 features merged (pickup games, team wallet, flash deals, achievements, leaderboard).
 
-- Run locally.
-- Deploy to Vercel.
-- Be mobile responsive.
-- Support PWA basics.
-- Use mock mode for normal local feature work.
-- Keep Google Spreadsheet as demo database support only.
-- Be architected for easy migration to PostgreSQL.
-- Include public booking flow, customer auth, loyalty foundation, and admin/owner CMS.
+---
 
-## Product Direction
+## 1. SOURCE OF TRUTH
 
-Lapangin is a **booking-first marketplace** for sports venue booking in Indonesia.
-
-Do not build advanced community features before the supporting booking/payment/auth/loyalty/owner gaps are closed.
-
-Advanced features such as referral, team invite, public roster, open play, sparring, and tournaments must be built only after their dependency gaps are handled.
-
-## Current Source of Truth
-
-Before changing core app behavior, read:
+When docs or code disagree, follow this order:
 
 1. `docs/SYSTEM_TRUTH.md`
 2. `docs/CLINE_LOCAL_WORKFLOW.md`
 3. `docs/14-marketplace-gap-sync-plan.md`
-4. Related source files
+4. Current source code in `src/`
+5. Older stage docs in `docs/`
+6. README summary
 
-Older docs may contain historical notes. If docs disagree, follow `docs/SYSTEM_TRUTH.md`.
+**Never implement advanced features before closing the gaps they depend on.**
 
-## Canonical Demo Accounts
+---
 
-Use only:
+## 2. TECH STACK
 
-- `admin@lapangin.id / Admin123!@#`
-- `owner@lapangin.id / Owner123!@#`
+### Core
+- **Framework:** Next.js 15 (App Router)
+- **Language:** TypeScript (strict mode)
+- **Styling:** Tailwind CSS
+- **Database:** PostgreSQL 16 (primary)
+- **Auth:** JWT with bcryptjs password hashing
+- **Validation:** Zod schemas
+- **Icons:** Lucide React
 
-Do not reintroduce old credentials such as `admin@lapangin.com / admin123`.
+### Infrastructure
+- **Runtime:** Node.js 20+
+- **Package Manager:** npm
+- **Container:** Docker (development)
+- **Deployment:** VPS Ubuntu 24.04 + Docker Compose
+- **Reverse Proxy:** Nginx
+- **SSL:** Let's Encrypt
 
-## Tech Stack
+### Quality Tools
+- **Linting:** ESLint
+- **Type Checking:** TypeScript compiler
+- **Testing:** Playwright (E2E), Vitest (unit)
+- **Error Monitoring:** Sentry (optional)
 
-Use:
+---
 
-- Next.js App Router
-- TypeScript
-- Tailwind CSS
-- Server-side validation
-- JWT with env-only secret
-- bcryptjs password hashing
-- Database adapter pattern
+## 3. ARCHITECTURE RULES
 
-Do not:
+### Layered Architecture
 
-- Hardcode database access in UI components.
-- Put business logic directly inside page components.
-- Create huge files.
-- Skip TypeScript types.
-- Ignore mobile responsiveness.
-- Ignore error states and loading states.
-- Add JWT fallback secrets.
-- Store plaintext passwords.
-- Expose private booking/customer data through public endpoints.
-- Upgrade many dependencies inside feature PRs.
-
-## Architecture Rules
-
-Follow this pattern:
-
-```txt
+```
 UI Page / Component
-↓
-API Route
-↓
-Service Layer
-↓
-Database Adapter
-↓
-Mock / Google Sheets / PostgreSQL
+    ↓
+API Route (validation + auth check)
+    ↓
+Service Layer (business logic)
+    ↓
+Database Adapter (data access)
+    ↓
+PostgreSQL / Mock / Google Sheets
 ```
 
-Important:
+### Strict Separation
 
-- UI must not directly call Google Sheets or PostgreSQL.
-- Booking logic must live in `src/lib/services`.
-- Data access must live in `src/lib/adapters`.
-- Domain types must live in `src/lib/types`.
-- Validation schemas must live in `src/lib/validators` or close to API routes.
-- Public API routes must only expose data intended for public users.
-- Admin/customer API routes must stay protected by middleware and role checks.
+**UI Layer** (`src/app/`, `src/components/`)
+- Never call database directly
+- Never put business logic in components
+- Use API routes for all data operations
+- Handle loading/error states
 
-## Local Runtime Rules
+**API Layer** (`src/app/api/`)
+- Validate all inputs with Zod
+- Check authentication/authorization
+- Call service layer
+- Return clean JSON responses
+- Never expose sensitive data (passwords, tokens)
 
-- Keep `DATABASE_PROVIDER=mock` for normal local feature work.
-- Use `postgres` only when implementing PostgreSQL adapter/migrations.
-- Do not remove Google Sheets demo support unless the task explicitly says so.
-- Do not weaken `JWT_SECRET` validation.
-- If changing auth/booking/payment/database, update `docs/SYSTEM_TRUTH.md`.
+**Service Layer** (`src/lib/services/`)
+- Contains all business logic
+- Calls adapter for data access
+- Handles complex operations (booking validation, pricing calculation)
+- Returns domain objects
 
-## Booking Rules
+**Adapter Layer** (`src/lib/adapters/`)
+- Implements `DatabaseAdapter` interface
+- Handles database-specific queries
+- Returns domain objects
+- Never contains business logic
 
-A booking must have:
+**Domain Layer** (`src/lib/types/domain.ts`)
+- Defines all domain types (Booking, Court, Customer, etc.)
+- Single source of truth for data shapes
+- Used across all layers
 
-- id
+### File Organization
+
+```
+src/
+├── app/
+│   ├── (public)/          # Public pages (booking, search, auth)
+│   ├── admin/             # Super admin dashboard (secret path)
+│   ├── dashboard/         # Owner dashboard
+│   ├── profile/           # Customer profile
+│   └── api/               # API routes (mirror domain structure)
+├── components/            # Reusable UI components
+│   ├── ui/               # Base UI components (Button, Card, etc.)
+│   ├── booking/          # Booking-specific components
+│   ├── admin/            # Admin dashboard components
+│   └── charts/           # Chart components (pure SVG, no deps)
+└── lib/
+    ├── adapters/         # Database adapters
+    ├── services/         # Business logic services
+    ├── types/            # TypeScript types
+    ├── validators/       # Zod schemas
+    ├── auth/             # JWT utilities
+    └── security/         # Security helpers
+```
+
+---
+
+## 4. DATABASE RULES
+
+### Primary Database: PostgreSQL
+
+**Connection:**
+```env
+DATABASE_PROVIDER=postgres
+DATABASE_URL=postgresql://user:pass@localhost:5432/lapangin
+```
+
+**Schema Location:** `db/postgres/schema.sql`
+**Seed Data:** `db/postgres/seed.sql`
+**Migrations:** `db/postgres/migrations/`
+
+### Critical Tables
+
+| Table | Purpose |
+|-------|---------|
+| `admins` | Admin/owner accounts (role: super_admin, admin, staff, owner) |
+| `venue_owners` | Business owners (status: pending_review, active, suspended, rejected) |
+| `venues` | Physical venues (linked to owner + area) |
+| `courts` | Individual courts per venue (linked to sport) |
+| `customers` | Players/users (loyalty_points, total_spent) |
+| `bookings` | Booking records (status + payment_status) |
+| `pricing_rules` | Dynamic pricing (weekday/weekend/holiday) |
+| `pickup_games` | Open play sessions (Sprint 11) |
+| `team_wallets` | Shared team wallets (Sprint 11) |
+| `flash_deals` | Last-minute discounts (Sprint 11) |
+
+### Booking Overlap Prevention
+
+**Database Constraint:**
+```sql
+CONSTRAINT bookings_no_active_overlap EXCLUDE USING gist (
+  court_id WITH =,
+  tstzrange(start_time, end_time) WITH &&
+) WHERE (status IN ('waiting_payment', 'waiting_verification', 'confirmed', 'paid') AND expires_at IS NULL OR expires_at > NOW())
+```
+
+**Rule:** Never allow overlapping bookings at database level. Always validate in service layer + database constraint.
+
+### Migration Rules
+
+1. Create migration file: `db/postgres/migrations/XXX_description.sql`
+2. Use `CREATE TABLE IF NOT EXISTS` for safety
+3. Add indexes for frequently queried columns
+4. Test migration locally before committing
+5. Update `schema.sql` to reflect final state
+6. Update `seed.sql` if adding demo data
+
+---
+
+## 5. AUTHENTICATION & AUTHORIZATION
+
+### JWT Session Structure
+
+```typescript
+interface AuthSession {
+  userId: string;
+  role: "admin" | "super_admin" | "staff" | "customer" | "owner";
+  name: string;
+  email: string;
+  phone?: string;
+  ownerId?: string;  // For owner role
+}
+```
+
+### Cookie Names
+
+| Role | Cookie Name |
+|------|-------------|
+| Super Admin | `admin_auth_token` |
+| Owner | `owner_auth_token` |
+| Customer | `customer_token` |
+
+### Secret Admin Path
+
+- Admin panel accessible via secret 24-char hex path: `/{SECRET_PATH}/`
+- Direct `/admin` access blocked (redirects to homepage)
+- Environment variable: `ADMIN_SECRET_PATH` (server-only)
+- Generate: `openssl rand -hex 12`
+
+### Role-Based Access
+
+| Role | Dashboard | Access Scope |
+|------|-----------|--------------|
+| `super_admin` | `/{SECRET}/` | Full platform: all owners, venues, bookings, CMS, SEO |
+| `admin` / `staff` | `/{SECRET}/` | Same as super_admin |
+| `owner` | `/dashboard/` | Own venues, courts, bookings, stats only |
+| `customer` | `/profile/` | Own bookings, achievements, referrals |
+
+### Authorization Rules
+
+1. **Never hardcode role checks** — use helper functions
+2. **Owner scope:** Owner can only access their own venues/courts/bookings
+3. **Admin scope:** Admin can access all platform data
+4. **Customer scope:** Customer can only access their own data
+5. **Public APIs:** Never expose private data (phone, email, address)
+
+### Password Rules
+
+1. **Always hash passwords** with bcryptjs (10 rounds)
+2. **Never store plaintext** passwords
+3. **Never expose password hashes** in API responses
+4. **Demo credentials** for local dev only:
+   - Admin: `admin@lapangin.id` / `Admin123!@#`
+   - Owner: `owner@lapangin.id` / `Owner123!@#`
+   - Customer: `john@example.com` / `password123`
+
+---
+
+## 6. BOOKING FLOW
+
+### Booking Lifecycle
+
+```
+1. Customer selects court + time slots
+   ↓
+2. POST /api/bookings (create temporary hold)
+   - booking_status: waiting_payment
+   - payment_status: unpaid
+   - expires_at: created_at + 15 minutes
+   ↓
+3. Customer sees countdown + payment instructions
+   ↓
+4a. Customer uploads payment proof
+    - POST /api/uploads/proof (multipart/form-data, 5MB max)
+    - booking_status: waiting_verification
+    - payment_status: waiting_confirmation
+    - expires_at: NULL (hold extended)
+    ↓
+5. Admin/Owner reviews proof
+    ↓
+6a. APPROVE
+    - booking_status: confirmed
+    - payment_status: paid
+    - Award loyalty points (1 point per Rp 10,000)
+    ↓
+6b. REJECT
+    - booking_status: rejected
+    - payment_status: rejected
+    - Release slot (no expiry needed)
+```
+
+### Booking Status Values
+
+```typescript
+type BookingStatus =
+  | "waiting_payment"      // Temporary hold, countdown active
+  | "waiting_verification" // Proof uploaded, pending review
+  | "confirmed"            // Approved, slot reserved
+  | "paid"                 // Payment confirmed
+  | "rejected"             // Proof rejected
+  | "cancelled"            // Cancelled by customer/admin
+  | "expired"              // Hold expired (no payment)
+  | "completed"            // Booking finished
+  | "no_show"              // Customer didn't show up
+```
+
+### Payment Status Values
+
+```typescript
+type PaymentStatus =
+  | "unpaid"               // Initial state
+  | "waiting_confirmation" // Proof uploaded
+  | "paid"                 // Confirmed
+  | "rejected"             // Proof rejected
+  | "refunded"             // Refund issued
+```
+
+### Critical Booking Rules
+
+1. **Temporary holds expire** — `expires_at` must be set on creation
+2. **Lazy expiry cleanup** — Run on `GET /api/availability` and `GET /api/bookings/[code]`
+3. **Never block availability with expired holds** — Filter out expired before checking overlaps
+4. **Booking success page is NOT final confirmation** — It's a status page that polls for updates
+5. **Loyalty points only after confirmation** — Never award on temporary hold creation
+6. **Prevent double booking** — Validate in service layer + database constraint
+7. **Public booking lookup requires verification** — Use `bookingCode + phone` for security
+
+---
+
+## 7. PAYMENT PROOF
+
+### Upload Flow
+
+1. Customer uploads proof via `POST /api/uploads/proof`
+2. Server validates file (max 5MB, image types only)
+3. Save to `public/uploads/payments/{timestamp}-{random}.jpg`
+4. Return `{ proofUrl: "/uploads/payments/..." }`
+5. Customer submits proofUrl via `POST /api/bookings/[code]/verify`
+
+### File Validation
+
+```typescript
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+```
+
+### Storage
+
+- **Local dev:** `public/uploads/payments/`
+- **Production:** Object storage (S3, Cloudflare R2) — not yet implemented
+
+### Rules
+
+1. **Never expose internal booking IDs** in public APIs
+2. **Use bookingCode + phone** for payment proof submission
+3. **Validate file size and type** before saving
+4. **Sanitize filenames** — use timestamp + random string
+5. **Never store base64 in database** — use file URLs
+
+---
+
+## 8. LOYALTY & REWARDS
+
+### Points System
+
+- **Earn rate:** 1 point per Rp 10,000 confirmed booking value
+- **Award timing:** Only after booking confirmation (status = `confirmed`)
+- **Prevent duplicates:** Use unique index on `loyalty_transactions(booking_id, type='earned')`
+
+### Loyalty Tiers
+
+| Tier | Points Required | Multiplier |
+|------|-----------------|------------|
+| Bronze | 0 - 499 | 1.0x |
+| Silver | 500 - 1,999 | 1.2x |
+| Gold | 2,000 - 4,999 | 1.5x |
+| Platinum | 5,000+ | 2.0x |
+
+### Rewards
+
+- Stored in `rewards` table
+- Redemption tracked in `reward_redemptions`
+- Points deducted from `customers.loyalty_points`
+
+### Rules
+
+1. **Never award points on temporary holds**
+2. **Prevent duplicate awards** — check if already awarded for this booking
+3. **Use transaction** — deduct points + create redemption in one transaction
+4. **Tier auto-updates** — recalculate tier when points change
+5. **Move all loyalty logic to `LoyaltyService`** — don't scatter across codebase
+
+---
+
+## 9. PRIVACY & PUBLIC APIs
+
+### Never Expose in Public APIs
+
+- Customer phone numbers
+- Customer email addresses
+- Full customer addresses
+- Payment proof URLs
+- Internal booking IDs (use bookingCode instead)
+- Admin/owner private data
+- Password hashes
+- JWT tokens
+
+### Public API Safe Fields
+
+**Booking:**
 - bookingCode
-- customerName
-- customerPhone
-- customerEmail optional
-- sportId
-- venueId
-- courtId
-- bookingDate
-- startTime
-- endTime
-- durationMinutes
-- totalPrice
-- paymentStatus
-- bookingStatus
-- expiresAt optional
-- createdAt
-- updatedAt
+- courtId, venueId
+- startTime, endTime
+- status (only: confirmed, completed)
+- sportType
 
-Booking status:
+**Customer:**
+- name (or alias)
+- loyalty tier
+- achievements (public badges)
 
-- pending
-- waiting_payment
-- waiting_verification
-- paid
-- confirmed
-- rejected
-- cancelled
-- expired
-- completed
-- no_show
+**Venue/Court:**
+- name, description
+- location (area, address)
+- facilities
+- pricing
+- availability
 
-Payment status:
+### Public Roster / Open Play
 
-- unpaid
-- waiting_confirmation
-- dp_paid
-- paid
-- rejected
-- refunded
+- **Opt-in only** — customers must explicitly allow visibility
+- **Safe fields only:** name/alias, skill level, position
+- **Never expose:** phone, email, full address
 
-Prevent double booking:
+---
 
-- Check courtId + bookingDate + startTime + endTime.
-- Active blocking statuses include temporary holds that are not expired and confirmed/paid bookings.
-- Validate again on the server before saving.
-- PostgreSQL production path must enforce overlap prevention at database level.
-- Expired temporary holds must not block availability.
+## 10. SPRINT 11 FEATURES (SOCIAL CORE)
 
-## Payment Proof Rules
+### Pickup Games
 
-- Prefer `bookingCode + phone + proofUrl` for public payment proof submission.
-- `bookingId` is temporary compatibility only.
-- Base64 proof upload is MVP only; production must use object storage.
-- Do not expose internal booking IDs as the primary public lookup mechanism.
+**Purpose:** Find teammates for open play sessions
 
-## Privacy and Public API Rules
+**Key Tables:**
+- `pickup_games` — Session details (host, court, time, max_players, price_per_person)
+- `pickup_game_participants` — Players joined (split_amount, payment_status)
+- `pickup_game_messages` — Chat between participants
 
-Never expose these fields in public APIs:
+**API Endpoints:**
+- `GET /api/pickup-games` — List open games
+- `POST /api/pickup-games` — Create game (host)
+- `POST /api/pickup-games/[id]/join` — Join game
+- `POST /api/pickup-games/[id]/leave` — Leave game
+- `GET /api/pickup-games/[id]/messages` — Get chat
+- `POST /api/pickup-games/[id]/messages` — Send message
 
-- customer phone
-- customer email
-- full customer address
-- payment proof
-- internal booking ID as primary lookup
-- private owner/admin data
+**Rules:**
+- Host creates game + sets price_per_person
+- Participants pay split_amount (auto-calculated)
+- Chat is light (polling, not WebSocket yet)
+- Game status: open → full → completed/cancelled
 
-Public schedule/session data must use safe fields only, such as:
+### Team Wallets
 
-- venue
-- court
-- sport
-- date/time
-- team name
-- host alias
-- player count
-- open slots
-- skill level
+**Purpose:** Shared wallet for team bookings
 
-Public roster/open-play visibility must be opt-in.
+**Key Tables:**
+- `team_wallets` — Wallet details (owner, balance, members)
+- `team_wallet_members` — Members with roles (owner, admin, member)
+- `team_wallet_deposits` — Money in (from members)
+- `team_wallet_transactions` — Money out (for bookings)
 
-## Loyalty and Referral Rules
+**API Endpoints:**
+- `POST /api/team-wallets` — Create wallet
+- `POST /api/team-wallets/[id]/deposits` — Deposit money
+- `POST /api/team-wallets/[id]/booking` — Pay booking from wallet
+- `GET /api/team-wallets/[id]/transactions` — Transaction history
 
-- Points are awarded only after booking confirmation.
-- Keep loyalty awarding idempotent.
-- Prevent duplicate points for the same booking.
-- Referral rewards require verified/meaningful user activity.
-- Do not create large referral bonuses on registration alone.
-- Move loyalty logic into `LoyaltyService` before advanced referral/team features.
+**Rules:**
+- Owner creates wallet + invites members
+- Members deposit money (manual confirmation for now)
+- Wallet pays bookings (deduct balance)
+- Transaction log for audit
 
-## Owner/Admin Rules
+### Flash Deals
 
-- `super_admin` may access platform-wide data.
-- `admin`/owner access must be scoped to owned venue data.
-- `staff` access should be scoped to assigned operational data.
-- Do not hardcode `role === "admin"` as the only accepted admin role.
-- Use helper authorization for venue/booking access checks.
+**Purpose:** Last-minute discounts for empty slots
 
-## Development Workflow
+**Key Table:** `flash_deals`
 
-For every task:
+**API Endpoints:**
+- `GET /api/flash-deals` — List active deals
+- `POST /api/flash-deals/[id]/claim` — Claim deal
 
-1. Read existing files first.
-2. Read docs when touching core modules.
-3. Make the smallest useful change.
-4. Explain what changed.
-5. Run or state relevant checks.
-6. Do not rewrite unrelated files.
-7. Keep MVP working at every step.
-
-## UI Direction
-
-- Mobile first.
-- Clean sports booking style.
-- Simple cards.
-- Large clear booking buttons.
-- Admin table must be readable.
-- Use status badges.
-- Use empty states.
-- Avoid hiding critical booking/payment status.
-
-## Environment Variables
-
-Use:
-
-- `DATABASE_PROVIDER`
-- `JWT_SECRET`
-- `GOOGLE_SHEETS_SPREADSHEET_ID`
-- `GOOGLE_SHEETS_CLIENT_EMAIL`
-- `GOOGLE_SHEETS_PRIVATE_KEY`
-- `NEXT_PUBLIC_APP_URL`
-- `NEXT_PUBLIC_APP_NAME`
-
-## Required Local Checks
-
-Before finishing local work, run:
-
-```bash
-npm run doctor
-npm run type-check
-npm run lint
-npm run build
-```
-
-Or:
-
-```bash
-npm run check
-```
-
-If a check cannot be run, state clearly which check was not run and why.
-
-## Impeccable Design Skills
-
-Impeccable is installed at `.github/skills/impeccable/`. It provides design, UX, and frontend quality tools for AI agents.
-
-### When to use
-
-- `/impeccable init` — Run once per session if PRODUCT.md missing. Already done; skip.
-- `/impeccable critique <page>` — UX design review with heuristic scoring.
-- `/impeccable audit <area>` — Technical quality checks (a11y, perf, responsive).
-- `/impeccable polish <component>` — Final quality pass before shipping.
-- `/impeccable craft <feature>` — Shape UX/UI then build end-to-end.
-- `/impeccable live` — Visual variant mode in browser.
-
-### Setup per session
-
-1. Run `node .github/skills/impeccable/scripts/context.mjs` once.
-2. If target file/route specified, pass `--target <path>`.
-3. For sub-commands, always load `reference/<command>.md` first.
-4. PRODUCT.md lives at project root (register: product).
-5. DESIGN.md and live config can be added later via `/impeccable document` and `/impeccable live`.
-
-### Integration rules
-
-- Read PRODUCT.md before any design task.
-- Follow impeccable's design rules for UI work: OKLCH colors, proper contrast (4.5:1), no side-stripe borders, no gradient text, no glassmorphism default.
-- Mobile-first responsive design enforced.
-- After UI edits, run `node .github/skills/impeccable/scripts/detect.mjs <target>` to catch anti-patterns.
-
-## Testing Direction
-
-Test:
-
-- Available slots display.
-- Booking creation.
-- Temporary hold expiry.
-- Double booking prevention.
-- Payment proof submission.
-- Admin confirmation.
-- Admin rejection.
-- Loyalty point awarding.
-- Auth redirects and protected routes.
-- Owner-scoped access.
-- Mobile responsive pages.
-- Vercel deployment.
+**Rules:**
+- Owner creates deal for specific court + time
+- Deal expires at scheduled time
+- First customer to claim gets discount
+- Prevent double-claim (unique

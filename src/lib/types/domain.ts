@@ -750,3 +750,77 @@ export interface TeamWalletSplitMember {
   paid: boolean;
   paidAt?: string;
 }
+
+// ── Smart Group Booking (Sprint 16) ──
+
+export type GroupBookingStatus =
+  | "draft"
+  | "voting"
+  | "confirmed"
+  | "cancelled"
+  | "expired";
+
+export type GroupBookingParticipantStatus =
+  | "invited"
+  | "accepted"
+  | "declined"
+  | "confirmed"
+  | "no_show";
+
+export interface GroupBooking {
+  id: string;
+  organizerId: string;
+  venueId: string;
+  courtId: string;
+  sportId: string;
+  title: string;
+  description?: string;
+  bookingDate?: string;
+  startTime?: string;
+  endTime?: string;
+  durationMinutes: number;
+  minParticipants: number;
+  maxParticipants: number;
+  pricePerSlot: number;
+  status: GroupBookingStatus;
+  deadline?: string;
+  finalBookingId?: string;
+  createdAt: string;
+  updatedAt: string;
+  // Joins (read payloads)
+  organizerName?: string;
+  venueName?: string;
+  courtName?: string;
+  participantCount?: number;
+}
+
+export interface GroupBookingParticipant {
+  id: string;
+  groupBookingId: string;
+  customerId: string;
+  status: GroupBookingParticipantStatus;
+  availabilityJson: string[];
+  voteSlotId?: string;
+  splitAmount: number;
+  isOrganizer: boolean;
+  joinedAt: string;
+  confirmedAt?: string;
+  customerName?: string;
+  customerPhone?: string;
+}
+
+export interface GroupBookingTimeSlot {
+  id: string;
+  groupBookingId: string;
+  slotDate: string;
+  startTime: string;
+  endTime: string;
+  voteCount: number;
+  isWinner: boolean;
+  createdAt: string;
+}
+
+export type GroupBookingDetail = GroupBooking & {
+  participants: GroupBookingParticipant[];
+  timeSlots: GroupBookingTimeSlot[];
+};

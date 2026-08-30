@@ -20,7 +20,7 @@
 ### Production Server
 - Port: 3002 (tested)
 - Node: `next start` ✅
-- Database: PostgreSQL 16 via `hris-postgres` container (localhost:5432/lapangin)
+- Database: PostgreSQL 16 via `lapangin` container (localhost:5432/lapangin)
 - Status: **UP** on `http://localhost:3002`
 
 ---

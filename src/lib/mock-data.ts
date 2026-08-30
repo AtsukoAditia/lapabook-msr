@@ -151,6 +151,9 @@ export const mockSports: Sport[] = [
   { id: "sport-padel", name: "Padel", slug: "padel", isActive: true },
   { id: "sport-tenis", name: "Tenis", slug: "tenis", isActive: true },
   { id: "sport-basket", name: "Basket", slug: "basket", isActive: true },
+  // legacy aliases (kept for compat, hidden from homepage via filter if needed)
+  { id: "sport-bulu-tangkis", name: "Bulu Tangkis", slug: "bulu-tangkis", isActive: true },
+  { id: "sport-mini-soccer", name: "Mini Soccer", slug: "mini-soccer", isActive: true },
 ];
 
 // ── Venues (distributed across ALL areas) ──

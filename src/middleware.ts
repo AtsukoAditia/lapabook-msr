@@ -30,13 +30,14 @@ async function hasRole(token: string | undefined, role: string): Promise<boolean
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const adminSecret = process.env.ADMIN_SECRET_PATH || "5b08d37a8d376d3f97ec3972";
-
-  // Secret admin path — require admin auth
-  // Pattern: /[24-char-hex]/...  OR  /<ADMIN_SECRET>/...
-  const isSecretPath = pathname === `/${adminSecret}` || pathname.startsWith(`/${adminSecret}/`);
-  const isHexSecret = /^\/[0-9a-f]{24}(\/|$)/.test(pathname);
-  if (isSecretPath || isHexSecret) {
+  const adminSecret = process.env.ADMIN_SECRET_PATH;
+  if (!adminSecret) {
+    // Fail closed in production — no fallback secret
+    if (process.env.NODE_ENV === "production") throw new Error("ADMIN_SECRET_PATH missing");
+  }
+  const effectiveSecret = adminSecret || "5b08d37a8d376d3f97ec3972";
+  const isSecretPath = pathname === `/${effectiveSecret}` || pathname.startsWith(`/${effectiveSecret}/`);
+  if (isSecretPath) {
     const token = request.cookies.get(ADMIN_TOKEN_NAME)?.value;
     if (!(await hasRole(token, "admin"))) {
       // Not authenticated — redirect to admin login with secret path as redirect
@@ -45,7 +46,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
     // Authenticated — rewrite to /admin and add noindex
-    const subPath = pathname.replace(/^\/[0-9a-f]{24}/, "") || "/";
+    const subPath = pathname.replace(new RegExp(`^/${effectiveSecret}`), "") || "/";
     const rewritten = request.nextUrl.clone();
     rewritten.pathname = `/admin${subPath}`;
     const res = NextResponse.rewrite(rewritten);

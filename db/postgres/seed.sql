@@ -62,14 +62,19 @@ INSERT INTO venue_owners (id, admin_id, business_name, pic_name, phone, email, s
   ('owner-arena-futsal', NULL,     'Arena Futsal Bandung',   'Charlie Putra', '083456789012', 'charlie@arenafutsal.id','active', NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
--- ==================== SPORTS ====================
+-- ==================== SPORTS (6 canonical) ====================
 INSERT INTO sports (id, name, slug, icon, is_active, created_at, updated_at) VALUES
   ('sport-futsal',    'Futsal',      'futsal',    '⚽',  true, NOW(), NOW()),
-  ('sport-bulu-tangkis','Bulu Tangkis','bulu-tangkis','🏸', true, NOW(), NOW()),
-  ('sport-mini-soccer','Mini Soccer', 'mini-soccer','⚽',  true, NOW(), NOW()),
+  ('sport-minisoccer','Minisoccer',  'minisoccer','🥅', true, NOW(), NOW()),
+  ('sport-badminton', 'Badminton',   'badminton', '🏸', true, NOW(), NOW()),
   ('sport-padel',     'Padel',       'padel',     '🎾',  true, NOW(), NOW()),
   ('sport-tenis',     'Tenis',       'tenis',     '🎾',  true, NOW(), NOW()),
   ('sport-basket',    'Basket',      'basket',    '🏀',  true, NOW(), NOW())
+ON CONFLICT (id) DO NOTHING;
+-- Legacy aliases for backward compat
+INSERT INTO sports (id, name, slug, icon, is_active, created_at, updated_at) VALUES
+  ('sport-bulu-tangkis','Bulu Tangkis','bulu-tangkis','🏸', true, NOW(), NOW()),
+  ('sport-mini-soccer','Mini Soccer', 'mini-soccer','⚽',  true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- ==================== VENUES ====================

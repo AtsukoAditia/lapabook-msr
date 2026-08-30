@@ -110,6 +110,10 @@ export interface CreateBlockedSlotInput {
 export interface DatabaseAdapter {
   // Sports
   getSports(): Promise<Sport[]>;
+  getAllSports(): Promise<Sport[]>;
+  createSport(input: { name: string; slug: string; isActive?: boolean }): Promise<Sport>;
+  updateSport(id: string, input: { name?: string; slug?: string; isActive?: boolean }): Promise<Sport>;
+  deleteSport(id: string): Promise<void>;
 
   // Regions
   getProvinces(): Promise<Province[]>;

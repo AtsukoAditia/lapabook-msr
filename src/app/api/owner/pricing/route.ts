@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
   const cookieStore = await cookies();
   const token = cookieStore.get(OWNER_TOKEN_NAME)?.value;
   const session = token ? await verifyToken(token) : null;
-  if (!session || session.role !== "owner") {
+  if (!session || session.role !== "owner" || !session.ownerId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -51,6 +51,13 @@ export async function POST(request: NextRequest) {
   }
 
   const adapter = getDatabaseAdapter();
+  // Verify court belongs to owner
+  const venues = await adapter.getVenuesByOwner(session.ownerId);
+  const venueIds = new Set(venues.map((v) => v.id));
+  const court = await adapter.getCourtById(courtId);
+  if (!court || !venueIds.has(court.venueId)) {
+    return NextResponse.json({ error: "Forbidden: court bukan milik owner" }, { status: 403 });
+  }
   const rule = await adapter.createPricingRule({
     courtId,
     dayType,
@@ -68,7 +75,7 @@ export async function PUT(request: NextRequest) {
   const cookieStore = await cookies();
   const token = cookieStore.get(OWNER_TOKEN_NAME)?.value;
   const session = token ? await verifyToken(token) : null;
-  if (!session || session.role !== "owner") {
+  if (!session || session.role !== "owner" || !session.ownerId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

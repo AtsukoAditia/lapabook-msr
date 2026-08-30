@@ -56,6 +56,10 @@ import type {
   VenueVerification,
   VenueVerificationPhoto,
   LoyaltyTier,
+  GroupBooking,
+  GroupBookingParticipant,
+  GroupBookingTimeSlot,
+  GroupBookingDetail,
 } from "@/lib/types/domain";
 import {
   mockSports,
@@ -283,6 +287,22 @@ export class MockAdapter implements DatabaseAdapter {
   // ── Sports ──
   async getSports(): Promise<Sport[]> {
     return mockSports.filter((s) => s.isActive);
+  }
+  async getAllSports(): Promise<Sport[]> { return [...mockSports]; }
+  async createSport(input: { name: string; slug: string; isActive?: boolean }): Promise<Sport> {
+    const s: Sport = { id: `sport-${input.slug}`, name: input.name, slug: input.slug, isActive: input.isActive ?? true };
+    mockSports.push(s); return s;
+  }
+  async updateSport(id: string, input: { name?: string; slug?: string; isActive?: boolean }): Promise<Sport> {
+    const s = mockSports.find(x => x.id === id); if (!s) throw new Error(`Sport not found: ${id}`);
+    if (input.name !== undefined) s.name = input.name;
+    if (input.slug !== undefined) s.slug = input.slug;
+    if (input.isActive !== undefined) s.isActive = input.isActive;
+    return s;
+  }
+  async deleteSport(id: string): Promise<void> {
+    const idx = mockSports.findIndex(x => x.id === id); if (idx === -1) throw new Error(`Sport not found: ${id}`);
+    mockSports.splice(idx, 1);
   }
 
   // ── Regions ──
@@ -912,4 +932,20 @@ export class MockAdapter implements DatabaseAdapter {
   async getVenueVerificationPhotos(): Promise<VenueVerificationPhoto[]> { throw new Error('Not implemented in MockAdapter'); }
   async createVenueVerificationPhoto(): Promise<VenueVerificationPhoto> { throw new Error('Not implemented in MockAdapter'); }
   async getLoyaltyTiers(): Promise<LoyaltyTier[]> { throw new Error('Not implemented in MockAdapter'); }
+  async createGroupBooking(): Promise<GroupBooking> { throw new Error('Not implemented in MockAdapter'); }
+  async getGroupBookingById(): Promise<GroupBooking | null> { throw new Error('Not implemented in MockAdapter'); }
+  async getGroupBookingDetail(): Promise<GroupBookingDetail | null> { throw new Error('Not implemented in MockAdapter'); }
+  async getGroupBookingsByOrganizer(): Promise<GroupBooking[]> { throw new Error('Not implemented in MockAdapter'); }
+  async updateGroupBookingStatus(): Promise<GroupBooking> { throw new Error('Not implemented in MockAdapter'); }
+  async deleteGroupBooking(): Promise<void> { throw new Error('Not implemented in MockAdapter'); }
+  async getGroupBookingParticipants(): Promise<GroupBookingParticipant[]> { throw new Error('Not implemented in MockAdapter'); }
+  async addGroupBookingParticipant(): Promise<GroupBookingParticipant> { throw new Error('Not implemented in MockAdapter'); }
+  async getGroupBookingParticipant(): Promise<GroupBookingParticipant | null> { throw new Error('Not implemented in MockAdapter'); }
+  async updateGroupBookingParticipantStatus(): Promise<GroupBookingParticipant> { throw new Error('Not implemented in MockAdapter'); }
+  async getGroupBookingParticipantById(): Promise<GroupBookingParticipant | null> { throw new Error('Not implemented in MockAdapter'); }
+  async getGroupBookingTimeSlots(): Promise<GroupBookingTimeSlot[]> { throw new Error('Not implemented in MockAdapter'); }
+  async addGroupBookingTimeSlot(): Promise<GroupBookingTimeSlot> { throw new Error('Not implemented in MockAdapter'); }
+  async getGroupBookingTimeSlotById(): Promise<GroupBookingTimeSlot | null> { throw new Error('Not implemented in MockAdapter'); }
+  async voteGroupBookingTimeSlot(): Promise<GroupBookingTimeSlot> { throw new Error('Not implemented in MockAdapter'); }
+  async markGroupBookingWinner(): Promise<GroupBookingTimeSlot> { throw new Error('Not implemented in MockAdapter'); }
 }

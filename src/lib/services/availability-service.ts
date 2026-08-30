@@ -82,12 +82,12 @@ export function hasBookingConflict(
   startTime: string,
   endTime: string,
 ): boolean {
-  return bookings.some(
-    (b) =>
-      ACTIVE_STATUSES.includes(b.bookingStatus) &&
-      b.startTime < endTime &&
-      b.endTime > startTime,
-  );
+  const now = new Date();
+  return bookings.some((b) => {
+    if (!ACTIVE_STATUSES.includes(b.bookingStatus)) return false;
+    if (b.bookingStatus === "waiting_payment" && b.expiresAt && new Date(b.expiresAt) <= now) return false;
+    return b.startTime < endTime && b.endTime > startTime;
+  });
 }
 
 export function hasBlockedSlotConflict(

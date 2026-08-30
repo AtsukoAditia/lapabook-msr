@@ -182,8 +182,34 @@ function mapPricing(row: Record<string, unknown>): PricingRule {
 export class PostgresAdapter implements DatabaseAdapter {
   // ── Sports ──
   async getSports(): Promise<Sport[]> {
-    const rows = await query<Record<string, unknown>>("SELECT id, name, slug, is_active FROM sports WHERE is_active = true");
+    const rows = await query<Record<string, unknown>>("SELECT id, name, slug, is_active FROM sports WHERE is_active = true ORDER BY name");
     return rows.map((r) => ({ id: r.id as string, name: r.name as string, slug: r.slug as string, isActive: (r.isActive ?? r.is_active) as boolean }));
+  }
+  async getAllSports(): Promise<Sport[]> {
+    const rows = await query<Record<string, unknown>>("SELECT id, name, slug, is_active FROM sports ORDER BY name");
+    return rows.map((r) => ({ id: r.id as string, name: r.name as string, slug: r.slug as string, isActive: (r.isActive ?? r.is_active) as boolean }));
+  }
+  async createSport(input: { name: string; slug: string; isActive?: boolean }): Promise<Sport> {
+    const id = `sport-${input.slug}`;
+    const r = await queryOne<Record<string, unknown>>("INSERT INTO sports (id, name, slug, is_active) VALUES ($1,$2,$3,$4) RETURNING id, name, slug, is_active", [id, input.name, input.slug, input.isActive ?? true]);
+    if (!r) throw new Error("Gagal membuat olahraga");
+    return { id: r.id as string, name: r.name as string, slug: r.slug as string, isActive: (r.isActive ?? r.is_active) as boolean };
+  }
+  async updateSport(id: string, input: { name?: string; slug?: string; isActive?: boolean }): Promise<Sport> {
+    const sets: string[] = []; const vals: unknown[] = []; let i = 1;
+    if (input.name !== undefined) { sets.push(`name = $${i++}`); vals.push(input.name); }
+    if (input.slug !== undefined) { sets.push(`slug = $${i++}`); vals.push(input.slug); }
+    if (input.isActive !== undefined) { sets.push(`is_active = $${i++}`); vals.push(input.isActive); }
+    if (!sets.length) throw new Error("No fields to update");
+    sets.push(`updated_at = NOW()`); vals.push(id);
+    const r = await queryOne<Record<string, unknown>>(`UPDATE sports SET ${sets.join(", ")} WHERE id = $${i} RETURNING id, name, slug, is_active`, vals);
+    if (!r) throw new Error(`Sport not found: ${id}`);
+    return { id: r.id as string, name: r.name as string, slug: r.slug as string, isActive: (r.isActive ?? r.is_active) as boolean };
+  }
+  async deleteSport(id: string): Promise<void> {
+    const cnt = await queryOne<{ count: string }>("SELECT COUNT(*)::text as count FROM courts WHERE sport_id = $1", [id]);
+    if (cnt && Number(cnt.count) > 0) throw new Error("Tidak bisa hapus: masih ada lapangan pakai olahraga ini");
+    await query("DELETE FROM sports WHERE id = $1", [id]);
   }
 
   // ── Regions ──
@@ -312,11 +338,19 @@ export class PostgresAdapter implements DatabaseAdapter {
 
   // ── Areas ──
   async getAreas(): Promise<Area[]> {
-    return [];
+    const rows = await query<Record<string, unknown>>("SELECT * FROM areas WHERE is_active = true ORDER BY label");
+    return rows.map((r) => mapRow<Area>(r));
   }
 
-  async getAreasBySport(_sportId: string): Promise<Area[]> {
-    return [];
+  async getAreasBySport(sportId: string): Promise<Area[]> {
+    const rows = await query<Record<string, unknown>>(
+      `SELECT DISTINCT a.* FROM areas a
+       JOIN venues v ON v.area_id = a.id
+       JOIN courts c ON c.venue_id = v.id
+       WHERE c.sport_id = $1 AND a.is_active = true AND v.is_active = true AND v.approval_status = 'active'`,
+      [sportId]
+    );
+    return rows.map((r) => mapRow<Area>(r));
   }
 
   async getVenuesByArea(areaId: string, sportId?: string): Promise<Venue[]> {
@@ -608,7 +642,7 @@ export class PostgresAdapter implements DatabaseAdapter {
   // ── Auth - Customer ──
   async registerCustomer(data: { name: string; email: string; phone: string; passwordHash: string }): Promise<CustomerPublic> {
     const r = await queryOne<Record<string, unknown>>(
-      "INSERT INTO customers (name, email, phone, password_hash) VALUES ($1,$2,$3,$4) RETURNING *",
+      "INSERT INTO customers (id, name, email, phone, password_hash) VALUES (gen_random_uuid(), $1,$2,$3,$4) RETURNING *",
       [data.name, data.email, data.phone, data.passwordHash],
     );
     const c = snakeToCamel(r!);
@@ -643,9 +677,28 @@ export class PostgresAdapter implements DatabaseAdapter {
   }
 
   async addLoyaltyPoints(customerId: string, points: number, bookingId: string | undefined, description: string, type: LoyaltyTransactionType): Promise<LoyaltyTransaction> {
-    await pool.query("UPDATE customers SET loyalty_points = loyalty_points + $1, updated_at = NOW() WHERE id = $2", [points, customerId]);
-    const r = await queryOne<Record<string, unknown>>("INSERT INTO loyalty_transactions (customer_id, booking_id, type, points, description) VALUES ($1,$2,$3,$4,$5) RETURNING *", [customerId, bookingId || null, type, points, description]);
-    return mapRow<LoyaltyTransaction>(r!);
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      // Idempotent for earned per booking — skip if already exists
+      if (type === "earned" && bookingId) {
+        const existing = await client.query("SELECT id FROM loyalty_transactions WHERE booking_id = $1 AND type = 'earned' LIMIT 1", [bookingId]);
+        if (existing.rows.length > 0) {
+          await client.query("ROLLBACK");
+          const r = await queryOne<Record<string, unknown>>("SELECT * FROM loyalty_transactions WHERE booking_id = $1 AND type='earned' LIMIT 1", [bookingId]);
+          return mapRow<LoyaltyTransaction>(r!);
+        }
+      }
+      await client.query("UPDATE customers SET loyalty_points = loyalty_points + $1, updated_at = NOW() WHERE id = $2", [points, customerId]);
+      const { rows } = await client.query("INSERT INTO loyalty_transactions (customer_id, booking_id, type, points, description) VALUES ($1,$2,$3,$4,$5) RETURNING *", [customerId, bookingId || null, type, points, description]);
+      await client.query("COMMIT");
+      return mapRow<LoyaltyTransaction>(rows[0]);
+    } catch (e) {
+      try { await client.query("ROLLBACK"); } catch {}
+      throw e;
+    } finally {
+      client.release();
+    }
   }
 
   async redeemLoyaltyPoints(customerId: string, rewardId: string, bookingId?: string): Promise<RewardRedemption> {
@@ -1855,7 +1908,7 @@ export class PostgresAdapter implements DatabaseAdapter {
   }
 
   private mapGroupBookingTimeSlot(r: Record<string, unknown>): GroupBookingTimeSlot {
-    let sd = r.slot_date as unknown;
+    const sd = r.slot_date as unknown;
     let slotDateStr: string;
     if (sd instanceof Date) slotDateStr = sd.toISOString().slice(0, 10);
     else if (typeof sd === "string") {

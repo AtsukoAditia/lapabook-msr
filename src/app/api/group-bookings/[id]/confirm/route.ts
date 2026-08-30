@@ -97,7 +97,7 @@ export async function POST(
     const total = finalBooking.totalPrice;
     const count = Math.max(accepted.length, 1);
     const base = Math.floor(total / count);
-    let remainder = total - base * count;
+    const remainder = total - base * count;
     const sortedAccepted = [...(accepted as { id: string; isOrganizer?: boolean }[])].sort((a, b) => (b.isOrganizer ? 1 : 0) - (a.isOrganizer ? 1 : 0));
     // Actually sort organizer first
     sortedAccepted.sort((a, b) => (a.isOrganizer ? -1 : 1));

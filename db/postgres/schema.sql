@@ -237,6 +237,7 @@ CREATE INDEX IF NOT EXISTS bookings_court_date_idx ON bookings (court_id, bookin
 CREATE INDEX IF NOT EXISTS bookings_customer_idx ON bookings (user_id);
 CREATE INDEX IF NOT EXISTS bookings_code_idx ON bookings (booking_code);
 CREATE INDEX IF NOT EXISTS bookings_status_idx ON bookings (booking_status);
+CREATE INDEX IF NOT EXISTS bookings_expires_idx ON bookings (expires_at) WHERE booking_status = 'waiting_payment';
 
 -- ============================================================
 -- Blocked slots

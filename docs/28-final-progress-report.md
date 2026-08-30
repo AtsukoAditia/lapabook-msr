@@ -218,7 +218,7 @@
 ### Production Deployment
 - **Service:** `lapangin.service` (systemd, enabled on boot)
 - **Port:** 3002
-- **Database:** PostgreSQL 16 via `hris-postgres` container (localhost:5432/lapangin)
+- **Database:** PostgreSQL 16 via `lapangin` container (localhost:5432/lapangin)
 - **Status:** Running and serving traffic
 
 ### GitHub Actions CI/CD

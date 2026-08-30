@@ -17,19 +17,49 @@ export default function ReferralPage() {
   const [applyCode, setApplyCode] = useState("");
   const [applying, setApplying] = useState(false);
   const [applyResult, setApplyResult] = useState("");
-
-  // TODO: replace with actual customer ID from auth
-  const customerId = "placeholder";
+  const [customerId, setCustomerId] = useState<string | null>(null);
+  const [authError, setAuthError] = useState("");
 
   useEffect(() => {
-    fetch(`/api/referrals?customerId=${customerId}`)
-      .then((r) => r.json())
-      .then(setData)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    let cancelled = false;
+    async function load() {
+      try {
+        const s = await fetch("/api/auth/session", { cache: "no-store" });
+        const sj = await s.json().catch(() => ({}));
+        const uid = sj?.user?.userId ?? null;
+        if (cancelled) return;
+        if (!uid) {
+          setAuthError("Login dulu untuk pakai referral.");
+          setLoading(false);
+          return;
+        }
+        setCustomerId(uid);
+        const r = await fetch(`/api/referrals?customerId=${uid}`, { cache: "no-store" });
+        const j = await r.json().catch(() => ({}));
+        if (cancelled) return;
+        // guard: API may return error shape
+        if (j?.error) {
+          setData({ referralCode: null, referrals: [], transactions: [], stats: { completedReferrals: 0, totalPointsEarned: 0, currentBalance: 0, totalSpent: 0 } });
+        } else {
+          setData({
+            referralCode: j.referralCode ?? null,
+            referrals: Array.isArray(j.referrals) ? j.referrals : [],
+            transactions: Array.isArray(j.transactions) ? j.transactions : [],
+            stats: j.stats ?? { completedReferrals: 0, totalPointsEarned: 0, currentBalance: 0, totalSpent: 0 },
+          });
+        }
+      } catch {
+        if (!cancelled) setData({ referralCode: null, referrals: [], transactions: [], stats: { completedReferrals: 0, totalPointsEarned: 0, currentBalance: 0, totalSpent: 0 } });
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
   }, []);
 
   async function generateCode() {
+    if (!customerId) return;
     setGenerating(true);
     try {
       const res = await fetch("/api/referrals", {
@@ -37,16 +67,18 @@ export default function ReferralPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ customerId }),
       });
-      const d = await res.json();
+      const d = await res.json().catch(() => ({}));
       if (d.referralCode) {
-        setData((prev) => prev ? { ...prev, referralCode: d.referralCode } : prev);
+        setData((prev) => prev ? { ...prev, referralCode: d.referralCode } : { referralCode: d.referralCode, referrals: [], transactions: [], stats: { completedReferrals: 0, totalPointsEarned: 0, currentBalance: 0, totalSpent: 0 } });
+      } else if (d.error) {
+        setApplyResult(`❌ ${d.error}`);
       }
     } catch {}
     setGenerating(false);
   }
 
   async function applyReferral() {
-    if (!applyCode.trim()) return;
+    if (!applyCode.trim() || !customerId) return;
     setApplying(true);
     setApplyResult("");
     try {
@@ -55,11 +87,15 @@ export default function ReferralPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ referralCode: applyCode.trim(), refereeId: customerId }),
       });
-      const d = await res.json();
+      const d = await res.json().catch(() => ({}));
       if (res.ok) {
         setApplyResult(`✅ Berhasil! Kamu dapat ${d.refereePoints} poin 🎉`);
+        // refresh data
+        const r = await fetch(`/api/referrals?customerId=${customerId}`, { cache: "no-store" });
+        const j = await r.json().catch(() => ({}));
+        if (j && !j.error) setData({ referralCode: j.referralCode ?? null, referrals: j.referrals ?? [], transactions: j.transactions ?? [], stats: j.stats ?? { completedReferrals: 0, totalPointsEarned: 0, currentBalance: 0, totalSpent: 0 } });
       } else {
-        setApplyResult(`❌ ${d.error}`);
+        setApplyResult(`❌ ${d.error ?? "Gagal"}`);
       }
     } catch {
       setApplyResult("❌ Gagal menggunakan kode referral");
@@ -79,6 +115,21 @@ export default function ReferralPage() {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="animate-spin h-8 w-8 border-4 border-emerald-200 border-t-emerald-600 rounded-full" />
+      </div>
+    );
+  }
+
+  if (authError) {
+    return (
+      <div className="page-enter min-h-screen bg-slate-50">
+        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 px-4 py-8 text-center">
+          <p className="text-4xl mb-2">🤝</p>
+          <h1 className="text-2xl font-black text-white">Referral & Rewards</h1>
+        </div>
+        <div className="mx-auto max-w-lg px-4 py-10 text-center">
+          <p className="text-sm text-slate-600">{authError}</p>
+          <a href="/login" className="mt-4 inline-block rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-bold text-white">Masuk</a>
+        </div>
       </div>
     );
   }
@@ -158,19 +209,19 @@ export default function ReferralPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="rounded-xl bg-white border p-4 text-center">
-            <p className="text-2xl font-bold text-emerald-600">{data?.stats.completedReferrals || 0}</p>
+            <p className="text-2xl font-bold text-emerald-600">{(data?.stats?.completedReferrals ?? 0)}</p>
             <p className="text-xs text-gray-500">Teman Diundang</p>
           </div>
           <div className="rounded-xl bg-white border p-4 text-center">
-            <p className="text-2xl font-bold text-emerald-600">{(data?.stats.totalPointsEarned || 0).toLocaleString("id-ID")}</p>
+            <p className="text-2xl font-bold text-emerald-600">{(data?.stats?.totalPointsEarned ?? 0).toLocaleString("id-ID")}</p>
             <p className="text-xs text-gray-500">Poin dari Referral</p>
           </div>
           <div className="rounded-xl bg-white border p-4 text-center">
-            <p className="text-2xl font-bold text-primary-500">{(data?.stats.currentBalance || 0).toLocaleString("id-ID")}</p>
+            <p className="text-2xl font-bold text-primary-500">{(data?.stats?.currentBalance ?? 0).toLocaleString("id-ID")}</p>
             <p className="text-xs text-gray-500">Poin Saat Ini</p>
           </div>
           <div className="rounded-xl bg-white border p-4 text-center">
-            <p className="text-2xl font-bold text-primary-500">Rp {(data?.stats.totalSpent || 0).toLocaleString("id-ID")}</p>
+            <p className="text-2xl font-bold text-primary-500">Rp {(data?.stats?.totalSpent ?? 0).toLocaleString("id-ID")}</p>
             <p className="text-xs text-gray-500">Total Transaksi</p>
           </div>
         </div>

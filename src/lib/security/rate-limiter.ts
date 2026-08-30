@@ -1,23 +1,27 @@
 import { RateLimiterMemory } from "rate-limiter-flexible";
 
-// Login rate limiter — 5 attempts per 15 min per IP
+// Flag: disable rate limiter when running tests or in dev mode
+export const IS_TESTING_ENV =
+  process.env.NODE_ENV === 'test' || process.env.IS_TESTING === 'true';
+
+// Login rate limiter — generous in testing, strict in prod
 export const loginLimiter = new RateLimiterMemory({
-  points: 5,
-  duration: 900, // 15 minutes
+  points: IS_TESTING_ENV ? 10000 : 5,
+  duration: IS_TESTING_ENV ? 60 * 60 : 900, // 1h vs 15m
   keyPrefix: "login",
 });
 
-// API rate limiter — 100 requests per minute per IP
+// API rate limiter — generous in testing, strict in prod
 export const apiLimiter = new RateLimiterMemory({
-  points: 100,
+  points: IS_TESTING_ENV ? 100000 : 100,
   duration: 60,
   keyPrefix: "api",
 });
 
-// Booking rate limiter — 10 per hour per IP
+// Booking rate limiter — generous in testing, strict in prod
 export const bookingLimiter = new RateLimiterMemory({
-  points: 10,
-  duration: 3600,
+  points: IS_TESTING_ENV ? 10000 : 10,
+  duration: IS_TESTING_ENV ? 3600 : 3600,
   keyPrefix: "booking",
 });
 
@@ -34,6 +38,7 @@ export async function checkRateLimit(
   limiter: RateLimiterMemory,
   key: string
 ): Promise<{ limited: true; retryAfter: number } | null> {
+  if (IS_TESTING_ENV) return null;
   try {
     await limiter.consume(key);
     return null; // allowed

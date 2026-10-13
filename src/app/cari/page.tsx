@@ -52,11 +52,17 @@ function CariContent() {
   useEffect(() => {
     fetch("/api/areas")
       .then((r) => r.json())
-      .then((d) => setAreas(d.areas || d || []))
+      .then((d) => {
+        const list = Array.isArray(d) ? d : (d.areas ?? d.data ?? []);
+        setAreas(Array.isArray(list) ? list : []);
+      })
       .catch(() => {});
     fetch("/api/sports")
       .then((r) => r.json())
-      .then((d) => setSports(d.sports || d || []))
+      .then((d) => {
+        const list = Array.isArray(d) ? d : (d.sports ?? d.data ?? []);
+        setSports(Array.isArray(list) ? list : []);
+      })
       .catch(() => {});
   }, []);
 

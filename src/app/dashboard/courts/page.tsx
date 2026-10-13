@@ -45,6 +45,18 @@ export default function OwnerCourtsPage() {
   const [filterVenue, setFilterVenue] = useState("all");
   const [filterSport, setFilterSport] = useState("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({
+    venueId: "",
+    sportId: "",
+    name: "",
+    surfaceType: "",
+    indoorType: "outdoor",
+    capacity: "",
+    basePrice: "",
+  });
+  const [formError, setFormError] = useState("");
+  const [formSubmitting, setFormSubmitting] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -60,6 +72,56 @@ export default function OwnerCourtsPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const refreshCourts = async () => {
+    const courtsData = await fetch("/api/owner/courts").then((r) => r.json());
+    setCourts(courtsData.courts ?? []);
+  };
+
+  function slugPreview(name: string): string {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+
+  const handleCreate = async () => {
+    if (!form.venueId || !form.sportId || !form.name || !form.basePrice) {
+      setFormError("Venue, olahraga, nama, dan harga wajib diisi");
+      return;
+    }
+    const price = Number(form.basePrice);
+    if (Number.isNaN(price) || price < 0) {
+      setFormError("Harga tidak valid");
+      return;
+    }
+    setFormSubmitting(true);
+    setFormError("");
+    try {
+      const res = await fetch("/api/owner/courts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          venueId: form.venueId,
+          sportId: form.sportId,
+          name: form.name,
+          surfaceType: form.surfaceType,
+          indoorType: form.indoorType,
+          capacity: form.capacity === "" ? 0 : Number(form.capacity),
+          basePrice: price,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setFormError(data.error || "Gagal membuat lapangan");
+        return;
+      }
+      setShowModal(false);
+      setForm({ venueId: "", sportId: "", name: "", surfaceType: "", indoorType: "outdoor", capacity: "", basePrice: "" });
+      await refreshCourts();
+    } catch {
+      setFormError("Terjadi kesalahan");
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
 
   const handleToggleActive = async (courtId: string, currentActive: boolean) => {
     setActionLoading(courtId);
@@ -138,6 +200,12 @@ export default function OwnerCourtsPage() {
           <h1 className="text-2xl font-black text-gray-900">Lapangan</h1>
           <p className="text-gray-500 text-sm mt-1">Kelola lapangan di semua venue Anda</p>
         </div>
+        <button
+          onClick={() => setShowModal(true)}
+          className="inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-emerald-700 transition-colors"
+        >
+          + Tambah Lapangan
+        </button>
       </div>
 
       {/* Stats */}
@@ -256,6 +324,119 @@ export default function OwnerCourtsPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-lg font-bold text-gray-900">Tambah Lapangan</h2>
+            {formError && (
+              <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl">{formError}</div>
+            )}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Venue *</label>
+              <select
+                value={form.venueId}
+                onChange={(e) => setForm({ ...form, venueId: e.target.value })}
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value="">Pilih venue</option>
+                {venues.map((v) => (
+                  <option key={v.id} value={v.id}>{v.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Olahraga *</label>
+              <select
+                value={form.sportId}
+                onChange={(e) => setForm({ ...form, sportId: e.target.value })}
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value="">Pilih olahraga</option>
+                {sports.map((s) => (
+                  <option key={s.id} value={s.id}>{s.icon ? `${s.icon} ` : ""}{s.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nama Lapangan *</label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Contoh: Futsal Court A"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              {form.name && (
+                <p className="text-xs text-gray-400 mt-1">slug: {slugPreview(form.name) || "-"}</p>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Permukaan</label>
+                <input
+                  type="text"
+                  value={form.surfaceType}
+                  onChange={(e) => setForm({ ...form, surfaceType: e.target.value })}
+                  placeholder="Rumput Sintetis"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tipe</label>
+                <select
+                  value={form.indoorType}
+                  onChange={(e) => setForm({ ...form, indoorType: e.target.value })}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="outdoor">Outdoor</option>
+                  <option value="indoor">Indoor</option>
+                  <option value="semi_outdoor">Semi Outdoor</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Kapasitas</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={form.capacity}
+                  onChange={(e) => setForm({ ...form, capacity: e.target.value })}
+                  placeholder="14"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Harga / jam *</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={form.basePrice}
+                  onChange={(e) => setForm({ ...form, basePrice: e.target.value })}
+                  placeholder="120000"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                onClick={() => setShowModal(false)}
+                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-50"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={formSubmitting}
+                className="flex-1 px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 disabled:opacity-50"
+              >
+                {formSubmitting ? "Menyimpan..." : "Simpan"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,5 +1,8 @@
 "use client";
 
+// ponytail: skip prerender karena useSearchParams butuh Suspense; wrap Suspense saat mau static generation lagi
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";

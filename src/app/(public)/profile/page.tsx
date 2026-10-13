@@ -223,9 +223,10 @@ export default function ProfilePage() {
       {/* Quick Links */}
       <div className="max-w-lg mx-auto px-4 -mt-4 relative z-10">
         <div className="bg-white rounded-2xl shadow-lg p-3">
-          <div className="grid grid-cols-5 gap-2 text-center">
+          <div className="grid grid-cols-4 gap-2 text-center">
             {[
               { href: "/profile/bookings", icon: "📋", label: "Booking" },
+              { href: "/profile/wallet", icon: "💰", label: "Wallet" },
               { href: "/profile/reviews", icon: "⭐", label: "Ulasan" },
               { href: "/profile/favorites", icon: "❤️", label: "Favorit" },
               { href: "/support", icon: "💬", label: "Bantuan" },

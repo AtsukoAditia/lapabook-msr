@@ -156,7 +156,7 @@ function CheckoutContent() {
     setSubmitting(true);
     try {
       const data = await createBooking();
-      router.push(`/booking/success?code=${data.bookingCode}`);
+      router.push(`/checkout/success?code=${data.bookingCode}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan.");
     } finally {
@@ -518,9 +518,9 @@ function CheckoutContent() {
       {snapToken && (
         <MidtransSnap
           snapToken={snapToken}
-          onSuccess={() => router.push(`/booking/success?code=${pendingBookingCode}`)}
-          onPending={() => router.push(`/booking/success?code=${pendingBookingCode}`)}
-          onError={() => router.push(`/booking/success?code=${pendingBookingCode}`)}
+          onSuccess={() => router.push(`/checkout/success?code=${pendingBookingCode}`)}
+          onPending={() => router.push(`/checkout/success?code=${pendingBookingCode}`)}
+          onError={() => router.push(`/checkout/success?code=${pendingBookingCode}`)}
           onClose={() => setSnapToken(null)}
         />
       )}

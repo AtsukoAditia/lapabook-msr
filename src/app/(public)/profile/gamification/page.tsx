@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface Achievement {
   id: string;
@@ -31,20 +32,32 @@ export default function GamificationPage() {
   const [achievements, setAchievements] = useState<{ unlocked: Achievement[]; locked: Achievement[] }>({ unlocked: [], locked: [] });
   const [stats, setStats] = useState({ totalAchievements: 0, unlockedCount: 0, completionPct: 0, tierCounts: { bronze: 0, silver: 0, gold: 0, platinum: 0 }, achievementPoints: 0 });
   const [loading, setLoading] = useState(true);
-
-  // TODO: replace with actual customer ID from auth
-  const customerId = "placeholder";
+  const router = useRouter();
 
   useEffect(() => {
-    fetch(`/api/gamification/achievements?customerId=${customerId}`)
-      .then((r) => r.json())
+    fetch("/api/auth/session")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((s) => {
+        const user = s?.user;
+        if (!user || user.role !== "customer" || !user.userId) {
+          router.push("/login");
+          return null;
+        }
+        return fetch(`/api/gamification/achievements?customerId=${user.userId}`);
+      })
+      .then((r) => (r ? r.json() : null))
       .then((d) => {
+        if (!d) return;
+        if (d?.error === "Unauthorized") {
+          router.push("/login");
+          return;
+        }
         setAchievements(d.achievements || { unlocked: [], locked: [] });
-        setStats((s) => d.stats || s);
+        setStats((prev) => d.stats || prev);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [router]);
 
   if (loading) {
     return (

@@ -63,8 +63,15 @@ export default function MyBookingsPage() {
     fetch(`/api/customer/bookings${qs}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        if (data?.bookings) setBookings(data.bookings);
-        else if (data?.error === "Unauthorized") router.push("/login");
+        if (data?.error === "Unauthorized") {
+          router.push("/login");
+          return;
+        }
+        const d = data as unknown;
+        const list = Array.isArray(d)
+          ? d
+          : ((d as { bookings?: BookingItem[] } | null)?.bookings ?? (d as { data?: BookingItem[] } | null)?.data ?? []);
+        if (Array.isArray(list)) setBookings(list as BookingItem[]);
       })
       .finally(() => setLoading(false));
   };

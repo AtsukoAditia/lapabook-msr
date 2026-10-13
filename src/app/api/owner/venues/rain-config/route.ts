@@ -7,12 +7,12 @@ export async function GET() {
   const cookieStore = await cookies();
   const token = cookieStore.get(OWNER_TOKEN_NAME)?.value;
   const session = token ? await verifyToken(token) : null;
-  if (!session || session.role !== "owner") {
+  if (!session || session.role !== "owner" || !session.ownerId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const adapter = getDatabaseAdapter();
-  const venues = await adapter.getVenuesByOwner(session.userId);
+  const venues = await adapter.getVenuesByOwner(session.ownerId);
 
   const configs = venues.map((v) => ({
     venueId: v.id,
@@ -27,7 +27,7 @@ export async function PUT(request: NextRequest) {
   const cookieStore = await cookies();
   const token = cookieStore.get(OWNER_TOKEN_NAME)?.value;
   const session = token ? await verifyToken(token) : null;
-  if (!session || session.role !== "owner") {
+  if (!session || session.role !== "owner" || !session.ownerId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -36,6 +36,12 @@ export async function PUT(request: NextRequest) {
 
   if (!venueId || !config) {
     return NextResponse.json({ error: "venueId dan config wajib diisi" }, { status: 400 });
+  }
+
+  // Verify venue belongs to owner
+  const ownerVenues = await getDatabaseAdapter().getVenuesByOwner(session.ownerId);
+  if (!ownerVenues.some((v) => v.id === venueId)) {
+    return NextResponse.json({ error: "Forbidden: venue bukan milik owner" }, { status: 403 });
   }
 
   // Validate config structure

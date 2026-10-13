@@ -34,8 +34,15 @@ export default function MyReviewsPage() {
     fetch("/api/customer/reviews")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        if (data?.reviews) setReviews(data.reviews);
-        else if (data?.error === "Unauthorized") router.push("/login");
+        if (data?.error === "Unauthorized") {
+          router.push("/login");
+          return;
+        }
+        const d = data as unknown;
+        const list = Array.isArray(d)
+          ? d
+          : ((d as { reviews?: ReviewItem[] } | null)?.reviews ?? (d as { data?: ReviewItem[] } | null)?.data ?? []);
+        if (Array.isArray(list)) setReviews(list as ReviewItem[]);
       })
       .finally(() => setLoading(false));
   }, [router]);

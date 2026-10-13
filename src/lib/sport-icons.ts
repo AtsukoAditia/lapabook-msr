@@ -1,14 +1,52 @@
-// Sport-specific emoji/icon mapping for visual cards
-// Supports both DB IDs (sport-futsal) and legacy keys (futsal)
+// Sport icon mapping.
+// - New UI: `getSportVisual()` → lucide SVG component (no emoji).
+// - Legacy: `sportEmoji` / `sportColor` kept for older pages still rendering emoji strings.
+import type { LucideIcon } from "lucide-react";
+import { Trophy, Dumbbell, Volleyball } from "lucide-react";
+
+export interface SportVisual {
+  Icon: LucideIcon;
+  colorClass: string;
+}
+
+const FUTSAL: SportVisual = { Icon: Dumbbell, colorClass: "bg-blue-100 text-blue-800" };
+const MINISOCCER: SportVisual = { Icon: Dumbbell, colorClass: "bg-blue-100 text-blue-700" };
+const BADMINTON: SportVisual = { Icon: Volleyball, colorClass: "bg-orange-100 text-orange-700" };
+const PADEL: SportVisual = { Icon: Volleyball, colorClass: "bg-sky-100 text-sky-700" };
+const TENNIS: SportVisual = { Icon: Volleyball, colorClass: "bg-amber-100 text-amber-700" };
+const BASKET: SportVisual = { Icon: Volleyball, colorClass: "bg-red-100 text-red-700" };
+const FALLBACK: SportVisual = { Icon: Trophy, colorClass: "bg-slate-100 text-slate-600" };
+
+const VISUALS: Record<string, SportVisual> = {
+  "sport-futsal": FUTSAL,
+  "sport-mini-soccer": MINISOCCER,
+  "sport-bulu-tangkis": BADMINTON,
+  "sport-padel": PADEL,
+  "sport-tenis": TENNIS,
+  "sport-basket": BASKET,
+  futsal: FUTSAL,
+  minisoccer: MINISOCCER,
+  "mini-soccer": MINISOCCER,
+  badminton: BADMINTON,
+  "bulu-tangkis": BADMINTON,
+  padel: PADEL,
+  tenis: TENNIS,
+  basket: BASKET,
+};
+
+export function getSportVisual(slugOrId: string | undefined | null): SportVisual {
+  if (!slugOrId) return FALLBACK;
+  return VISUALS[slugOrId] ?? FALLBACK;
+}
+
+// Legacy emoji map — phased out; migrate callers to getSportVisual().
 export const sportEmoji: Record<string, string> = {
-  // DB IDs
   "sport-futsal": "⚽",
   "sport-mini-soccer": "🥅",
   "sport-bulu-tangkis": "🏸",
   "sport-padel": "🎾",
   "sport-tenis": "🎾",
   "sport-basket": "🏀",
-  // Legacy / slug keys
   futsal: "⚽",
   minisoccer: "🥅",
   "mini-soccer": "🥅",
@@ -19,21 +57,6 @@ export const sportEmoji: Record<string, string> = {
   basket: "🏀",
 };
 
-export const sportColor: Record<string, string> = {
-  // DB IDs
-  "sport-futsal": "bg-emerald-100 text-emerald-700",
-  "sport-mini-soccer": "bg-green-100 text-green-700",
-  "sport-bulu-tangkis": "bg-orange-100 text-orange-700",
-  "sport-padel": "bg-blue-100 text-blue-700",
-  "sport-tenis": "bg-yellow-100 text-yellow-700",
-  "sport-basket": "bg-red-100 text-red-700",
-  // Legacy / slug keys
-  futsal: "bg-emerald-100 text-emerald-700",
-  minisoccer: "bg-green-100 text-green-700",
-  "mini-soccer": "bg-green-100 text-green-700",
-  badminton: "bg-orange-100 text-orange-700",
-  "bulu-tangkis": "bg-orange-100 text-orange-700",
-  padel: "bg-blue-100 text-blue-700",
-  tenis: "bg-yellow-100 text-yellow-700",
-  basket: "bg-red-100 text-red-700",
-};
+export const sportColor: Record<string, string> = Object.fromEntries(
+  Object.entries(VISUALS).map(([k, v]) => [k, v.colorClass]),
+);

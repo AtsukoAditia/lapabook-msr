@@ -3,6 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import {
+  Zap,
+  Home,
+  Calendar,
+  User,
+  Star,
+  ClipboardList,
+  LayoutDashboard,
+  LogOut,
+  LogIn,
+  Sparkles,
+  ChevronDown,
+  Menu,
+  X,
+} from "lucide-react";
 
 type User = {
   role: string;
@@ -29,7 +44,7 @@ export default function Navbar() {
   }, [pathname]);
 
   const handleLogout = async () => {
-    const endpoint = user?.role === "admin" 
+    const endpoint = user?.role === "admin"
       ? "/api/auth/admin/logout"
       : user?.role === "owner"
       ? "/api/auth/owner/logout"
@@ -41,7 +56,7 @@ export default function Navbar() {
 
   const isAdminPage = pathname.startsWith("/admin");
 
-  if (isAdminPage) return null; // Admin has its own layout
+  if (isAdminPage) return null;
 
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
@@ -49,21 +64,21 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-              <span className="text-white font-bold text-lg">⚡</span>
+            <div className="w-9 h-9 bg-gradient-to-br from-blue-700 to-blue-900 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+              <Zap className="h-5 w-5 text-orange-400" aria-hidden="true" />
             </div>
             <span className="text-xl font-black text-gray-900 tracking-tight">
-              Lapang<span className="text-emerald-600">in</span>
+              Lapa<span className="text-blue-800">book</span>
             </span>
           </Link>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">
             <NavLink href="/" active={pathname === "/"}>
-              🏠 Beranda
+              <Home className="h-4 w-4" aria-hidden="true" /> Beranda
             </NavLink>
             <NavLink href="/booking/futsal" active={pathname.startsWith("/booking")}>
-              📅 Booking
+              <Calendar className="h-4 w-4" aria-hidden="true" /> Booking
             </NavLink>
           </div>
 
@@ -75,60 +90,54 @@ export default function Navbar() {
               <div className="flex items-center gap-3">
                 {user.role === "customer" && user.points !== undefined && (
                   <Link
-                    href="/account/loyalty"
+                    href="/profile"
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-full text-sm font-semibold text-amber-700 hover:bg-amber-100 transition-colors"
                   >
-                    ⭐ {user.points.toLocaleString()} Poin
+                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" aria-hidden="true" />
+                    {user.points.toLocaleString()} Poin
                   </Link>
                 )}
                 <div className="relative group">
                   <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
-                      <span className="text-emerald-700 font-bold text-sm">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-800 font-bold text-sm">
                         {user.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
                     <span className="text-sm font-medium text-gray-700">{user.name}</span>
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <ChevronDown className="w-4 h-4 text-gray-400" aria-hidden="true" />
                   </button>
                   {/* Dropdown */}
                   <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                     {user.role === "customer" && (
                       <>
-                        <Link href="/account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                          👤 Profil Saya
+                        <Link href="/profile" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                          <User className="h-4 w-4" aria-hidden="true" /> Profil Saya
                         </Link>
-                        <Link href="/account/loyalty" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                          ⭐ Riwayat Poin
+                        <Link href="/profile" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                          <Star className="h-4 w-4" aria-hidden="true" /> Riwayat Poin
                         </Link>
-                        <Link href="/account/bookings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                          📋 Booking Saya
+                        <Link href="/profile/bookings" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                          <ClipboardList className="h-4 w-4" aria-hidden="true" /> Booking Saya
                         </Link>
                       </>
                     )}
                     {user.role === "admin" && (
-                      <Link href="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                        ⚙️ Dashboard Admin
+                      <Link href="/admin" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        <LayoutDashboard className="h-4 w-4" aria-hidden="true" /> Dashboard Admin
                       </Link>
                     )}
                     {user.role === "owner" && (
-                      <Link href="/owner" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                        🏟️ Dashboard Owner
-                      </Link>
-                    )}
-                    {user.role === "owner" && (
-                      <Link href="/owner" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                        🏟️ Dashboard Owner
+                      <Link href="/dashboard" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        <LayoutDashboard className="h-4 w-4" aria-hidden="true" /> Dashboard Owner
                       </Link>
                     )}
                     <hr className="my-1 border-gray-100" />
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      className="w-full flex items-center gap-2 text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer"
                     >
-                      🚪 Keluar
+                      <LogOut className="h-4 w-4" aria-hidden="true" /> Keluar
                     </button>
                   </div>
                 </div>
@@ -137,13 +146,13 @@ export default function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-emerald-600 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-800 transition-colors"
                 >
                   Masuk
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors shadow-sm"
+                  className="px-4 py-2 text-sm font-semibold text-white bg-orange-600 hover:bg-orange-500 rounded-lg transition-colors shadow-sm"
                 >
                   Daftar
                 </Link>
@@ -155,15 +164,12 @@ export default function Navbar() {
           <button
             className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}
           >
             {mobileOpen ? (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="w-6 h-6" aria-hidden="true" />
             ) : (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <Menu className="w-6 h-6" aria-hidden="true" />
             )}
           </button>
         </div>
@@ -174,10 +180,10 @@ export default function Navbar() {
         <div className="md:hidden bg-white border-t border-gray-100 shadow-lg">
           <div className="px-4 py-3 space-y-1">
             <MobileNavLink href="/" onClick={() => setMobileOpen(false)}>
-              🏠 Beranda
+              <Home className="h-4 w-4" aria-hidden="true" /> Beranda
             </MobileNavLink>
             <MobileNavLink href="/booking/futsal" onClick={() => setMobileOpen(false)}>
-              📅 Booking Lapangan
+              <Calendar className="h-4 w-4" aria-hidden="true" /> Booking Lapangan
             </MobileNavLink>
 
             {user ? (
@@ -185,7 +191,7 @@ export default function Navbar() {
                 <hr className="my-2 border-gray-100" />
                 {user.role === "customer" && user.points !== undefined && (
                   <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-lg">
-                    <span>⭐</span>
+                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" aria-hidden="true" />
                     <span className="text-sm font-semibold text-amber-700">
                       {user.points.toLocaleString()} Poin
                     </span>
@@ -193,51 +199,43 @@ export default function Navbar() {
                 )}
                 {user.role === "customer" && (
                   <>
-                    <MobileNavLink href="/account" onClick={() => setMobileOpen(false)}>
-                      👤 Profil Saya
+                    <MobileNavLink href="/profile" onClick={() => setMobileOpen(false)}>
+                      <User className="h-4 w-4" aria-hidden="true" /> Profil Saya
                     </MobileNavLink>
-                    <MobileNavLink href="/account/loyalty" onClick={() => setMobileOpen(false)}>
-                      ⭐ Riwayat Poin
-                    </MobileNavLink>
-                    <MobileNavLink href="/account/bookings" onClick={() => setMobileOpen(false)}>
-                      📋 Booking Saya
+                    <MobileNavLink href="/profile/bookings" onClick={() => setMobileOpen(false)}>
+                      <ClipboardList className="h-4 w-4" aria-hidden="true" /> Booking Saya
                     </MobileNavLink>
                   </>
                 )}
                 {user.role === "admin" && (
                   <MobileNavLink href="/admin" onClick={() => setMobileOpen(false)}>
-                    ⚙️ Dashboard Admin
+                    <LayoutDashboard className="h-4 w-4" aria-hidden="true" /> Dashboard Admin
                   </MobileNavLink>
                 )}
                 {user.role === "owner" && (
-                  <MobileNavLink href="/owner" onClick={() => setMobileOpen(false)}>
-                    🏟️ Dashboard Owner
-                  </MobileNavLink>
-                )}
-                {user.role === "owner" && (
-                  <MobileNavLink href="/owner" onClick={() => setMobileOpen(false)}>
-                    🏟️ Dashboard Owner
+                  <MobileNavLink href="/dashboard" onClick={() => setMobileOpen(false)}>
+                    <LayoutDashboard className="h-4 w-4" aria-hidden="true" /> Dashboard Owner
                   </MobileNavLink>
                 )}
                 <button
                   onClick={() => { handleLogout(); setMobileOpen(false); }}
-                  className="w-full text-left px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg"
+                  className="w-full flex items-center gap-2 text-left px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg"
                 >
-                  🚪 Keluar
+                  <LogOut className="h-4 w-4" aria-hidden="true" /> Keluar
                 </button>
               </>
             ) : (
               <>
                 <hr className="my-2 border-gray-100" />
                 <MobileNavLink href="/login" onClick={() => setMobileOpen(false)}>
-                  🔑 Masuk
+                  <LogIn className="h-4 w-4" aria-hidden="true" /> Masuk
                 </MobileNavLink>
                 <Link
                   href="/register"
                   onClick={() => setMobileOpen(false)}
-                  className="block w-full text-center px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg mt-2"
+                  className="flex items-center justify-center gap-2 w-full text-center px-4 py-2.5 text-sm font-semibold text-white bg-orange-600 hover:bg-orange-500 rounded-lg mt-2"
                 >
-                  ✨ Daftar Sekarang
+                  <Sparkles className="h-4 w-4" aria-hidden="true" /> Daftar Sekarang
                 </Link>
               </>
             )}
@@ -252,9 +250,9 @@ function NavLink({ href, active, children }: { href: string; active: boolean; ch
   return (
     <Link
       href={href}
-      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
         active
-          ? "bg-emerald-50 text-emerald-700"
+          ? "bg-blue-50 text-blue-800"
           : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
       }`}
     >
@@ -268,7 +266,7 @@ function MobileNavLink({ href, onClick, children }: { href: string; onClick: () 
     <Link
       href={href}
       onClick={onClick}
-      className="block px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+      className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
     >
       {children}
     </Link>

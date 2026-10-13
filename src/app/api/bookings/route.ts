@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     const rawBody = await request.json();
-    const { customerName, customerPhone, customerEmail, courtId, venueId, sportId, bookingDate, startTime, endTime, durationMinutes, notes } = sanitizeBookingInput(rawBody);
+    const { customerName, customerPhone, customerEmail, courtId, venueId, sportId, bookingDate, startTime, endTime, durationMinutes, notes, voucherCode } = sanitizeBookingInput(rawBody);
 
     let userId: string | undefined;
     try {
@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
       durationMinutes: durationMinutes ?? 60,
       notes: notes?.trim(),
       userId,
+      voucherCode: voucherCode?.trim().toUpperCase() || undefined,
     });
 
     return NextResponse.json(booking, { status: 201 });

@@ -17,6 +17,59 @@ export interface SendNotificationInput {
 }
 
 /**
+ * Build a WhatsApp click-to-chat link so the venue/customer can confirm a
+ * booking. No WA automation required — plain wa.me URL, zero dependencies.
+ */
+export function generateWhatsAppConfirmLink(
+  booking: Pick<Booking, "bookingCode" | "customerName" | "bookingDate" | "startTime" | "endTime" | "totalPrice">,
+  venuePhone: string,
+): string {
+  const digits = venuePhone.replace(/\D/g, "").replace(/^0/, "62");
+  const template =
+    `Halo, saya ${booking.customerName}. Booking saya sudah dikonfirmasi.\n` +
+    `Kode Booking: ${booking.bookingCode}\n` +
+    `Tanggal: ${booking.bookingDate}\n` +
+    `Jam: ${booking.startTime} - ${booking.endTime}\n` +
+    `Total: Rp ${booking.totalPrice.toLocaleString("id-ID")}\n` +
+    `Terima kasih.`;
+  return `https://wa.me/${digits}?text=${encodeURIComponent(template)}`;
+}
+
+/**
+ * After a payment is confirmed, persist the WA confirm link so staff (or a
+ * future automation) can send it out. Non-blocking by design — a malformed
+ * venue phone still yields a useful row in notification_logs.
+ */
+export async function recordWhatsAppConfirmLink(
+  booking: Booking,
+  venueId: string,
+): Promise<string | null> {
+  try {
+    const adapter = getDatabaseAdapter();
+    const venue = await adapter.getVenueById(venueId);
+    const venuePhone = venue?.phone ?? "";
+    if (!venuePhone) return null;
+    const link = generateWhatsAppConfirmLink(booking, venuePhone);
+    await adapter.createNotificationLog(
+      {
+        type: "payment_confirmed",
+        channel: "whatsapp",
+        recipient: venuePhone,
+        subject: `WA confirm ${booking.bookingCode}`,
+        message: link,
+        bookingId: booking.id,
+        bookingCode: booking.bookingCode,
+      },
+      "sent",
+    );
+    return link;
+  } catch (error) {
+    console.error("[WA confirm link]", error);
+    return null;
+  }
+}
+
+/**
  * Build and send a notification, persisting to the notification_logs table.
  * In MVP, all notifications are logged but not actually delivered via email/SMS.
  * This service acts as the foundation for future delivery integrations.

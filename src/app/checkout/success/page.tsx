@@ -21,6 +21,7 @@ import {
   MessageCircle,
   Home,
   Calendar,
+  CalendarPlus,
   UploadCloud,
   TriangleAlert,
 } from "lucide-react";
@@ -61,6 +62,17 @@ function formatCountdown(seconds: number): string {
   const secs = seconds % 60;
   return `${minutes}:${secs.toString().padStart(2, "0")}`;
 }
+
+function pad(n: number) {
+  return n.toString().padStart(2, "0");
+}
+
+function escapeICS(text: string): string {
+  return text.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+}
+
+type VenueInfo = { id: string; name: string; address: string };
+type SportInfo = { id: string; name: string };
 
 function getHeader(booking: PublicBooking | null) {
   if (!booking) {
@@ -194,6 +206,9 @@ function SuccessContent() {
   const [proofSubmitted, setProofSubmitted] = useState(false);
   const [loading, setLoading] = useState(Boolean(bookingCode));
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [venueInfo, setVenueInfo] = useState<VenueInfo | null>(null);
+  const [sportName, setSportName] = useState<string>("");
+  const [icsDownloading, setIcsDownloading] = useState(false);
   const expiryRefreshRef = useRef(false);
 
   const fetchBooking = useCallback(async () => {
@@ -449,6 +464,81 @@ function SuccessContent() {
     "cancelled",
   ].includes(booking.bookingStatus);
 
+  // Fetch venue info for ICS location
+  useEffect(() => {
+    if (!booking?.venueId) return;
+    fetch("/api/venues")
+      .then((r) => r.json())
+      .then((d) => {
+        const venues: VenueInfo[] = d.venues ?? d.data ?? [];
+        const found = venues.find((v) => v.id === booking.venueId);
+        if (found) setVenueInfo(found);
+      })
+      .catch(() => {});
+  }, [booking?.venueId]);
+
+  // Fetch sport name for ICS summary
+  useEffect(() => {
+    if (!booking?.sportId) return;
+    fetch("/api/sports")
+      .then((r) => r.json())
+      .then((d) => {
+        const sports: SportInfo[] = d.sports ?? d.data ?? [];
+        const found = sports.find((s) => s.id === booking.sportId);
+        if (found) setSportName(found.name);
+      })
+      .catch(() => {});
+  }, [booking?.sportId]);
+
+  function handleDownloadICS() {
+    if (!booking) return;
+    setIcsDownloading(true);
+    try {
+      const [year, month, day] = booking.bookingDate.split("-").map(Number);
+      const [sh, sm] = booking.startTime.split(":").map(Number);
+      const [eh, em] = booking.endTime.split(":").map(Number);
+      const dtStart = `${year}${pad(month)}${pad(day)}T${pad(sh)}${pad(sm)}00`;
+      const dtEnd = `${year}${pad(month)}${pad(day)}T${pad(eh)}${pad(em)}00`;
+      const dtStamp = new Date()
+        .toISOString()
+        .replace(/[-:]/g, "")
+        .replace(/\.\d{3}/, "");
+
+      const venueName = venueInfo?.name ?? "Venue";
+      const location = venueInfo?.address ?? "";
+      const summary = `Main ${sportName || "olahraga"} di ${venueName}`;
+      const description = `Kode Booking: ${booking.bookingCode}\nDurasi: ${booking.durationMinutes} menit\nTotal: Rp ${booking.totalPrice.toLocaleString("id-ID")}`;
+
+      const ics = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Lapabook//Booking//ID",
+        "BEGIN:VEVENT",
+        `UID:${booking.id}@lapabook`,
+        `DTSTAMP:${dtStamp}`,
+        `DTSTART:${dtStart}`,
+        `DTEND:${dtEnd}`,
+        `SUMMARY:${escapeICS(summary)}`,
+        `LOCATION:${escapeICS(location)}`,
+        `DESCRIPTION:${escapeICS(description)}`,
+        "END:VEVENT",
+        "END:VCALENDAR",
+      ].join("\r\n");
+
+      const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `lapabook-booking-${booking.bookingCode}.ics`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } finally {
+      setIcsDownloading(false);
+    }
+  }
+
   // Generate WhatsApp message
   const whatsappMessage = encodeURIComponent(
     `Halo admin, saya ingin konfirmasi booking dengan kode: ${booking.bookingCode}\n\n` +
@@ -655,6 +745,24 @@ function SuccessContent() {
             </div>
           </section>
         )}
+
+        {/* Add to Calendar */}
+        <section className="mb-6 overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-sm">
+          <div className="p-5">
+            <button
+              type="button"
+              onClick={handleDownloadICS}
+              disabled={icsDownloading}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-blue-700 disabled:opacity-60"
+            >
+              <CalendarPlus className="h-5 w-5" aria-hidden="true" />
+              {icsDownloading ? "Mengunduh..." : "Tambah ke Kalender"}
+            </button>
+            <p className="mt-2 text-center text-xs text-slate-500">
+              Unduh file .ics — bisa dibuka di Google Calendar, Apple Calendar, atau Outlook.
+            </p>
+          </div>
+        </section>
 
         {/* WhatsApp Chat Button */}
         <section className="mb-6 overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">

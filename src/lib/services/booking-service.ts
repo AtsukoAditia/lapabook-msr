@@ -1,6 +1,7 @@
 import type { CreateBookingInput, DatabaseAdapter } from "@/lib/adapters/database-adapter";
 import type { Booking, AuditLogAction } from "@/lib/types/domain";
 import { calculateDynamicPrice } from "./pricing-service";
+import { validateVoucher, consumeVoucher } from "./voucher-service";
 import { hasBlockedSlotConflict, hasBookingConflict } from "./availability-service";
 import {
   sendBookingCreated,
@@ -88,9 +89,27 @@ export class BookingService {
       adapter: this.adapter,
     }, this.adapter);
 
+    // ── 3b. Voucher (optional) ──
+    // Server-side re-validation, then atomic quota consumption. If the quota
+    // race is lost, the booking is rejected rather than silently over-redeeming.
+    let voucherDiscount = 0;
+    let appliedVoucherCode: string | undefined;
+    if (input.voucherCode) {
+      const redeem = await validateVoucher(input.voucherCode, baseTotalPrice);
+      if (!redeem.valid) {
+        throw new Error(redeem.error);
+      }
+      const consumed = await consumeVoucher(redeem.code);
+      if (!consumed) {
+        throw new Error("Kuota voucher baru saja habis. Silakan lanjut tanpa voucher.");
+      }
+      voucherDiscount = redeem.discountAmount;
+      appliedVoucherCode = redeem.code;
+    }
+
     // Generate unique 3-digit code for transfer identification
     const uniqueCode = generateUniqueCode();
-    const totalPrice = baseTotalPrice + uniqueCode;
+    const totalPrice = Math.max(0, baseTotalPrice - voucherDiscount) + uniqueCode;
 
     // ── 4. Re-check conflicts right before save (double-booking prevention) ──
     // This prevents race conditions where two requests pass step 2 simultaneously.
@@ -106,6 +125,7 @@ export class BookingService {
     const booking = await this.adapter.createBooking({
       ...input,
       totalPrice,
+      voucherCode: appliedVoucherCode,
     });
 
     // ── 5. Audit log ──

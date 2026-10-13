@@ -1,5 +1,6 @@
 import { getDatabaseAdapter } from "@/lib/adapters";
 import type { Booking, PaymentMethod } from "@/lib/types/domain";
+import { recordWhatsAppConfirmLink } from "./notification-service";
 
 // ponvian: midtrans-client has no types, any is unavoidable
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -222,6 +223,9 @@ export class PaymentService {
       previousValue: booking.paymentStatus,
       newValue: "paid",
     });
+
+    // Fire-and-forget: WA confirm link row in notification_logs.
+    void recordWhatsAppConfirmLink(updated, updated.venueId);
 
     return updated;
   }

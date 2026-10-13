@@ -5,6 +5,7 @@ import type {
   CreatePricingRuleInput,
   UpdatePricingRuleInput,
   CreateBlockedSlotInput,
+  VoucherRow,
 } from "./database-adapter";
 import type {
   Area,
@@ -365,6 +366,10 @@ export class MockAdapter implements DatabaseAdapter {
 
   async getVenueById(id: string): Promise<Venue | null> {
     return mockVenues.find((v) => v.id === id) ?? null;
+  }
+
+  async getVenueBySlug(slug: string): Promise<Venue | null> {
+    return mockVenues.find((v) => v.slug === slug) ?? null;
   }
 
   async getVenuesByOwner(ownerId: string): Promise<Venue[]> {
@@ -953,4 +958,6 @@ export class MockAdapter implements DatabaseAdapter {
   async getGroupBookingTimeSlotById(): Promise<GroupBookingTimeSlot | null> { throw new Error('Not implemented in MockAdapter'); }
   async voteGroupBookingTimeSlot(): Promise<GroupBookingTimeSlot> { throw new Error('Not implemented in MockAdapter'); }
   async markGroupBookingWinner(): Promise<GroupBookingTimeSlot> { throw new Error('Not implemented in MockAdapter'); }
+  async getVoucherByCode(_code: string): Promise<VoucherRow | null> { return null; }
+  async incrementVoucherUsage(_code: string): Promise<boolean> { return false; }
 }

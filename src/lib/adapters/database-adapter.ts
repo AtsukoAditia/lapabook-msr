@@ -68,6 +68,20 @@ export interface CreateBookingInput {
   totalPrice: number;
   notes?: string;
   userId?: string;
+  voucherCode?: string;
+}
+
+export interface VoucherRow {
+  id: string;
+  code: string;
+  label: string | null;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  minBookingAmount: number;
+  maxUses: number | null;
+  usedCount: number;
+  validUntil: string | null;
+  isActive: boolean;
 }
 
 export interface UpdateCourtInput {
@@ -133,6 +147,7 @@ export interface DatabaseAdapter {
   getVenuesByArea(areaId: string, sportId?: string): Promise<Venue[]>;
   getVenuesByOwner(ownerId: string): Promise<Venue[]>;
   getVenueById(id: string): Promise<Venue | null>;
+  getVenueBySlug(slug: string): Promise<Venue | null>;
 
   // Courts
   getCourts(): Promise<Court[]>;
@@ -386,4 +401,8 @@ export interface DatabaseAdapter {
     groupBookingId: string,
     timeSlotId: string,
   ): Promise<GroupBookingTimeSlot>;
+
+  // Vouchers
+  getVoucherByCode(code: string): Promise<VoucherRow | null>;
+  incrementVoucherUsage(code: string): Promise<boolean>;
 }

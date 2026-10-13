@@ -307,6 +307,12 @@ export class GoogleSheetsAdapter implements DatabaseAdapter {
     );
   }
 
+  async getBookingsByVenueIds(venueIds: string[]): Promise<Booking[]> {
+    const set = new Set(venueIds);
+    const bookings = await this.getBookings();
+    return bookings.filter((b) => set.has(b.venueId));
+  }
+
   async getBookingByCode(code: string): Promise<Booking | null> {
     // ponytail: sheets full-scan, add column index when perf matters
     const doc = await getSpreadsheet();

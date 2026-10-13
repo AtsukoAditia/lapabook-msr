@@ -391,6 +391,12 @@ export class PostgresAdapter implements DatabaseAdapter {
     return rows.map(mapBooking);
   }
 
+  async getBookingsByVenueIds(venueIds: string[]): Promise<Booking[]> {
+    if (venueIds.length === 0) return [];
+    const rows = await query<Record<string, unknown>>("SELECT * FROM bookings WHERE venue_id = ANY($1) ORDER BY created_at DESC", [venueIds]);
+    return rows.map(mapBooking);
+  }
+
   async expireBookings(): Promise<number> {
     const { rowCount } = await pool.query("UPDATE bookings SET booking_status = 'expired', payment_status = 'unpaid', updated_at = NOW() WHERE booking_status = 'waiting_payment' AND expires_at < NOW()");
     return rowCount ?? 0;

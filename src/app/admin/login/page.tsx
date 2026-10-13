@@ -101,7 +101,7 @@ export default function AdminLoginPage() {
                   }
                 }}
                 className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                placeholder="admin@lapangin.com"
+                placeholder="admin@lapabook.com"
                 autoComplete="email"
               />
             </div>
@@ -156,10 +156,10 @@ export default function AdminLoginPage() {
         <div className="mt-6 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
           <p className="text-xs text-gray-400 text-center mb-2">Demo Credentials:</p>
           <p className="text-xs text-gray-500 text-center font-mono">
-            admin@lapangin.id / Admin123!@#
+            admin@lapabook.id / Admin123!@#
           </p>
           <p className="text-xs text-gray-600 text-center font-mono mt-1">
-            owner@lapangin.id / Owner123!@#
+            owner@lapabook.id / Owner123!@#
           </p>
         </div>
       </div>

@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Registrasi berhasil. Akun Anda sedang menunggu review dari tim Lapangin.",
+      message: "Registrasi berhasil. Akun Anda sedang menunggu review dari tim Lapabook.",
       adminId: result.adminId,
       ownerId: result.ownerId,
     });

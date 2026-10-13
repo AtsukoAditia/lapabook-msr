@@ -1,5 +1,5 @@
 -- ==========================================================
--- Lapangin — Supabase Demo Seed Data
+-- Lapabook — Supabase Demo Seed Data
 -- Synced with supabase/schema.sql
 -- Idempotent via ON CONFLICT DO NOTHING.
 -- ==========================================================
@@ -18,8 +18,8 @@ ON CONFLICT (id) DO NOTHING;
 
 -- ==================== ADMINS ====================
 INSERT INTO admins (id, username, name, email, password_hash, role, is_active, created_at, last_login_at) VALUES
-  ('admin-1', 'superadmin', 'Super Admin',   'admin@lapangin.id',  '$2b$10$c6oIJREEQCdxIc8mY/1T2uAxZA/uSIlyQ4KsdNxRlC0KnxW9tPvXS', 'super_admin', true, '2026-06-25T00:00:00Z', NULL),
-  ('owner-1', 'venueowner', 'Venue Owner',   'owner@lapangin.id',  '$2b$10$dIBbN.TQD1XHEJWAV6ubqObTOIgm37WsMjhSbcK1Y6qQyhJLQH7n.', 'admin',       true, '2026-06-25T00:00:00Z', NULL)
+  ('admin-1', 'superadmin', 'Super Admin',   'admin@lapabook.id',  '$2b$10$c6oIJREEQCdxIc8mY/1T2uAxZA/uSIlyQ4KsdNxRlC0KnxW9tPvXS', 'super_admin', true, '2026-06-25T00:00:00Z', NULL),
+  ('owner-1', 'venueowner', 'Venue Owner',   'owner@lapabook.id',  '$2b$10$dIBbN.TQD1XHEJWAV6ubqObTOIgm37WsMjhSbcK1Y6qQyhJLQH7n.', 'admin',       true, '2026-06-25T00:00:00Z', NULL)
 ON CONFLICT (id) DO NOTHING;
 
 -- ==================== VENUE OWNERS ====================
@@ -116,7 +116,7 @@ ON CONFLICT (id) DO NOTHING;
 
 -- ==================== PAYMENT METHODS ====================
 INSERT INTO payment_methods (id, name, label, type, account_name, account_number, provider, details, instructions, is_active, created_at, updated_at) VALUES
-  ('pm-1', 'BCA Transfer',    'BCA Transfer',    'bank_transfer', 'PT Lapangin Indonesia', '1234567890', 'BCA',    '', 'Transfer ke rekening BCA atas nama PT Lapangin Indonesia. Setelah transfer, kirim bukti pembayaran.', true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z'),
-  ('pm-2', 'Mandiri Transfer','Mandiri Transfer', 'bank_transfer', 'PT Lapangin Indonesia', '0987654321', 'Mandiri','', 'Transfer ke rekening Mandiri atas nama PT Lapangin Indonesia. Setelah transfer, kirim bukti pembayaran.', true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z'),
-  ('pm-3', 'QRIS',            'QRIS',            'qris',          'PT Lapangin Indonesia', 'QRIS-LAPANGIN', '',    '', 'Scan QR code yang diberikan. Setelah transfer, kirim bukti pembayaran.',                             true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z')
+  ('pm-1', 'BCA Transfer',    'BCA Transfer',    'bank_transfer', 'PT Lapabook Indonesia', '1234567890', 'BCA',    '', 'Transfer ke rekening BCA atas nama PT Lapabook Indonesia. Setelah transfer, kirim bukti pembayaran.', true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z'),
+  ('pm-2', 'Mandiri Transfer','Mandiri Transfer', 'bank_transfer', 'PT Lapabook Indonesia', '0987654321', 'Mandiri','', 'Transfer ke rekening Mandiri atas nama PT Lapabook Indonesia. Setelah transfer, kirim bukti pembayaran.', true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z'),
+  ('pm-3', 'QRIS',            'QRIS',            'qris',          'PT Lapabook Indonesia', 'QRIS-LAPABOOK', '',    '', 'Scan QR code yang diberikan. Setelah transfer, kirim bukti pembayaran.',                             true, '2026-06-25T00:00:00Z', '2026-06-25T00:00:00Z')
 ON CONFLICT (id) DO NOTHING;

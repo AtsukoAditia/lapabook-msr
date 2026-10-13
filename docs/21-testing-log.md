@@ -8,7 +8,7 @@
 
 ### Environment
 - Server: localhost:3000 (Next.js dev)
-- Database: PostgreSQL 16 (localhost:5432/lapangin)
+- Database: PostgreSQL 16 (localhost:5432/lapabook)
 - Adapter: postgres
 
 ### Results

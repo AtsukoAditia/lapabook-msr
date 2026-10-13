@@ -1,4 +1,4 @@
--- Lapangin PostgreSQL schema
+-- Lapabook PostgreSQL schema
 -- Aligned with seed.sql and app needs
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;

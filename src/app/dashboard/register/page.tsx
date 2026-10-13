@@ -78,7 +78,7 @@ export default function OwnerRegisterPage() {
             <div className="text-6xl mb-4">🎉</div>
             <h2 className="text-2xl font-black text-white mb-4">Registrasi Berhasil!</h2>
             <p className="text-emerald-200/80 mb-6">
-              Akun Anda sedang dalam review tim Lapangin. Kami akan menghubungi Anda setelah akun disetujui.
+              Akun Anda sedang dalam review tim Lapabook. Kami akan menghubungi Anda setelah akun disetujui.
             </p>
             <Link
               href="/dashboard/login"
@@ -102,7 +102,7 @@ export default function OwnerRegisterPage() {
           <h1 className="text-2xl font-black text-white">
             Daftar sebagai <span className="text-emerald-300">Owner</span>
           </h1>
-          <p className="text-emerald-200/70 mt-2">Kelola venue olahragamu di Lapangin</p>
+          <p className="text-emerald-200/70 mt-2">Kelola venue olahragamu di Lapabook</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8 shadow-2xl">
@@ -225,7 +225,7 @@ export default function OwnerRegisterPage() {
               <Link href="/kebijakan" target="_blank" className="text-emerald-300 hover:underline font-medium">
                 Kebijakan Privasi
               </Link>{" "}
-              Lapangin, termasuk ketentuan khusus untuk Pemilik Lapangan.
+              Lapabook, termasuk ketentuan khusus untuk Pemilik Lapangan.
             </span>
           </label>
 

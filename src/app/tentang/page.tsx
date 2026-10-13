@@ -32,9 +32,9 @@ async function getSeo() {
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPageContent("tentang");
   const seo = await getSeo();
-  const siteName = seo.siteName || "Lapangin";
+  const siteName = seo.siteName || "Lapabook";
   const title = page?.metaTitle || `Tentang — ${siteName}`;
-  const description = page?.metaDescription || "Kenalan sama Lapangin, platform booking lapangan olahraga online terbaik di Indonesia.";
+  const description = page?.metaDescription || "Kenalan sama Lapabook, platform booking lapangan olahraga online terbaik di Indonesia.";
   return {
     title,
     description,
@@ -53,9 +53,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const DEFAULT_CONTENT = `
-# Tentang Lapangin
+# Tentang Lapabook
 
-**Lapangin** adalah platform booking lapangan olahraga online yang menghubungkan pemain dengan pemilik lapangan di seluruh Indonesia.
+**Lapabook** adalah platform booking lapangan olahraga online yang menghubungkan pemain dengan pemilik lapangan di seluruh Indonesia.
 
 ## Misi Kami
 
@@ -88,7 +88,7 @@ Daftarkan venue Anda dan dapatkan:
 
 ## Kontak
 
-Hubungi kami di [kontak@lapangin.id](mailto:kontak@lapangin.id) atau kunjungi halaman [Kontak](/kontak).
+Hubungi kami di [kontak@lapabook.id](mailto:kontak@lapabook.id) atau kunjungi halaman [Kontak](/kontak).
 `;
 
 export default async function TentangPage() {

@@ -1,4 +1,4 @@
-# Lapangin — Final System Overview & Documentation
+# Lapabook — Final System Overview & Documentation
 
 ## 📋 Table of Contents
 
@@ -189,7 +189,7 @@ src/
 ### Default Admin Credentials
 
 ```
-Email: admin@lapangin.id
+Email: admin@lapabook.id
 Password: admin123
 ```
 
@@ -417,7 +417,7 @@ vercel
 # Set environment variables in Vercel dashboard:
 # DATABASE_PROVIDER=mock
 # NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
-# NEXT_PUBLIC_APP_NAME=Lapangin
+# NEXT_PUBLIC_APP_NAME=Lapabook
 # JWT_SECRET=your-production-secret
 ```
 
@@ -429,8 +429,8 @@ GOOGLE_SHEETS_SPREADSHEET_ID=
 GOOGLE_SHEETS_CLIENT_EMAIL=
 GOOGLE_SHEETS_PRIVATE_KEY=
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_APP_NAME=Lapangin
-JWT_SECRET=lapangin-secret-key-change-in-production
+NEXT_PUBLIC_APP_NAME=Lapabook
+JWT_SECRET=lapabook-secret-key-change-in-production
 ```
 
 ---

@@ -87,7 +87,7 @@ if (provider === "postgres") {
   warnings.push("PostgresAdapter is still a follow-up item. Keep DATABASE_PROVIDER=mock for local feature work unless implementing the adapter.");
 }
 
-console.log("\nLapangin local readiness check");
+console.log("\nLapabook local readiness check");
 console.log("──────────────────────────────");
 console.log(`Env file: ${existsSync(envPath) ? envPath : "not found"}`);
 console.log(`DATABASE_PROVIDER: ${provider}`);

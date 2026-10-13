@@ -150,7 +150,7 @@ When a booking is confirmed (`status = confirmed`):
 ### Admin Credentials (Demo)
 
 ```
-Email: admin@lapangin.id
+Email: admin@lapabook.id
 Password: admin123
 ```
 

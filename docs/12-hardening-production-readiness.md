@@ -1,6 +1,6 @@
 # Stage 12 — Hardening & Production Readiness
 
-Stage 12 focuses on making Lapangin safer and more stable before wider feature expansion or real business usage.
+Stage 12 focuses on making Lapabook safer and more stable before wider feature expansion or real business usage.
 
 ## Goals
 

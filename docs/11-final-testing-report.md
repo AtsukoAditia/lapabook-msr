@@ -1,4 +1,4 @@
-# 🏟️ Lapangin — Final Testing Report & Documentation
+# 🏟️ Lapabook — Final Testing Report & Documentation
 
 **Date:** June 24, 2026  
 **Version:** 1.0.0 MVP  
@@ -21,7 +21,7 @@
 
 ## 🏗️ System Overview
 
-Lapangin is a web-based PWA sports court booking system built with:
+Lapabook is a web-based PWA sports court booking system built with:
 
 | Technology            | Purpose             |
 | --------------------- | ------------------- |
@@ -236,7 +236,7 @@ Response: {"error":"CONFLICT: Slot sudah dipesan atau diblokir. Silakan pilih ja
 
 ```
 POST /api/auth/admin/login
-Body: {"email":"admin@lapangin.com","password":"admin123"}
+Body: {"email":"admin@lapabook.com","password":"admin123"}
 Status: ✅ 200 OK
 Response: {"success":true,"user":{"id":"admin-1","name":"Super Admin",...}}
 Cookie: admin_session=<JWT token>
@@ -267,8 +267,8 @@ Response: {"error":"Unauthorized"}
 
 | Email              | Password | Role        | Access Level     |
 | ------------------ | -------- | ----------- | ---------------- |
-| admin@lapangin.com | admin123 | super_admin | Full access      |
-| owner@lapangin.com | owner123 | admin       | Venue management |
+| admin@lapabook.com | admin123 | super_admin | Full access      |
+| owner@lapabook.com | owner123 | admin       | Venue management |
 
 ### Customer Accounts
 
@@ -279,7 +279,7 @@ Customers can register via `/register` page.
 ```json
 {
   "sub": "admin-1",
-  "email": "admin@lapangin.com",
+  "email": "admin@lapabook.com",
   "role": "super_admin",
   "type": "admin",
   "iat": 1719225600,
@@ -368,7 +368,7 @@ Customers can register via `/register` page.
 ### Admin Panel
 
 - **URL:** `/admin/login`
-- **Email:** `admin@lapangin.com`
+- **Email:** `admin@lapabook.com`
 - **Password:** `admin123`
 
 ### Customer Account
@@ -386,7 +386,7 @@ curl http://localhost:3000/api/health
 # Admin login
 curl -X POST http://localhost:3000/api/auth/admin/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@lapangin.com","password":"admin123"}' \
+  -d '{"email":"admin@lapabook.com","password":"admin123"}' \
   -c cookies.txt
 
 # Create booking
@@ -452,7 +452,7 @@ src/
 DATABASE_PROVIDER=mock
 JWT_SECRET=your-secret-key-min-32-chars
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_APP_NAME=Lapangin
+NEXT_PUBLIC_APP_NAME=Lapabook
 ```
 
 ### Vercel Deployment

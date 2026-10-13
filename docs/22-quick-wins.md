@@ -28,7 +28,7 @@ form-action 'self'
 ```
 
 ### 3. Custom Error Pages
-- `src/app/not-found.tsx` — 404 page with Lapangin branding
+- `src/app/not-found.tsx` — 404 page with Lapabook branding
 - `src/app/error.tsx` — 500 page with retry button
 
 ---

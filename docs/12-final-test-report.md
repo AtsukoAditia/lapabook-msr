@@ -1,4 +1,4 @@
-# Lapangin - Final Testing Report
+# Lapabook - Final Testing Report
 
 **Date**: 2026-06-24  
 **Dev Server**: `http://localhost:3001`  
@@ -49,7 +49,7 @@ curl -s -b /tmp/customer.txt http://localhost:3001/api/customer/loyalty
 ```bash
 curl -s -c /tmp/admin.txt http://localhost:3001/api/auth/admin/login \
   -X POST -H "Content-Type: application/json" \
-  -d '{"email":"admin@lapangin.com","password":"admin123"}'
+  -d '{"email":"admin@lapabook.com","password":"admin123"}'
 ```
 
 **Result**: `{"success":true,"user":{"name":"Super Admin"}}`
@@ -120,8 +120,8 @@ curl -s http://localhost:3001/api/bookings -X POST \
 
 | Email              | Password | Role        |
 | ------------------ | -------- | ----------- |
-| admin@lapangin.com | admin123 | Super Admin |
-| owner@lapangin.com | owner123 | Owner       |
+| admin@lapabook.com | admin123 | Super Admin |
+| owner@lapabook.com | owner123 | Owner       |
 
 ### Test Customer
 

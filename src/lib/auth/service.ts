@@ -5,8 +5,8 @@
  * Customer accounts persist in the database.
  *
  * Demo admin accounts:
- *   - admin@lapangin.id / Admin123!@# (Super Admin)
- *   - owner@lapangin.id / Owner123!@# (Owner/Venue Admin)
+ *   - admin@lapabook.id / Admin123!@# (Super Admin)
+ *   - owner@lapabook.id / Owner123!@# (Owner/Venue Admin)
  *
  * Owner registration flow:
  *   1. Owner registers via /api/auth/owner/register → creates AdminUser + VenueOwner (pending_review)

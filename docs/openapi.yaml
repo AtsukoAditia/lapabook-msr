@@ -1,12 +1,12 @@
 openapi: 3.0.3
 info:
-  title: Lapangin API
+  title: Lapabook API
   version: 1.0.0
   description: |
-    Backend API for Lapangin — Indonesian sports venue booking platform.
+    Backend API for Lapabook — Indonesian sports venue booking platform.
     Base URL: /api
   contact:
-    email: support@lapangin.id
+    email: support@lapabook.id
 
 servers:
   - url: /

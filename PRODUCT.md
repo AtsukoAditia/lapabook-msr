@@ -1,7 +1,7 @@
-# PRODUCT.md — Lapangin
+# PRODUCT.md — Lapabook
 
 ## What
-Lapangin is a sports venue booking platform for Indonesia. Users browse available courts, book time slots, and pay — all mobile-first.
+Lapabook is a sports venue booking platform for Indonesia. Users browse available courts, book time slots, and pay — all mobile-first.
 
 ## Users
 - **Customers** — Jakarta-based sports players (futsal, badminton, padel, tennis, basketball, minisoccer)

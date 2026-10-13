@@ -1,4 +1,4 @@
-# Lapangin System Truth
+# Lapabook System Truth
 
 This document is the single reference for the current implementation state.
 
@@ -15,7 +15,7 @@ This document is the single reference for the current implementation state.
 
 ## Product direction
 
-- Lapangin is moving toward a booking-first marketplace model for multiple sports venue owners across different areas in Indonesia.
+- Lapabook is moving toward a booking-first marketplace model for multiple sports venue owners across different areas in Indonesia.
 - Public discovery should support area/location filtering plus sport filtering.
 - Owners should be able to register venues/courts, but marketplace publication should remain controllable by platform admin.
 - Owner/admin access must be scoped: venue owners may only access their own venues, courts, bookings, pricing, and reports.
@@ -25,13 +25,13 @@ This document is the single reference for the current implementation state.
 
 | Email             | Password      | Role        | Dashboard |
 | ----------------- | ------------- | ----------- | --------- |
-| admin@lapangin.id | Admin123!@#   | Super Admin | `/{SECRET_PATH}/` |
-| owner@lapangin.id | Owner123!@#   | Venue Owner | `/dashboard/` |
+| admin@lapabook.id | Admin123!@#   | Super Admin | `/{SECRET_PATH}/` |
+| owner@lapabook.id | Owner123!@#   | Venue Owner | `/dashboard/` |
 | john@example.com  | password123   | Customer    | `/profile/` |
 | jane@example.com  | password123   | Customer    | `/profile/` |
 | bob@example.com   | password123   | Customer    | `/profile/` |
 
-Deprecated credentials such as `admin@lapangin.com / admin123` must not be reintroduced.
+Deprecated credentials such as `admin@lapabook.com / admin123` must not be reintroduced.
 
 ## Booking flow truth
 

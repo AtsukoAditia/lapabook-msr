@@ -29,13 +29,13 @@ if (isConfigured) {
   messaging.onBackgroundMessage((payload) => {
     console.log("[FCM SW] Background message:", payload);
 
-    const title = payload.notification?.title || "Lapangin";
+    const title = payload.notification?.title || "Lapabook";
     const options = {
       body: payload.notification?.body || "Anda punya notifikasi baru.",
       icon: payload.notification?.icon || "/icons/icon-192.png",
       badge: "/icons/icon-192.png",
       data: payload.data,
-      tag: payload.data?.tag || "lapangin-notification",
+      tag: payload.data?.tag || "lapabook-notification",
     };
 
     return self.registration.showNotification(title, options);

@@ -1,6 +1,6 @@
 # 13 — Marketplace Temporary Booking & Manual Payment Flow
 
-Dokumen ini menjelaskan update arah produk Lapangin MSR per 24 Juni 2026: Lapangin bukan hanya aplikasi booking satu venue, tetapi marketplace booking lapangan olahraga untuk banyak owner/pemilik lapangan dari berbagai daerah.
+Dokumen ini menjelaskan update arah produk Lapabook MSR per 24 Juni 2026: Lapabook bukan hanya aplikasi booking satu venue, tetapi marketplace booking lapangan olahraga untuk banyak owner/pemilik lapangan dari berbagai daerah.
 
 ## Ringkasan keputusan produk
 
@@ -24,7 +24,7 @@ Halaman tersebut harus diperlakukan sebagai halaman **booking sementara / menung
 6. Jika customer tidak transfer sampai waktu habis, booking otomatis dianggap expired dan slot dilepas.
 7. Jika customer transfer dan upload/kirim bukti transfer, booking masuk ke status menunggu verifikasi admin/owner.
 8. Booking baru dianggap berhasil setelah admin/owner mengonfirmasi pembayaran.
-9. Lapangin dikembangkan sebagai marketplace agar banyak pemilik lapangan dari berbagai daerah bisa mendaftarkan venue mereka.
+9. Lapabook dikembangkan sebagai marketplace agar banyak pemilik lapangan dari berbagai daerah bisa mendaftarkan venue mereka.
 
 ## Alur customer terbaru
 
@@ -214,7 +214,7 @@ waiting_payment dengan expires_at <= now()
 
 ## Marketplace owner flow
 
-Lapangin perlu mendukung lebih dari satu pemilik lapangan.
+Lapabook perlu mendukung lebih dari satu pemilik lapangan.
 
 ### Owner registration flow
 
@@ -488,7 +488,7 @@ Task:
 ## CLINE prompt siap pakai
 
 ```txt
-You are working on Lapangin MSR.
+You are working on Lapabook MSR.
 Read these docs first:
 - docs/SYSTEM_TRUTH.md
 - docs/CLINE_LOCAL_WORKFLOW.md

@@ -1,4 +1,4 @@
-# Lapangin MSR — FINAL COMPREHENSIVE PROGRESS REPORT
+# Lapabook MSR — FINAL COMPREHENSIVE PROGRESS REPORT
 **Generated:** 14 Juli 2026, 19:40 GMT+8
 **Status:** ✅ ALL COMPLETE — DEPLOYED TO PRODUCTION
 
@@ -216,9 +216,9 @@
 ## Infrastructure
 
 ### Production Deployment
-- **Service:** `lapangin.service` (systemd, enabled on boot)
+- **Service:** `lapabook.service` (systemd, enabled on boot)
 - **Port:** 3002
-- **Database:** PostgreSQL 16 via `lapangin` container (localhost:5432/lapangin)
+- **Database:** PostgreSQL 16 via `lapabook` container (localhost:5432/lapabook)
 - **Status:** Running and serving traffic
 
 ### GitHub Actions CI/CD

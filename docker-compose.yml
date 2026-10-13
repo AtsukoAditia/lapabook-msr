@@ -1,10 +1,10 @@
 services:
   postgres:
     image: postgres:16
-    container_name: lapangin-postgres
+    container_name: lapabook-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: lapangin
+      POSTGRES_DB: lapabook
       POSTGRES_USER: brodit
       POSTGRES_PASSWORD: TYtB39f5FBO5UTJEiaFr6vj76MpS7llm
     volumes:
@@ -13,15 +13,15 @@ services:
 
   app:
     build: .
-    container_name: lapangin-app
+    container_name: lapabook-app
     depends_on:
       - postgres
     env_file:
       - .env.local
     environment:
       # Override host for docker network (localhost inside container -> postgres service)
-      DATABASE_URL: postgresql://brodit:TYtB39f5FBO5UTJEiaFr6vj76MpS7llm@postgres:5432/lapangin
-      POSTGRES_URL: postgresql://brodit:TYtB39f5FBO5UTJEiaFr6vj76MpS7llm@postgres:5432/lapangin
+      DATABASE_URL: postgresql://brodit:TYtB39f5FBO5UTJEiaFr6vj76MpS7llm@postgres:5432/lapabook
+      POSTGRES_URL: postgresql://brodit:TYtB39f5FBO5UTJEiaFr6vj76MpS7llm@postgres:5432/lapabook
       IS_TESTING: "true"
       DISABLE_RATE_LIMIT: "true"
     ports:

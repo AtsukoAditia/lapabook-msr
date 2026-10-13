@@ -1,4 +1,4 @@
-# Lapangin — Advance Feature Proposals
+# Lapabook — Advance Feature Proposals
 
 **Date:** 2026-08-27  
 **Status:** 📋 Proposed — Awaiting Selection  

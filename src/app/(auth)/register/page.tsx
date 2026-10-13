@@ -117,7 +117,7 @@ export default function RegisterPage() {
                 <Link href="/kebijakan" target="_blank" className="text-emerald-600 hover:underline font-medium">
                   Kebijakan Privasi
                 </Link>{" "}
-                Lapangin.
+                Lapabook.
               </span>
             </label>
 

@@ -1,7 +1,7 @@
-const CACHE_NAME = "lapangin-v1";
-const STATIC_CACHE = "lapangin-static-v1";
-const DYNAMIC_CACHE = "lapangin-dynamic-v1";
-const IMAGE_CACHE = "lapangin-images-v1";
+const CACHE_NAME = "lapabook-v1";
+const STATIC_CACHE = "lapabook-static-v1";
+const DYNAMIC_CACHE = "lapabook-dynamic-v1";
+const IMAGE_CACHE = "lapabook-images-v1";
 
 // Static assets to pre-cache during install
 const STATIC_ASSETS = [
@@ -158,7 +158,7 @@ self.addEventListener("push", (event) => {
 
   const data = event.data.json();
   const options = {
-    body: data.body || "Ada notifikasi baru dari Lapangin",
+    body: data.body || "Ada notifikasi baru dari Lapabook",
     icon: "/icons/icon-192.png",
     badge: "/icons/icon-192.png",
     vibrate: [100, 50, 100],
@@ -172,7 +172,7 @@ self.addEventListener("push", (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || "Lapangin", options)
+    self.registration.showNotification(data.title || "Lapabook", options)
   );
 });
 

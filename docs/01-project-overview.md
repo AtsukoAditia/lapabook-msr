@@ -2,7 +2,7 @@
 
 ## Nama Project
 
-Lapangin
+Lapabook
 
 ## Jenis Aplikasi
 

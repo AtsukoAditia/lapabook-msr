@@ -1,10 +1,10 @@
-# CLINE RULES — Lapangin MSR
+# CLINE RULES — Lapabook MSR
 
-You are developing **Lapangin**, a sports court booking marketplace and venue operations platform for Indonesia.
+You are developing **Lapabook**, a sports court booking marketplace and venue operations platform for Indonesia.
 
 ## Project Overview
 
-Lapangin is a **booking-first marketplace** where:
+Lapabook is a **booking-first marketplace** where:
 - **Customers** book sports courts (futsal, badminton, padel, tennis, basketball, minisoccer)
 - **Venue Owners** manage courts, schedules, pricing, and bookings
 - **Admins** oversee the entire platform
@@ -136,7 +136,7 @@ src/
 **Connection:**
 ```env
 DATABASE_PROVIDER=postgres
-DATABASE_URL=postgresql://user:pass@localhost:5432/lapangin
+DATABASE_URL=postgresql://user:pass@localhost:5432/lapabook
 ```
 
 **Schema Location:** `db/postgres/schema.sql`
@@ -234,8 +234,8 @@ interface AuthSession {
 2. **Never store plaintext** passwords
 3. **Never expose password hashes** in API responses
 4. **Demo credentials** for local dev only:
-   - Admin: `admin@lapangin.id` / `Admin123!@#`
-   - Owner: `owner@lapangin.id` / `Owner123!@#`
+   - Admin: `admin@lapabook.id` / `Admin123!@#`
+   - Owner: `owner@lapabook.id` / `Owner123!@#`
    - Customer: `john@example.com` / `password123`
 
 ---

@@ -1,4 +1,4 @@
-# CLINE Local Workflow — Lapangin
+# CLINE Local Workflow — Lapabook
 
 Use this guide before asking CLINE to continue features locally.
 
@@ -34,7 +34,7 @@ Set at least:
 DATABASE_PROVIDER=mock
 JWT_SECRET=replace-with-a-long-random-value-at-least-32-chars
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_APP_NAME=Lapangin
+NEXT_PUBLIC_APP_NAME=Lapabook
 ```
 
 Generate a better local secret with:
@@ -49,10 +49,10 @@ Keep `DATABASE_PROVIDER=mock` while building normal app features. Use `postgres`
 
 | Email             | Password    | Role        |
 | ----------------- | ----------- | ----------- |
-| admin@lapangin.id | Admin123!@# | Super Admin |
-| owner@lapangin.id | Owner123!@# | Venue Owner |
+| admin@lapabook.id | Admin123!@# | Super Admin |
+| owner@lapabook.id | Owner123!@# | Venue Owner |
 
-Do not reintroduce old credentials such as `admin@lapangin.com / admin123`.
+Do not reintroduce old credentials such as `admin@lapabook.com / admin123`.
 
 ## 4. Run local readiness check
 
@@ -122,10 +122,10 @@ npm run check
 Use this when starting a new local task:
 
 ```txt
-You are working on Lapangin MSR.
+You are working on Lapabook MSR.
 Read docs/SYSTEM_TRUTH.md, docs/CLINE_LOCAL_WORKFLOW.md, and docs/14-marketplace-gap-sync-plan.md first.
 Keep DATABASE_PROVIDER=mock for local feature work unless the task is explicitly about PostgreSQL.
-Use canonical demo accounts only: admin@lapangin.id / Admin123!@# and owner@lapangin.id / Owner123!@#.
+Use canonical demo accounts only: admin@lapabook.id / Admin123!@# and owner@lapabook.id / Owner123!@#.
 Do not expose booking/customer private data in public APIs.
 Do not bypass service layer or adapter pattern.
 Before editing, inspect related files.

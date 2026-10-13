@@ -1,8 +1,8 @@
-# Project Brief — Lapangin
+# Project Brief — Lapabook
 
 ## Deskripsi Singkat
 
-Lapangin adalah aplikasi booking lapangan olahraga berbasis web PWA yang diarahkan menjadi **booking-first marketplace** untuk venue olahraga di Indonesia. Customer dapat mencari venue, melihat slot tersedia, membuat booking sementara, menyelesaikan pembayaran, menerima status booking, dan mengumpulkan loyalty points. Admin/operator/owner dapat mengelola lapangan, harga, jadwal, booking, pembayaran, dan laporan operasional.
+Lapabook adalah aplikasi booking lapangan olahraga berbasis web PWA yang diarahkan menjadi **booking-first marketplace** untuk venue olahraga di Indonesia. Customer dapat mencari venue, melihat slot tersedia, membuat booking sementara, menyelesaikan pembayaran, menerima status booking, dan mengumpulkan loyalty points. Admin/operator/owner dapat mengelola lapangan, harga, jadwal, booking, pembayaran, dan laporan operasional.
 
 ## Tujuan Produk
 
@@ -17,7 +17,7 @@ Lapangin adalah aplikasi booking lapangan olahraga berbasis web PWA yang diarahk
 
 ## Positioning
 
-Lapangin bukan sekadar clone AYO. Arah yang dipilih adalah:
+Lapabook bukan sekadar clone AYO. Arah yang dipilih adalah:
 
 > Easiest court booking and venue operations platform for Indonesia.
 

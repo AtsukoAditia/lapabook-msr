@@ -5,21 +5,21 @@ import { PostgresAdapter } from "./postgres-adapter";
 
 // Use globalThis to ensure singleton across Next.js module boundaries in dev mode
 const globalForAdapter = globalThis as unknown as {
-  __lapanginAdapter: DatabaseAdapter | undefined;
+  __lapabookAdapter: DatabaseAdapter | undefined;
 };
 
 export function getDatabaseAdapter(): DatabaseAdapter {
-  if (globalForAdapter.__lapanginAdapter) return globalForAdapter.__lapanginAdapter;
+  if (globalForAdapter.__lapabookAdapter) return globalForAdapter.__lapabookAdapter;
 
   const provider = process.env.DATABASE_PROVIDER ?? "mock";
 
   switch (provider) {
     case "postgres":
       if (process.env.POSTGRES_URL || process.env.DATABASE_URL) {
-        globalForAdapter.__lapanginAdapter = new PostgresAdapter();
+        globalForAdapter.__lapabookAdapter = new PostgresAdapter();
       } else {
         console.warn("Postgres env vars not set, falling back to mock adapter");
-        globalForAdapter.__lapanginAdapter = new MockAdapter();
+        globalForAdapter.__lapabookAdapter = new MockAdapter();
       }
       break;
     case "google_sheets":
@@ -28,16 +28,16 @@ export function getDatabaseAdapter(): DatabaseAdapter {
         process.env.GOOGLE_SHEETS_CLIENT_EMAIL &&
         process.env.GOOGLE_SHEETS_PRIVATE_KEY
       ) {
-        globalForAdapter.__lapanginAdapter = new GoogleSheetsAdapter();
+        globalForAdapter.__lapabookAdapter = new GoogleSheetsAdapter();
       } else {
         console.warn("Google Sheets env vars not set, falling back to mock adapter");
-        globalForAdapter.__lapanginAdapter = new MockAdapter();
+        globalForAdapter.__lapabookAdapter = new MockAdapter();
       }
       break;
     default:
-      globalForAdapter.__lapanginAdapter = new MockAdapter();
+      globalForAdapter.__lapabookAdapter = new MockAdapter();
       break;
   }
 
-  return globalForAdapter.__lapanginAdapter!;
+  return globalForAdapter.__lapabookAdapter!;
 }

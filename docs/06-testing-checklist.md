@@ -144,7 +144,7 @@
 - [x] Login form: email + password input.
 - [x] Login berhasil → redirect ke `/admin` dashboard.
 - [x] Login gagal → pesan error "Email atau password salah".
-- [x] Session tersimpan di cookie httpOnly (`lapangin_session`).
+- [x] Session tersimpan di cookie httpOnly (`lapabook_session`).
 - [x] Admin bisa logout dari sidebar.
 - [x] Logout → redirect ke `/admin/login`.
 - [x] Direct akses `/admin` tanpa session → redirect ke `/admin/login`.
@@ -164,7 +164,7 @@
 | UI      | `src/app/admin/login/page.tsx`           | Admin login form                       |
 | Layout  | `src/components/admin/AdminLayout.tsx`   | Session check + redirect               |
 
-**Cookie:** `lapangin_session` — httpOnly, sameSite=lax, maxAge=86400, path=/
+**Cookie:** `lapabook_session` — httpOnly, sameSite=lax, maxAge=86400, path=/
 
 ## Customer Registration, Login & Loyalty Points (Stage 10)
 
@@ -279,10 +279,10 @@
 
 | Request Type                 | Strategy                         | Cache Name         |
 | ---------------------------- | -------------------------------- | ------------------ |
-| Static assets (JS/CSS/fonts) | stale-while-revalidate           | lapangin-static-v1 |
-| Images                       | cache-first                      | lapangin-images-v1 |
-| API calls                    | network-first                    | lapangin-api-v1    |
-| HTML navigation              | network-first + offline fallback | lapangin-pages-v1  |
+| Static assets (JS/CSS/fonts) | stale-while-revalidate           | lapabook-static-v1 |
+| Images                       | cache-first                      | lapabook-images-v1 |
+| API calls                    | network-first                    | lapabook-api-v1    |
+| HTML navigation              | network-first + offline fallback | lapabook-pages-v1  |
 | Push notifications           | push event listener              | N/A (event-based)  |
 
 **Pre-cached:** `/offline.html`, `/icons/icon-192.png`, `/icons/icon-512.png`

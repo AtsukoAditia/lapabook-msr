@@ -3,8 +3,8 @@ import { type Page } from "@playwright/test";
 // ── Shared Test Data ──
 
 export const TEST_USERS = {
-  admin: { email: "admin@lapangin.id", password: "Admin123!@#" },
-  owner: { email: "owner@lapangin.id", password: "Owner123!@#" },
+  admin: { email: "admin@lapabook.id", password: "Admin123!@#" },
+  owner: { email: "owner@lapabook.id", password: "Owner123!@#" },
   customer: {
     email: `e2e-customer-${Date.now()}@test.com`,
     password: "Test12345!",

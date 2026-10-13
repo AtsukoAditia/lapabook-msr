@@ -20,7 +20,7 @@
 ### Production Server
 - Port: 3002 (tested)
 - Node: `next start` ✅
-- Database: PostgreSQL 16 via `lapangin` container (localhost:5432/lapangin)
+- Database: PostgreSQL 16 via `lapabook` container (localhost:5432/lapabook)
 - Status: **UP** on `http://localhost:3002`
 
 ---
@@ -223,8 +223,8 @@ All `/profile/*` pages return 200 with customer auth.
 
 | Role | Email | Password |
 |------|-------|----------|
-| Super Admin | admin@lapangin.id | Admin123!@# |
-| Owner | owner@lapangin.id | Owner123!@# |
+| Super Admin | admin@lapabook.id | Admin123!@# |
+| Owner | owner@lapabook.id | Owner123!@# |
 | Customer | john@example.com | password123 |
 
 ---

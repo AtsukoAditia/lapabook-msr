@@ -16,8 +16,8 @@ async function getSeo() {
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPage("kebijakan");
   return {
-    title: page?.metaTitle || "Kebijakan & Privasi — Lapangin",
-    description: page?.metaDescription || "Kebijakan privasi dan perlindungan data pengguna Lapangin.",
+    title: page?.metaTitle || "Kebijakan & Privasi — Lapabook",
+    description: page?.metaDescription || "Kebijakan privasi dan perlindungan data pengguna Lapabook.",
   };
 }
 
@@ -91,7 +91,7 @@ Kami menggunakan cookie untuk:
 
 ## 8. Kontak
 
-Untuk pertanyaan tentang privasi: [privacy@lapangin.id](mailto:privacy@lapangin.id)
+Untuk pertanyaan tentang privasi: [privacy@lapabook.id](mailto:privacy@lapabook.id)
 
 ## 9. Perubahan Kebijakan
 

@@ -1,5 +1,5 @@
 /**
- * Script to generate/seed the Google Spreadsheet for Lapangin.
+ * Script to generate/seed the Google Spreadsheet for Lapabook.
  * Creates all required sheets with headers and seed data.
  *
  * Usage: npx tsx scripts/generate-spreadsheet.ts
@@ -90,7 +90,7 @@ const SEED_AREAS = [
 ];
 
 const SEED_VENUE_OWNERS = [
-  { id: "owner-1", admin_id: "admin-1", business_name: "Arena Sport Group", pic_name: "Admin Lapangin", phone: "081234567890", email: "admin@lapangin.id", status: "active", created_at: now, updated_at: now },
+  { id: "owner-1", admin_id: "admin-1", business_name: "Arena Sport Group", pic_name: "Admin Lapabook", phone: "081234567890", email: "admin@lapabook.id", status: "active", created_at: now, updated_at: now },
   { id: "owner-2", admin_id: "", business_name: "Greenfield Sports", pic_name: "Pak Budi", phone: "081298765432", email: "budi@greenfield.id", status: "active", created_at: now, updated_at: now },
 ];
 
@@ -226,25 +226,25 @@ const SEED_AUDIT_LOG = [
 const SEED_PAYMENT_METHODS = [
   {
     id: "pm-bca", name: "BCA Transfer", label: "Transfer BCA", type: "bank_transfer",
-    account_name: "PT Lapangin Indonesia", account_number: "1234567890", provider: "BCA",
+    account_name: "PT Lapabook Indonesia", account_number: "1234567890", provider: "BCA",
     details: "Bank Central Asia", instructions: "Transfer ke rekening BCA di atas, lalu upload bukti transfer.",
     is_active: "true",
   },
   {
     id: "pm-mandiri", name: "Mandiri Transfer", label: "Transfer Mandiri", type: "bank_transfer",
-    account_name: "PT Lapangin Indonesia", account_number: "0987654321", provider: "Mandiri",
+    account_name: "PT Lapabook Indonesia", account_number: "0987654321", provider: "Mandiri",
     details: "Bank Mandiri", instructions: "Transfer ke rekening Mandiri di atas, lalu upload bukti transfer.",
     is_active: "true",
   },
   {
     id: "pm-gopay", name: "GoPay", label: "GoPay", type: "ewallet",
-    account_name: "Lapangin", account_number: "081234567890", provider: "GoPay",
+    account_name: "Lapabook", account_number: "081234567890", provider: "GoPay",
     details: "E-Wallet GoPay", instructions: "Scan QR atau transfer ke nomor GoPay di atas.",
     is_active: "true",
   },
   {
     id: "pm-ovo", name: "OVO", label: "OVO", type: "ewallet",
-    account_name: "Lapangin", account_number: "081234567890", provider: "OVO",
+    account_name: "Lapabook", account_number: "081234567890", provider: "OVO",
     details: "E-Wallet OVO", instructions: "Transfer ke nomor OVO di atas, lalu upload bukti transfer.",
     is_active: "true",
   },
@@ -267,12 +267,12 @@ const SEED_NOTIFICATION_LOGS = [
 
 const SEED_ADMIN_USERS = [
   {
-    id: "admin-1", name: "Super Admin", email: "admin@lapangin.id",
+    id: "admin-1", name: "Super Admin", email: "admin@lapabook.id",
     password_hash: "$2b$10$nqVUtvNgF1EXm9pqLiVTQOetT6geXw0gHFjHd03x6Y8uO/v/Ft7mO", // password: Admin123!@#
     role: "super_admin", is_active: "true", created_at: now,
   },
   {
-    id: "owner-1", name: "Venue Owner", email: "owner@lapangin.id",
+    id: "owner-1", name: "Venue Owner", email: "owner@lapabook.id",
     password_hash: "$2b$10$PBtyTDlbmSKYI5XLiziL0eg51As8BoWNSq4MvnzPK33L1KqLlGNk2", // password: Owner123!@#
     role: "admin", is_active: "true", created_at: now,
   },
@@ -379,17 +379,17 @@ const SEED_ACTIVITY_LOGS = [
   // === AUTH - Admin ===
   {
     id: "act-007", timestamp: "2026-06-24T05:30:00.000Z", action: "admin_login",
-    category: "auth", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
-    target_type: "admin", target_id: "admin-1", target_label: "admin@lapangin.id",
-    description: "Admin Lapangin berhasil login ke panel admin",
+    category: "auth", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
+    target_type: "admin", target_id: "admin-1", target_label: "admin@lapabook.id",
+    description: "Admin Lapabook berhasil login ke panel admin",
     metadata: '{"role":"admin"}',
     ip_address: "202.150.10.5", user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
   },
   {
     id: "act-008", timestamp: "2026-06-25T17:00:00.000Z", action: "admin_logout",
-    category: "auth", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
-    target_type: "admin", target_id: "admin-1", target_label: "admin@lapangin.id",
-    description: "Admin Lapangin logout dari panel admin",
+    category: "auth", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
+    target_type: "admin", target_id: "admin-1", target_label: "admin@lapabook.id",
+    description: "Admin Lapabook logout dari panel admin",
     metadata: "{}",
     ip_address: "202.150.10.5", user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
   },
@@ -465,7 +465,7 @@ const SEED_ACTIVITY_LOGS = [
   // === ADMIN - Booking Management ===
   {
     id: "act-017", timestamp: "2026-06-24T09:00:00.000Z", action: "booking_status_changed",
-    category: "admin_booking", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_booking", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "booking", target_id: "bk-001", target_label: "AB-TEST001",
     description: "Status booking AB-TEST001 diubah: pending → confirmed",
     metadata: '{"previous_status":"pending","new_status":"confirmed","reason":"Pembayaran sudah diverifikasi"}',
@@ -473,7 +473,7 @@ const SEED_ACTIVITY_LOGS = [
   },
   {
     id: "act-018", timestamp: "2026-06-24T09:05:00.000Z", action: "booking_status_changed",
-    category: "admin_booking", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_booking", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "booking", target_id: "bk-004", target_label: "AB-TEST004",
     description: "Status booking AB-TEST004 diubah: pending → confirmed",
     metadata: '{"previous_status":"pending","new_status":"confirmed","reason":"Pembayaran sudah diverifikasi"}',
@@ -481,7 +481,7 @@ const SEED_ACTIVITY_LOGS = [
   },
   {
     id: "act-019", timestamp: "2026-06-24T10:30:00.000Z", action: "payment_confirmed",
-    category: "admin_booking", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_booking", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "booking", target_id: "bk-001", target_label: "AB-TEST001",
     description: "Pembayaran booking AB-TEST001 dikonfirmasi admin",
     metadata: '{"payment_status":"paid","amount":240000}',
@@ -489,7 +489,7 @@ const SEED_ACTIVITY_LOGS = [
   },
   {
     id: "act-020", timestamp: "2026-06-24T10:35:00.000Z", action: "payment_confirmed",
-    category: "admin_booking", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_booking", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "booking", target_id: "bk-004", target_label: "AB-TEST004",
     description: "Pembayaran booking AB-TEST004 dikonfirmasi admin",
     metadata: '{"payment_status":"paid","amount":400000}',
@@ -499,7 +499,7 @@ const SEED_ACTIVITY_LOGS = [
   // === ADMIN - Court Management ===
   {
     id: "act-021", timestamp: "2026-06-24T05:45:00.000Z", action: "court_created",
-    category: "admin_court", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_court", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "court", target_id: "court-f1", target_label: "Futsal A",
     description: "Lapangan baru ditambahkan: Futsal A (Arena Sport Center, Sintetis, Rp 150.000/jam)",
     metadata: '{"venue":"Arena Sport Center","sport":"Futsal","surface":"Sintetis","indoor":true,"capacity":10,"base_price":150000}',
@@ -507,7 +507,7 @@ const SEED_ACTIVITY_LOGS = [
   },
   {
     id: "act-022", timestamp: "2026-06-24T05:50:00.000Z", action: "court_created",
-    category: "admin_court", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_court", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "court", target_id: "court-f2", target_label: "Futsal B",
     description: "Lapangan baru ditambahkan: Futsal B (Arena Sport Center, Vinyl, Rp 120.000/jam)",
     metadata: '{"venue":"Arena Sport Center","sport":"Futsal","surface":"Vinyl","indoor":true,"capacity":10,"base_price":120000}',
@@ -515,7 +515,7 @@ const SEED_ACTIVITY_LOGS = [
   },
   {
     id: "act-023", timestamp: "2026-06-24T06:00:00.000Z", action: "court_updated",
-    category: "admin_court", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_court", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "court", target_id: "court-b1", target_label: "Badminton Court 1",
     description: "Lapangan diperbarui: Badminton Court 1 - harga dasar diubah",
     metadata: '{"field":"base_price","old_value":"70000","new_value":"80000"}',
@@ -525,7 +525,7 @@ const SEED_ACTIVITY_LOGS = [
   // === ADMIN - Pricing Management ===
   {
     id: "act-024", timestamp: "2026-06-24T06:15:00.000Z", action: "pricing_rule_created",
-    category: "admin_pricing", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_pricing", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "pricing_rule", target_id: "pr-f1-weekday", target_label: "Futsal A - Weekday",
     description: "Aturan harga dibuat: Futsal A weekday 06:00-17:00 = Rp 120.000/jam",
     metadata: '{"court":"Futsal A","day_type":"weekday","time":"06:00-17:00","price":120000}',
@@ -533,7 +533,7 @@ const SEED_ACTIVITY_LOGS = [
   },
   {
     id: "act-025", timestamp: "2026-06-24T06:20:00.000Z", action: "pricing_rule_updated",
-    category: "admin_pricing", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_pricing", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "pricing_rule", target_id: "pr-f1-peak", target_label: "Futsal A - Peak",
     description: "Aturan harga diperbarui: Futsal A peak hours weekday",
     metadata: '{"old_price":140000,"new_price":150000,"time":"17:00-23:00"}',
@@ -543,7 +543,7 @@ const SEED_ACTIVITY_LOGS = [
   // === ADMIN - Blocked Slots ===
   {
     id: "act-026", timestamp: "2026-06-24T11:00:00.000Z", action: "blocked_slot_created",
-    category: "admin_court", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_court", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "blocked_slot", target_id: "bs-001", target_label: "Futsal A - 28 Jun 2026",
     description: "Slot diblokir: Futsal A, 28 Jun 2026 10:00-12:00 (Maintenance lapangan)",
     metadata: '{"court_id":"court-f1","date":"2026-06-28","time":"10:00-12:00","reason":"Maintenance lapangan"}',
@@ -551,7 +551,7 @@ const SEED_ACTIVITY_LOGS = [
   },
   {
     id: "act-027", timestamp: "2026-06-24T11:10:00.000Z", action: "blocked_slot_created",
-    category: "admin_court", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_court", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "blocked_slot", target_id: "bs-002", target_label: "Badminton Court 1 - 29 Jun 2026",
     description: "Slot diblokir: Badminton Court 1, 29 Jun 2026 14:00-16:00 (Event internal)",
     metadata: '{"court_id":"court-b1","date":"2026-06-29","time":"14:00-16:00","reason":"Event internal"}',
@@ -561,17 +561,17 @@ const SEED_ACTIVITY_LOGS = [
   // === ADMIN - Payment Methods ===
   {
     id: "act-028", timestamp: "2026-06-24T05:40:00.000Z", action: "payment_method_created",
-    category: "admin_settings", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_settings", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "payment_method", target_id: "pm-bca", target_label: "BCA Transfer",
-    description: "Metode pembayaran ditambahkan: Transfer BCA (1234567890 a.n PT Lapangin Indonesia)",
+    description: "Metode pembayaran ditambahkan: Transfer BCA (1234567890 a.n PT Lapabook Indonesia)",
     metadata: '{"type":"bank_transfer","provider":"BCA","account_number":"1234567890"}',
     ip_address: "202.150.10.5", user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
   },
   {
     id: "act-029", timestamp: "2026-06-24T05:42:00.000Z", action: "payment_method_created",
-    category: "admin_settings", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_settings", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "payment_method", target_id: "pm-gopay", target_label: "GoPay",
-    description: "Metode pembayaran ditambahkan: GoPay (081234567890 a.n Lapangin)",
+    description: "Metode pembayaran ditambahkan: GoPay (081234567890 a.n Lapabook)",
     metadata: '{"type":"ewallet","provider":"GoPay","account_number":"081234567890"}',
     ip_address: "202.150.10.5", user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
   },
@@ -631,7 +631,7 @@ const SEED_ACTIVITY_LOGS = [
   // === ADMIN - Notification Management ===
   {
     id: "act-036", timestamp: "2026-06-24T12:00:00.000Z", action: "notification_resent",
-    category: "admin_notification", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_notification", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "notification", target_id: "notif-002", target_label: "AB-TEST002 - WhatsApp",
     description: "Admin mengirim ulang notifikasi WhatsApp untuk booking AB-TEST002",
     metadata: '{"original_notif_id":"notif-002","channel":"whatsapp","recipient":"081298765432"}',
@@ -659,10 +659,10 @@ const SEED_ACTIVITY_LOGS = [
   // === ADMIN - Settings ===
   {
     id: "act-039", timestamp: "2026-06-24T05:35:00.000Z", action: "settings_updated",
-    category: "admin_settings", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_settings", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "settings", target_id: "", target_label: "App Settings",
     description: "Pengaturan aplikasi diperbarui: nama aplikasi, jam operasional",
-    metadata: '{"fields_updated":["app_name","open_time","close_time"],"app_name":"Lapangin"}',
+    metadata: '{"fields_updated":["app_name","open_time","close_time"],"app_name":"Lapabook"}',
     ip_address: "202.150.10.5", user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
   },
 
@@ -679,7 +679,7 @@ const SEED_ACTIVITY_LOGS = [
   // === BOOKING - Booking Completed ===
   {
     id: "act-041", timestamp: "2026-06-25T10:00:00.000Z", action: "booking_completed",
-    category: "booking", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "booking", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "booking", target_id: "bk-001", target_label: "AB-TEST001",
     description: "Booking AB-TEST001 ditandai selesai: Futsal A, 25 Jun 2026 08:00-10:00",
     metadata: '{"previous_status":"confirmed","new_status":"completed"}',
@@ -697,7 +697,7 @@ const SEED_ACTIVITY_LOGS = [
   // === BOOKING - No Show ===
   {
     id: "act-043", timestamp: "2026-06-26T12:00:00.000Z", action: "booking_no_show",
-    category: "booking", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "booking", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "booking", target_id: "bk-004", target_label: "AB-TEST004",
     description: "Booking AB-TEST004 ditandai no show: Minisoccer 1, 27 Jun 2026 15:00-17:00",
     metadata: '{"previous_status":"confirmed","new_status":"no_show"}',
@@ -707,7 +707,7 @@ const SEED_ACTIVITY_LOGS = [
   // === ADMIN - Venue Management ===
   {
     id: "act-044", timestamp: "2026-06-24T05:32:00.000Z", action: "venue_created",
-    category: "admin_venue", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_venue", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "venue", target_id: "venue-arena1", target_label: "Arena Sport Center",
     description: "Venue baru ditambahkan: Arena Sport Center, Jl. Sudirman No. 123, Jakarta Selatan",
     metadata: '{"address":"Jl. Sudirman No. 123, Jakarta Selatan","phone":"081234567890","open_time":"06:00","close_time":"23:00"}',
@@ -715,7 +715,7 @@ const SEED_ACTIVITY_LOGS = [
   },
   {
     id: "act-045", timestamp: "2026-06-24T05:33:00.000Z", action: "venue_created",
-    category: "admin_venue", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapangin",
+    category: "admin_venue", actor_type: "admin", actor_id: "admin-1", actor_name: "Admin Lapabook",
     target_type: "venue", target_id: "venue-greenfield", target_label: "Greenfield Arena",
     description: "Venue baru ditambahkan: Greenfield Arena, Jl. Gatot Subroto No. 45, Jakarta Pusat",
     metadata: '{"address":"Jl. Gatot Subroto No. 45, Jakarta Pusat","phone":"081298765432","open_time":"07:00","close_time":"22:00"}',

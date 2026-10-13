@@ -12,8 +12,8 @@ async function getPage(slug: string) {
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPage("kontak");
   return {
-    title: page?.metaTitle || "Kontak — Lapangin",
-    description: page?.metaDescription || "Hubungi tim Lapangin untuk pertanyaan, saran, atau kerjasama.",
+    title: page?.metaTitle || "Kontak — Lapabook",
+    description: page?.metaDescription || "Hubungi tim Lapabook untuk pertanyaan, saran, atau kerjasama.",
   };
 }
 
@@ -23,23 +23,23 @@ const DEFAULT = `
 Kami siap membantu Anda! Hubungi kami melalui channel berikut.
 
 ## Email
-- **Umum:** info@lapangin.id
-- **Support:** support@lapangin.id
-- **Kerjasama:** partnership@lapangin.id
-- **Privasi:** privacy@lapangin.id
-- **Legal:** legal@lapangin.id
+- **Umum:** info@lapabook.id
+- **Support:** support@lapabook.id
+- **Kerjasama:** partnership@lapabook.id
+- **Privasi:** privacy@lapabook.id
+- **Legal:** legal@lapabook.id
 
 ## Media Sosial
-- **Instagram:** @lapangin.id
-- **Twitter/X:** @lapangin_id
-- **TikTok:** @lapangin.id
-- **Facebook:** Lapangin Indonesia
+- **Instagram:** @lapabook.id
+- **Twitter/X:** @lapabook_id
+- **TikTok:** @lapabook.id
+- **Facebook:** Lapabook Indonesia
 
 ## WhatsApp
 +62 812-3456-7890 (Chat only, Senin-Jumat 09:00-17:00 WIB)
 
 ## Alamat
-Lapangin Indonesia
+Lapabook Indonesia
 Jakarta Selatan, DKI Jakarta
 Indonesia
 
@@ -57,10 +57,10 @@ A: Hubungi owner venue via WhatsApp yang tertera di halaman venue. Atau hubungi 
 A: Upload ulang bukti yang lebih jelas. Pastikan nominal, nama, dan tanggal terlihat.
 
 **Q: Ingin daftarkan venue saya?**
-A: Kunjungi /dashboard/register atau hubungi partnership@lapangin.id
+A: Kunjungi /dashboard/register atau hubungi partnership@lapabook.id
 
 **Q: Ada bug atau error?**
-A: Laporkan ke support@lapangin.id dengan screenshot dan langkah reproduksi.
+A: Laporkan ke support@lapabook.id dengan screenshot dan langkah reproduksi.
 `;
 
 export default async function KontakPage() {

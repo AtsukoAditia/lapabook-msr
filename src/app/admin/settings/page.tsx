@@ -34,7 +34,7 @@ export default function AdminSettingsPage() {
               </label>
               <input
                 type="text"
-                defaultValue="Lapangin"
+                defaultValue="Lapabook"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
               />
             </div>
@@ -44,7 +44,7 @@ export default function AdminSettingsPage() {
               </label>
               <input
                 type="text"
-                defaultValue="https://lapangin.vercel.app"
+                defaultValue="https://lapabook.vercel.app"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
               />
             </div>

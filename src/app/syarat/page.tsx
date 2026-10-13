@@ -12,8 +12,8 @@ async function getPage(slug: string) {
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPage("syarat");
   return {
-    title: page?.metaTitle || "Syarat & Ketentuan — Lapangin",
-    description: page?.metaDescription || "Syarat dan ketentuan penggunaan platform Lapangin.",
+    title: page?.metaTitle || "Syarat & Ketentuan — Lapabook",
+    description: page?.metaDescription || "Syarat dan ketentuan penggunaan platform Lapabook.",
   };
 }
 
@@ -24,7 +24,7 @@ Terakhir diperbarui: 12 Juli 2026
 
 ## Ketentuan Umum
 
-Dengan menggunakan Lapangin, Anda menyetujui syarat dan ketentuan berikut.
+Dengan menggunakan Lapabook, Anda menyetujui syarat dan ketentuan berikut.
 
 ## Untuk Pemain (Customer)
 
@@ -49,7 +49,7 @@ Dengan menggunakan Lapangin, Anda menyetujui syarat dan ketentuan berikut.
 - Poin hanya diberikan setelah booking dikonfirmasi
 - Poin dapat ditukar dengan reward yang tersedia
 - Poin yang sudah kadaluarsa tidak dapat diklaim kembali
-- Lapangin berhak menyesuaikan poin jika terjadi kesalahan
+- Lapabook berhak menyesuaikan poin jika terjadi kesalahan
 
 ### Referral
 - Kode referral bersifat unik per akun
@@ -67,7 +67,7 @@ Dengan menggunakan Lapangin, Anda menyetujui syarat dan ketentuan berikut.
 ### Pendaftaran
 - Harus memiliki usaha venue olahraga yang valid
 - Data bisnis harus benar dan dapat diverifikasi
-- Pendaftaran akan diverifikasi oleh tim Lapangin (1-3 hari kerja)
+- Pendaftaran akan diverifikasi oleh tim Lapabook (1-3 hari kerja)
 - Status akun: pending → active (setelah disetujui)
 
 ### Pengelolaan Venue
@@ -96,21 +96,21 @@ Dengan menggunakan Lapangin, Anda menyetujui syarat dan ketentuan berikut.
 - Menggunakan bot atau script otomatis
 - Reverse engineering atau exploitasi celah keamanan
 
-### Hak Lapangin
+### Hak Lapabook
 - Menangguhkan atau menghapus akun yang melanggar
 - Mengubah syarat dan ketentuan sewaktu-waktu
 - Menolak atau membatalkan booking yang mencurigakan
 - Mengambil tindakan hukum untuk pelanggaran serius
 
 ### Batasan Tanggung Jawab
-- Lapangin adalah platform perantara, bukan penyedia venue
+- Lapabook adalah platform perantara, bukan penyedia venue
 - Kualitas venue adalah tanggung jawab owner
 - Sengketa antara pemain dan owner harus diselesaikan secara musyawarah
-- Lapangin akan memediasi jika diperlukan
+- Lapabook akan memediasi jika diperlukan
 
 ### Ganti Rugi
 - Maksimal ganti rugi = nilai booking yang bersangkutan
-- Lapangin tidak bertanggung jawab atas kerugian tidak langsung
+- Lapabook tidak bertanggung jawab atas kerugian tidak langsung
 - Force majeure (bencana alam, pandemi, dll) dikecualikan
 
 ## Hukum yang Berlaku
@@ -120,7 +120,7 @@ Sengketa akan diselesaikan di pengadilan Jakarta Selatan.
 
 ## Kontak
 
-Pertanyaan tentang syarat & ketentuan: [legal@lapangin.id](mailto:legal@lapangin.id)
+Pertanyaan tentang syarat & ketentuan: [legal@lapabook.id](mailto:legal@lapabook.id)
 `;
 
 export default async function SyaratPage() {

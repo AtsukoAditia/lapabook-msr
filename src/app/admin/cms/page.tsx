@@ -17,7 +17,7 @@ interface CmsPage {
 }
 
 const AVAILABLE_PAGES = [
-  { slug: "tentang", label: "Tentang", icon: "ℹ️", description: "Halaman tentang Lapangin" },
+  { slug: "tentang", label: "Tentang", icon: "ℹ️", description: "Halaman tentang Lapabook" },
   { slug: "kebijakan", label: "Kebijakan & Privasi", icon: "🔒", description: "Kebijakan privasi pengguna" },
   { slug: "syarat", label: "Syarat & Ketentuan", icon: "📋", description: "Syarat ketentuan penggunaan" },
   { slug: "kontak", label: "Kontak", icon: "📞", description: "Informasi kontak" },
@@ -183,7 +183,7 @@ export default function AdminCmsPage() {
                     value={editMeta.ogImage}
                     onChange={(e) => setEditMeta((prev) => ({ ...prev, ogImage: e.target.value }))}
                     className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                    placeholder="https://lapangin.id/og-image.jpg"
+                    placeholder="https://lapabook.id/og-image.jpg"
                   />
                 </div>
               </div>

@@ -1,4 +1,4 @@
-# DESIGN.md — Lapangin Design System
+# DESIGN.md — Lapabook Design System
 
 ## Brand
 

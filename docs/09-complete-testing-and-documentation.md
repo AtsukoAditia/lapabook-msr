@@ -1,8 +1,8 @@
-# Lapangin - Complete Testing & Documentation
+# Lapabook - Complete Testing & Documentation
 
 ## Overview
 
-Lapangin is a web-based PWA sports court booking system with comprehensive features across 9 stages of development.
+Lapabook is a web-based PWA sports court booking system with comprehensive features across 9 stages of development.
 
 ---
 
@@ -125,7 +125,7 @@ Lapangin is a web-based PWA sports court booking system with comprehensive featu
 
 ```bash
 POST /api/auth/admin/login
-# Input: {"email":"admin@lapangin.com","password":"admin123"}
+# Input: {"email":"admin@lapabook.com","password":"admin123"}
 # Result: 200 OK with session cookie set
 ```
 
@@ -189,7 +189,7 @@ GET /admin (without auth)
 ### Admin Authentication
 
 - **Login**: `/admin/login`
-- **Default credentials**: `admin@lapangin.com` / `admin123`
+- **Default credentials**: `admin@lapabook.com` / `admin123`
 - **JWT stored in**: `admin_token` cookie (HttpOnly, 8h expiry)
 - **Middleware**: All `/admin/*` routes except `/admin/login` are protected
 
@@ -289,14 +289,14 @@ Switch via `DATABASE_PROVIDER` env var: `mock`, `google-sheets`, or `postgres`
 
 ```env
 DATABASE_PROVIDER=mock
-ADMIN_EMAIL=admin@lapangin.com
+ADMIN_EMAIL=admin@lapabook.com
 ADMIN_PASSWORD=admin123
 JWT_SECRET=your-secret-key-here
 GOOGLE_SHEETS_SPREADSHEET_ID=
 GOOGLE_SHEETS_CLIENT_EMAIL=
 GOOGLE_SHEETS_PRIVATE_KEY=
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_APP_NAME=Lapangin
+NEXT_PUBLIC_APP_NAME=Lapabook
 ```
 
 ---

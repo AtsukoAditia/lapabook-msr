@@ -1,4 +1,4 @@
--- Lapangin Supabase schema — synced with Sprint 5 (Marketplace foundation)
+-- Lapabook Supabase schema — synced with Sprint 5 (Marketplace foundation)
 
 -- ============================================================
 -- Areas (Sprint 5)

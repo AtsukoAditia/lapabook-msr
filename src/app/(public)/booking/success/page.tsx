@@ -58,7 +58,7 @@ function getHeader(booking: PublicBooking | null) {
   if (booking.bookingStatus === "completed") {
     return {
       title: "Selesai Bermain! 🎉",
-      subtitle: "Terima kasih sudah bermain di Lapangin. Jangan lupa beri review!",
+      subtitle: "Terima kasih sudah bermain di Lapabook. Jangan lupa beri review!",
     };
   }
 

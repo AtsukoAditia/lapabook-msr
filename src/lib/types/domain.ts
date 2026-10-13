@@ -1,4 +1,4 @@
-// ── Domain Types for Lapangin ──
+// ── Domain Types for Lapabook ──
 
 export interface Sport {
   id: string;

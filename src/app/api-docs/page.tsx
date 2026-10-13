@@ -2,8 +2,8 @@ import { readFileSync } from "fs";
 import { join } from "path";
 
 export const metadata = {
-  title: "Lapangin API Documentation",
-  description: "Complete API reference for the Lapangin booking platform.",
+  title: "Lapabook API Documentation",
+  description: "Complete API reference for the Lapabook booking platform.",
 };
 
 function loadEndpoints(): string[][] {
@@ -74,7 +74,7 @@ export default function ApiDocsPage() {
     <div className="min-h-screen bg-slate-50 px-4 py-8">
       <div className="mx-auto max-w-5xl">
         <h1 className="mb-2 text-3xl font-bold text-slate-900">
-          Lapangin API Reference
+          Lapabook API Reference
         </h1>
         <p className="mb-8 text-slate-600">
           {endpoints.length} endpoints across {orderedTags.length} groups.

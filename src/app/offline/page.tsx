@@ -46,7 +46,7 @@ export default function OfflinePage() {
           Coba Lagi
         </button>
         <p className="mt-4 text-xs text-slate-400">
-          Lapangin — Booking Lapangan Olahraga
+          Lapabook — Booking Lapangan Olahraga
         </p>
       </div>
     </main>

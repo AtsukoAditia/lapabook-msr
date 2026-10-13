@@ -73,49 +73,49 @@ import { hashPassword, verifyPassword } from "@/lib/auth/jwt";
 
 // Use globalThis for all stores to survive Next.js dev module reloading
 const g = globalThis as unknown as {
-  __lapanginBookings: Booking[];
-  __lapanginPricingRules: PricingRule[];
-  __lapanginBlockedSlots: BlockedSlot[];
-  __lapanginAuditLog: AuditLogEntry[];
-  __lapanginNotifications: NotificationLog[];
-  __lapanginAdmins: AdminUser[];
-  __lapanginCustomers: Customer[];
-  __lapanginLoyalty: LoyaltyTransaction[];
-  __lapanginRewards: Reward[];
-  __lapanginRedemptions: RewardRedemption[];
-  __lapanginPaymentMethods: PaymentMethod[];
-  __lapanginAreas: Area[];
-  __lapanginVenueOwners: VenueOwner[];
+  __lapabookBookings: Booking[];
+  __lapabookPricingRules: PricingRule[];
+  __lapabookBlockedSlots: BlockedSlot[];
+  __lapabookAuditLog: AuditLogEntry[];
+  __lapabookNotifications: NotificationLog[];
+  __lapabookAdmins: AdminUser[];
+  __lapabookCustomers: Customer[];
+  __lapabookLoyalty: LoyaltyTransaction[];
+  __lapabookRewards: Reward[];
+  __lapabookRedemptions: RewardRedemption[];
+  __lapabookPaymentMethods: PaymentMethod[];
+  __lapabookAreas: Area[];
+  __lapabookVenueOwners: VenueOwner[];
 };
 
 function getBookings(): Booking[] {
-  if (!g.__lapanginBookings) g.__lapanginBookings = [];
-  return g.__lapanginBookings;
+  if (!g.__lapabookBookings) g.__lapabookBookings = [];
+  return g.__lapabookBookings;
 }
 function getPricingRules(): PricingRule[] {
-  if (!g.__lapanginPricingRules) g.__lapanginPricingRules = [...mockPricingRules];
-  return g.__lapanginPricingRules;
+  if (!g.__lapabookPricingRules) g.__lapabookPricingRules = [...mockPricingRules];
+  return g.__lapabookPricingRules;
 }
 function getBlockedSlots(): BlockedSlot[] {
-  if (!g.__lapanginBlockedSlots) g.__lapanginBlockedSlots = [];
-  return g.__lapanginBlockedSlots;
+  if (!g.__lapabookBlockedSlots) g.__lapabookBlockedSlots = [];
+  return g.__lapabookBlockedSlots;
 }
 function getAuditLog(): AuditLogEntry[] {
-  if (!g.__lapanginAuditLog) g.__lapanginAuditLog = [];
-  return g.__lapanginAuditLog;
+  if (!g.__lapabookAuditLog) g.__lapabookAuditLog = [];
+  return g.__lapabookAuditLog;
 }
 function getNotifications(): NotificationLog[] {
-  if (!g.__lapanginNotifications) g.__lapanginNotifications = [];
-  return g.__lapanginNotifications;
+  if (!g.__lapabookNotifications) g.__lapabookNotifications = [];
+  return g.__lapabookNotifications;
 }
 function getAdmins(): AdminUser[] {
-  if (!g.__lapanginAdmins) {
-    g.__lapanginAdmins = [
+  if (!g.__lapabookAdmins) {
+    g.__lapabookAdmins = [
       {
         id: "admin-1",
         username: "superadmin",
         name: "Super Admin",
-        email: "admin@lapangin.id",
+        email: "admin@lapabook.id",
         passwordHash: hashPassword("Admin123!@#"),
         role: "super_admin",
         isActive: true,
@@ -125,7 +125,7 @@ function getAdmins(): AdminUser[] {
         id: "owner-1",
         username: "venueowner",
         name: "Venue Owner",
-        email: "owner@lapangin.id",
+        email: "owner@lapabook.id",
         passwordHash: hashPassword("Owner123!@#"),
         role: "admin",
         isActive: true,
@@ -133,19 +133,19 @@ function getAdmins(): AdminUser[] {
       },
     ];
   }
-  return g.__lapanginAdmins;
+  return g.__lapabookAdmins;
 }
 function getCustomers(): Customer[] {
-  if (!g.__lapanginCustomers) g.__lapanginCustomers = [];
-  return g.__lapanginCustomers;
+  if (!g.__lapabookCustomers) g.__lapabookCustomers = [];
+  return g.__lapabookCustomers;
 }
 function getLoyalty(): LoyaltyTransaction[] {
-  if (!g.__lapanginLoyalty) g.__lapanginLoyalty = [];
-  return g.__lapanginLoyalty;
+  if (!g.__lapabookLoyalty) g.__lapabookLoyalty = [];
+  return g.__lapabookLoyalty;
 }
 function getRewards(): Reward[] {
-  if (!g.__lapanginRewards) {
-    g.__lapanginRewards = [
+  if (!g.__lapabookRewards) {
+    g.__lapabookRewards = [
       {
         id: "reward-1",
         name: "Diskon 10%",
@@ -188,32 +188,32 @@ function getRewards(): Reward[] {
       },
     ];
   }
-  return g.__lapanginRewards;
+  return g.__lapabookRewards;
 }
 function getRedemptions(): RewardRedemption[] {
-  if (!g.__lapanginRedemptions) g.__lapanginRedemptions = [];
-  return g.__lapanginRedemptions;
+  if (!g.__lapabookRedemptions) g.__lapabookRedemptions = [];
+  return g.__lapabookRedemptions;
 }
 function getAreas(): Area[] {
-  if (!g.__lapanginAreas) g.__lapanginAreas = mockAreas.map((a: Area) => ({ ...a }));
-  return g.__lapanginAreas;
+  if (!g.__lapabookAreas) g.__lapabookAreas = mockAreas.map((a: Area) => ({ ...a }));
+  return g.__lapabookAreas;
 }
 function getVenueOwners(): VenueOwner[] {
-  if (!g.__lapanginVenueOwners) g.__lapanginVenueOwners = mockVenueOwners.map(o => ({ ...o }));
-  return g.__lapanginVenueOwners;
+  if (!g.__lapabookVenueOwners) g.__lapabookVenueOwners = mockVenueOwners.map(o => ({ ...o }));
+  return g.__lapabookVenueOwners;
 }
 function getPaymentMethods(): PaymentMethod[] {
-  if (!g.__lapanginPaymentMethods) {
-    g.__lapanginPaymentMethods = [
+  if (!g.__lapabookPaymentMethods) {
+    g.__lapabookPaymentMethods = [
       {
         id: "pm-1",
         name: "BCA Transfer",
         label: "BCA Transfer",
         type: "bank_transfer",
-        accountName: "PT Lapangin Indonesia",
+        accountName: "PT Lapabook Indonesia",
         accountNumber: "1234567890",
         provider: "BCA",
-        details: "BCA 1234567890 a/n PT Lapangin Indonesia",
+        details: "BCA 1234567890 a/n PT Lapabook Indonesia",
         instructions: "Transfer ke rekening BCA di atas, lalu upload bukti transfer.",
         isActive: true,
       },
@@ -222,10 +222,10 @@ function getPaymentMethods(): PaymentMethod[] {
         name: "Mandiri Transfer",
         label: "Mandiri Transfer",
         type: "bank_transfer",
-        accountName: "PT Lapangin Indonesia",
+        accountName: "PT Lapabook Indonesia",
         accountNumber: "0987654321",
         provider: "Mandiri",
-        details: "Mandiri 0987654321 a/n PT Lapangin Indonesia",
+        details: "Mandiri 0987654321 a/n PT Lapabook Indonesia",
         instructions: "Transfer ke rekening Mandiri di atas, lalu upload bukti transfer.",
         isActive: true,
       },
@@ -234,10 +234,10 @@ function getPaymentMethods(): PaymentMethod[] {
         name: "GoPay",
         label: "GoPay",
         type: "e_wallet",
-        accountName: "Lapangin Official",
+        accountName: "Lapabook Official",
         accountNumber: "081234567890",
         provider: "GoPay",
-        details: "GoPay: 081234567890 a/n Lapangin Official",
+        details: "GoPay: 081234567890 a/n Lapabook Official",
         instructions: "Kirim ke GoPay number di atas, lalu upload bukti transfer.",
         isActive: true,
       },
@@ -246,10 +246,10 @@ function getPaymentMethods(): PaymentMethod[] {
         name: "OVO",
         label: "OVO",
         type: "e_wallet",
-        accountName: "Lapangin Official",
+        accountName: "Lapabook Official",
         accountNumber: "081234567890",
         provider: "OVO",
-        details: "OVO: 081234567890 a/n Lapangin Official",
+        details: "OVO: 081234567890 a/n Lapabook Official",
         instructions: "Kirim ke OVO number di atas, lalu upload bukti transfer.",
         isActive: true,
       },
@@ -258,7 +258,7 @@ function getPaymentMethods(): PaymentMethod[] {
         name: "QRIS",
         label: "QRIS",
         type: "qris",
-        accountName: "Lapangin",
+        accountName: "Lapabook",
         provider: "QRIS",
         details: "Scan QRIS yang tersedia di lokasi",
         instructions: "Scan QRIS yang tersedia di lokasi, lalu upload bukti transfer.",
@@ -266,7 +266,7 @@ function getPaymentMethods(): PaymentMethod[] {
       },
     ];
   }
-  return g.__lapanginPaymentMethods;
+  return g.__lapabookPaymentMethods;
 }
 
 function generateBookingCode(): string {
@@ -656,7 +656,7 @@ export class MockAdapter implements DatabaseAdapter {
       customerId: customer.id,
       type: "bonus",
       points: 100,
-      description: "Bonus selamat datang member baru Lapangin!",
+      description: "Bonus selamat datang member baru Lapabook!",
       createdAt: now,
     });
     return { id: customer.id, name: customer.name, email: customer.email, phone: customer.phone, loyaltyPoints: customer.loyaltyPoints, totalSpent: customer.totalSpent, memberSince: customer.memberSince };

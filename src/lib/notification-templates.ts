@@ -44,7 +44,7 @@ const templates: Record<NotificationType, (v: TemplateVars) => TemplateResult> =
       `Jam: ${v.startTime} — ${v.endTime}\n` +
       `Total: ${formatCurrency(v.totalPrice)}\n\n` +
       `Silakan lakukan pembayaran untuk mengkonfirmasi booking Anda.\n\n` +
-      `Terima kasih,\nLapangin`,
+      `Terima kasih,\nLapabook`,
   }),
 
   booking_confirmed: (v) => ({
@@ -56,7 +56,7 @@ const templates: Record<NotificationType, (v: TemplateVars) => TemplateResult> =
       `Tanggal: ${formatDate(v.bookingDate)}\n` +
       `Jam: ${v.startTime} — ${v.endTime}\n\n` +
       `Silakan datang sesuai jadwal. Terima kasih!\n\n` +
-      `Lapangin`,
+      `Lapabook`,
   }),
 
   booking_rejected: (v) => ({
@@ -65,7 +65,7 @@ const templates: Record<NotificationType, (v: TemplateVars) => TemplateResult> =
       `Halo ${v.customerName},\n\n` +
       `Mohon maaf, booking Anda dengan kode ${v.bookingCode} ditolak.\n\n` +
       `Silakan hubungi admin untuk informasi lebih lanjut atau buat booking baru.\n\n` +
-      `Lapangin`,
+      `Lapabook`,
   }),
 
   booking_cancelled: (v) => ({
@@ -74,7 +74,7 @@ const templates: Record<NotificationType, (v: TemplateVars) => TemplateResult> =
       `Halo ${v.customerName},\n\n` +
       `Booking ${v.bookingCode} telah dibatalkan.\n\n` +
       `Jika Anda sudah melakukan pembayaran, silakan hubungi admin untuk proses refund.\n\n` +
-      `Lapangin`,
+      `Lapabook`,
   }),
 
   payment_received: (v) => ({
@@ -83,7 +83,7 @@ const templates: Record<NotificationType, (v: TemplateVars) => TemplateResult> =
       `Halo ${v.customerName},\n\n` +
       `Bukti pembayaran untuk booking ${v.bookingCode} telah kami terima dan sedang diverifikasi.\n\n` +
       `Kami akan menginformasikan status pembayaran Anda segera.\n\n` +
-      `Lapangin`,
+      `Lapabook`,
   }),
 
   payment_confirmed: (v) => ({
@@ -95,7 +95,7 @@ const templates: Record<NotificationType, (v: TemplateVars) => TemplateResult> =
       `Tanggal: ${formatDate(v.bookingDate)}\n` +
       `Jam: ${v.startTime} — ${v.endTime}\n\n` +
       `Booking Anda aktif. Sampai jumpa di lapangan!\n\n` +
-      `Lapangin`,
+      `Lapabook`,
   }),
 
   payment_rejected: (v) => ({
@@ -104,7 +104,7 @@ const templates: Record<NotificationType, (v: TemplateVars) => TemplateResult> =
       `Halo ${v.customerName},\n\n` +
       `Bukti pembayaran untuk booking ${v.bookingCode} tidak dapat diverifikasi.\n\n` +
       `Silakan upload ulang bukti pembayaran yang benar atau hubungi admin.\n\n` +
-      `Lapangin`,
+      `Lapabook`,
   }),
 
   reminder_before_booking: (v) => ({
@@ -116,7 +116,7 @@ const templates: Record<NotificationType, (v: TemplateVars) => TemplateResult> =
       `Tanggal: ${formatDate(v.bookingDate)}\n` +
       `Jam: ${v.startTime} — ${v.endTime}\n\n` +
       `Pastikan Anda datang tepat waktu. Sampai jumpa!\n\n` +
-      `Lapangin`,
+      `Lapabook`,
   }),
 
   admin_new_booking: (v) => ({

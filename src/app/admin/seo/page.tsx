@@ -19,7 +19,7 @@ interface SeoSettings {
 }
 
 const DEFAULT_SEO: SeoSettings = {
-  title: "Lapangin — Booking Lapangan Olahraga Online",
+  title: "Lapabook — Booking Lapangan Olahraga Online",
   description: "Booking lapangan futsal, badminton, basket, dan olahraga lainnya secara online. Cek jadwal, harga, dan lokasi terdekat.",
   keywords: "booking lapangan, sewa lapangan, futsal, badminton, basket, olahraga, lapangan online",
   ogImage: "",
@@ -27,7 +27,7 @@ const DEFAULT_SEO: SeoSettings = {
   ogDescription: "",
   canonicalUrl: "",
   structuredData: "",
-  robotsTxt: "User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /dashboard/\nDisallow: /api/\n\nSitemap: https://lapangin.id/sitemap.xml",
+  robotsTxt: "User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /dashboard/\nDisallow: /api/\n\nSitemap: https://lapabook.id/sitemap.xml",
   sitemapEnabled: true,
   analyticsId: "",
   gtmId: "",
@@ -126,7 +126,7 @@ export default function AdminSeoPage() {
                 value={seo.canonicalUrl}
                 onChange={(e) => handleChange("canonicalUrl", e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                placeholder="https://lapangin.id"
+                placeholder="https://lapabook.id"
               />
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function AdminSeoPage() {
                 value={seo.ogImage}
                 onChange={(e) => handleChange("ogImage", e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                placeholder="https://lapangin.id/og-image.jpg"
+                placeholder="https://lapabook.id/og-image.jpg"
               />
             </div>
           </div>

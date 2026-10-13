@@ -1,4 +1,4 @@
-# Lapangin — Next Features Roadmap & Development Plan
+# Lapabook — Next Features Roadmap & Development Plan
 
 **Date:** 2026-07-15
 **Status:** 📋 Planned — Development Ready
@@ -8,7 +8,7 @@
 
 ## Vision
 
-Transform Lapangin dari **booking tool** menjadi **social sports marketplace** Indonesia. Satu platform di mana player menemukan teman main, owner maximize occupancy, dan komunitas olahraga berkembang.
+Transform Lapabook dari **booking tool** menjadi **social sports marketplace** Indonesia. Satu platform di mana player menemukan teman main, owner maximize occupancy, dan komunitas olahraga berkembang.
 
 **Differentiator:** Tidak ada kompetitor Indonesia yang menggabungkan booking + social matching + shared wallet dalam satu platform.
 
@@ -524,7 +524,7 @@ score = (
 
 ### Sprint 14 — Trust & Transparency 🔍
 **Duration:** 2 weeks
-**Goal:** Bikin Lapangin jadi trust anchor untuk player & owner.
+**Goal:** Bikin Lapabook jadi trust anchor untuk player & owner.
 
 #### Modul 7: Court Live Cam
 
@@ -632,7 +632,7 @@ GET    /api/verifications/[id]/report            — Public verification report
 
 **Badge Display:**
 ```
-🏅 Lapangin Verified        — Score >= 4.0
+🏅 Lapabook Verified        — Score >= 4.0
 🥈 Quality Assured           — Score >= 3.5
 ✅ Basic Verified            — Score >= 3.0
 ```
@@ -768,7 +768,7 @@ Oct 13  → Public Launch + Marketing Push
 
 ## Open Questions
 
-1. **Payment split for pickup games** — Host pays full first then claim from others? Or everyone pays to Lapangin escrow?
+1. **Payment split for pickup games** — Host pays full first then claim from others? Or everyone pays to Lapabook escrow?
 2. **Tournament Builder** — deferred to post-launch (Sprint 16+), needs bracket logic complex
 3. **WhatsApp Business API** — perlu integrasi nyata untuk auto-notif pickup game & flash deals
 4. **Mystery shopper program** — perlu tim ops, deferred until venue count > 50

@@ -228,7 +228,7 @@ Definition of Done:
 - [x] Session API (`src/app/api/auth/session/route.ts`) — Returns current user from JWT cookie.
 - [x] Admin route protection — AdminLayout checks session, redirects to `/admin/login`.
 - [x] Admin sidebar shows user info + logout button.
-- [x] Default admin account: `admin@lapangin.com` / `admin123`.
+- [x] Default admin account: `admin@lapabook.com` / `admin123`.
 
 ### Arsitektur Admin Auth:
 
@@ -240,7 +240,7 @@ Definition of Done:
   - `POST /api/auth/admin/logout` — Clear JWT cookie.
   - `GET /api/auth/session` — Return current user from JWT cookie.
 - **AdminLayout** (`src/components/admin/AdminLayout.tsx`) — Checks session on mount, redirects if not admin.
-- **Cookie:** `lapangin_session` — httpOnly, sameSite=lax, maxAge=86400.
+- **Cookie:** `lapabook_session` — httpOnly, sameSite=lax, maxAge=86400.
 
 Definition of Done:
 

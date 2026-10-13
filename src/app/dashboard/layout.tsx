@@ -104,7 +104,7 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
                 <span className="text-white font-black text-lg">⚡</span>
               </div>
               <div>
-                <h1 className="font-black text-gray-900 text-lg">Lapangin</h1>
+                <h1 className="font-black text-gray-900 text-lg">Lapabook</h1>
                 <p className="text-xs text-gray-500">Owner Dashboard</p>
               </div>
             </Link>

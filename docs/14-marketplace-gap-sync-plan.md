@@ -1,6 +1,6 @@
-# Marketplace Gap Sync Plan — Lapangin
+# Marketplace Gap Sync Plan — Lapabook
 
-Dokumen ini adalah checklist kerja sebelum Lapangin lanjut ke fitur advanced seperti referral, team invite, public roster, open play, sparring, turnamen, dan full marketplace onboarding.
+Dokumen ini adalah checklist kerja sebelum Lapabook lanjut ke fitur advanced seperti referral, team invite, public roster, open play, sparring, turnamen, dan full marketplace onboarding.
 
 ## Goal
 
@@ -10,7 +10,7 @@ Arah produk:
 
 > Booking-first marketplace + venue operations platform untuk Indonesia.
 
-Artinya Lapangin harus unggul dulu di booking flow, payment status, owner/operator tooling, privacy, dan loyalty ledger sebelum mengejar fitur komunitas besar.
+Artinya Lapabook harus unggul dulu di booking flow, payment status, owner/operator tooling, privacy, dan loyalty ledger sebelum mengejar fitur komunitas besar.
 
 ---
 
@@ -20,8 +20,8 @@ Artinya Lapangin harus unggul dulu di booking flow, payment status, owner/operat
 
 - README diarahkan ke konsep booking-first marketplace.
 - Credential demo diseragamkan:
-  - `admin@lapangin.id / Admin123!@#`
-  - `owner@lapangin.id / Owner123!@#`
+  - `admin@lapabook.id / Admin123!@#`
+  - `owner@lapabook.id / Owner123!@#`
 - `docs/SYSTEM_TRUTH.md` diperbarui sebagai source of truth.
 - `docs/CLINE_LOCAL_WORKFLOW.md` diperketat untuk kerja lokal.
 - `.clinerules` ditambahkan untuk membatasi perubahan CLINE.
@@ -320,7 +320,7 @@ Use this order when continuing with CLINE:
 ## CLINE copy-paste prompt for next session
 
 ```txt
-You are continuing Lapangin MSR locally.
+You are continuing Lapabook MSR locally.
 First read docs/SYSTEM_TRUTH.md, docs/CLINE_LOCAL_WORKFLOW.md, docs/14-marketplace-gap-sync-plan.md, and .clinerules.
 Keep DATABASE_PROVIDER=mock.
 Do not add advanced marketplace/community features until the current gap for the target area is closed.

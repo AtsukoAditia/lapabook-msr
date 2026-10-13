@@ -15,7 +15,7 @@ Tiga dashboard terpisah berdasarkan role:
 
 | Role | URL | Description |
 |------|-----|-------------|
-| **Super Admin** (tim Lapangin) | `/{SECRET_PATH}/` | Manage owners, approve registrations, CMS, SEO, ads |
+| **Super Admin** (tim Lapabook) | `/{SECRET_PATH}/` | Manage owners, approve registrations, CMS, SEO, ads |
 | **Owner Lapangan** | `/dashboard/` | Manage venue sendiri, bookings, courts, stats |
 | **Customer/Player** | `/profile/` | Booking history, achievements, referrals, leaderboard |
 
@@ -307,8 +307,8 @@ Rewrite auth service untuk delegate ke `getDatabaseAdapter()`. Semua customer op
 
 | Email | Password | Role | Dashboard |
 |-------|----------|------|-----------|
-| `admin@lapangin.id` | `Admin123!@#` | Super Admin | `/{SECRET}/` |
-| `owner@lapangin.id` | `Owner123!@#` | Venue Owner | `/dashboard/` |
+| `admin@lapabook.id` | `Admin123!@#` | Super Admin | `/{SECRET}/` |
+| `owner@lapabook.id` | `Owner123!@#` | Venue Owner | `/dashboard/` |
 | `john@test.com` | `password123` | Customer | `/profile/` |
 
 ---
@@ -382,7 +382,7 @@ venues.review_count  INTEGER DEFAULT 0
 - `WEATHER_API_KEY` in `.env.local`
 
 ### Static Pages
-- `/tentang` — About Lapangin (mission, features, tech stack)
+- `/tentang` — About Lapabook (mission, features, tech stack)
 - `/kebijakan` — Privacy Policy (9 sections: data collection, usage, sharing, security, rights, retention, cookies, contact, changes)
 - `/syarat` — Terms & Conditions (customer: registration, booking, payment, loyalty, referral, obligations; owner: registration, venue management, booking, data; general: prohibitions, rights, liability, law)
 - `/kontak` — Contact info (email, social media, WhatsApp, address, hours, FAQ)

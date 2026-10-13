@@ -227,7 +227,7 @@ export default function HomePage() {
             {[
               { name: "Riko, Jakarta", text: "Booking futsal jadi 2 menit beres. Bayar, upload bukti, langsung confirmed.", stars: 5 },
               { name: "Sinta, Bandung", text: "Suka fitur hold 15 menit. Nggak rebutan slot pas jam rame.", stars: 5 },
-              { name: "Owner Greenfield", text: "Sejak pakai Lapangin, okupansi naik 30%. Kelola harga weekday/weekend gampang.", stars: 5 },
+              { name: "Owner Greenfield", text: "Sejak pakai Lapabook, okupansi naik 30%. Kelola harga weekday/weekend gampang.", stars: 5 },
             ].map(t => (
               <div key={t.name} className="rounded-2xl border border-slate-100 bg-slate-50 p-5">
                 <div className="text-amber-500 text-sm">{"★".repeat(t.stars)}</div>
@@ -291,7 +291,7 @@ export default function HomePage() {
                     </span>
                   </h2>
                   <p className="text-slate-600 mb-6 leading-relaxed">
-                    Daftar sekarang dan nikmati program loyalty Lapangin!
+                    Daftar sekarang dan nikmati program loyalty Lapabook!
                     Setiap transaksi booking lapangan akan mendapatkan poin
                     yang bisa ditukarkan untuk diskon, bonus jam, bahkan
                     lapangan gratis! 🎉
@@ -347,7 +347,7 @@ export default function HomePage() {
                   </h2>
                   <p className="text-slate-600 mb-6 leading-relaxed">
                     Punya lapangan futsal, badminton, basket, atau olahraga lainnya?
-                    Daftarkan venue Anda di Lapangin dan dapatkan akses ke ribuan pemain potensial.
+                    Daftarkan venue Anda di Lapabook dan dapatkan akses ke ribuan pemain potensial.
                     Kelola booking, atur harga, dan lihat statistik venue Anda semuanya di satu tempat.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3">
@@ -416,7 +416,7 @@ export default function HomePage() {
             Siap Bermain? 🏆
           </h2>
           <p className="mt-4 text-emerald-100 text-lg max-w-lg mx-auto">
-            Booking sekarang dan rasakan kemudahan Lapangin. Kumpulkan poin untuk reward eksklusif!
+            Booking sekarang dan rasakan kemudahan Lapabook. Kumpulkan poin untuk reward eksklusif!
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link

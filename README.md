@@ -1,4 +1,4 @@
-# 🏟️ Lapangin — Sports Court Booking Marketplace
+# 🏟️ Lapabook — Sports Court Booking Marketplace
 
 > Web-based PWA untuk booking lapangan olahraga, loyalty points, dan operasional venue olahraga di Indonesia.
 
@@ -11,7 +11,7 @@
 
 ## 🎯 Product Direction
 
-Lapangin diarahkan sebagai **booking-first marketplace** untuk sewa lapangan olahraga di Indonesia.
+Lapabook diarahkan sebagai **booking-first marketplace** untuk sewa lapangan olahraga di Indonesia.
 
 Fokus tahap awal:
 
@@ -80,7 +80,7 @@ cp .env.example .env.local
 DATABASE_PROVIDER=mock
 JWT_SECRET=replace-with-a-long-random-value-at-least-32-chars
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_APP_NAME=Lapangin
+NEXT_PUBLIC_APP_NAME=Lapabook
 
 # 4. Check local readiness
 npm run doctor
@@ -112,8 +112,8 @@ For CLINE local work, read these first:
 
 | Email              | Password     | Role        |
 | ------------------ | ------------ | ----------- |
-| admin@lapangin.id  | Admin123!@#  | Super Admin |
-| owner@lapangin.id  | Owner123!@#  | Venue Owner |
+| admin@lapabook.id  | Admin123!@#  | Super Admin |
+| owner@lapabook.id  | Owner123!@#  | Venue Owner |
 
 **Login:** http://localhost:3000/admin/login
 
@@ -240,7 +240,7 @@ curl -X POST http://localhost:3000/api/payments/proof \
 # Admin login
 curl -X POST http://localhost:3000/api/auth/admin/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@lapangin.id","password":"Admin123!@#"}' \
+  -d '{"email":"admin@lapabook.id","password":"Admin123!@#"}' \
   -c cookies.txt
 ```
 
@@ -272,7 +272,7 @@ vercel deploy
 DATABASE_PROVIDER=mock
 JWT_SECRET=your-secret-key-min-32-chars
 NEXT_PUBLIC_APP_URL=https://your-domain.com
-NEXT_PUBLIC_APP_NAME=Lapangin
+NEXT_PUBLIC_APP_NAME=Lapabook
 ```
 
 For real production booking, use PostgreSQL only after `PostgresAdapter` and migrations are fully implemented.
@@ -281,4 +281,4 @@ For real production booking, use PostgreSQL only after `PostgresAdapter` and mig
 
 ## 📝 License
 
-MIT © 2026 Lapangin
+MIT © 2026 Lapabook

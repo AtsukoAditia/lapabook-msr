@@ -29,8 +29,8 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd /home/ubuntu/projects/lapangin-msr
+            cd /home/ubuntu/projects/lapabook-msr
             git pull origin main
             npm ci
             npm run build
-            sudo systemctl restart lapangin
+            sudo systemctl restart lapabook

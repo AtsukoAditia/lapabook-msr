@@ -138,7 +138,7 @@ Deterministic anti-pattern detector (no LLM). Scans for AI-generated UI tells:
 
 | Issue | Fix |
 |-------|-----|
-| AdminLayout header "ArenaBook" | Changed to "Lapangin" |
+| AdminLayout header "ArenaBook" | Changed to "Lapabook" |
 | `gradient-text` class used in globals.css | Changed to solid color text |
 | Purple/indigo in admin customer avatars | Changed to primary-500/600 |
 

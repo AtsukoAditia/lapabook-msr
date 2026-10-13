@@ -45,7 +45,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-10 border-t border-white/10 pt-6 flex flex-col sm:flex-row justify-between gap-3 text-xs text-slate-500">
-          <span>© 2026 Lapangin. All rights reserved.</span>
+          <span>© 2026 Lapabook. All rights reserved.</span>
           <span>Made with ♥ untuk olahraga Indonesia</span>
         </div>
       </div>

@@ -9,14 +9,14 @@ import InstallPrompt from "@/components/pwa/InstallPrompt";
 const font = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Lapangin — Booking Lapangan Olahraga",
+  title: "Lapabook — Booking Lapangan Olahraga",
   description:
     "Booking lapangan olahraga lebih cepat, rapi, dan mobile friendly. Futsal, badminton, padel, tenis, basket, dan minisoccer.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Lapangin",
+    title: "Lapabook",
   },
   formatDetection: {
     telephone: false,

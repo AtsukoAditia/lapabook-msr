@@ -1,4 +1,4 @@
-# Lapangin API Reference
+# Lapabook API Reference
 
 ## Auth
 

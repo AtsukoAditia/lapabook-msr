@@ -138,7 +138,7 @@ export default function InvoicePage() {
             <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-5 text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold">⚽ Lapangin</h1>
+                  <h1 className="text-2xl font-bold">⚽ Lapabook</h1>
                   <p className="text-emerald-100 text-sm mt-1">Invoice Pembayaran</p>
                 </div>
                 <div className="text-right">
@@ -236,8 +236,8 @@ export default function InvoicePage() {
               <div className="text-xs text-gray-400 text-center pt-4 border-t">
                 <p>Dibuat: {new Date(data.createdAt).toLocaleString("id-ID")}</p>
                 {data.paidAt && <p>Dibayar: {new Date(data.paidAt).toLocaleString("id-ID")}</p>}
-                <p className="mt-2">Terima kasih telah menggunakan Lapangin!</p>
-                <p>lapangin.id</p>
+                <p className="mt-2">Terima kasih telah menggunakan Lapabook!</p>
+                <p>lapabook.id</p>
               </div>
             </div>
           </div>

@@ -1,5 +1,5 @@
 -- ==========================================================
--- Lapangin MSR — PostgreSQL Demo Seed Data
+-- Lapabook MSR — PostgreSQL Demo Seed Data
 -- Aligned with schema.sql
 -- ==========================================================
 
@@ -53,17 +53,17 @@ ON CONFLICT (id) DO NOTHING;
 -- Password for all demo owners: Owner123!@# (hash verified)
 -- Super admin: Admin123!@#
 INSERT INTO admins (id, username, name, email, password_hash, role, is_active, created_at, updated_at) VALUES
-  ('admin-1', 'superadmin', 'Super Admin',   'admin@lapangin.id',  '$2b$10$c6oIJREEQCdxIc8mY/1T2uAxZA/uSIlyQ4KsdNxRlC0KnxW9tPvXS', 'super_admin', true, NOW(), NOW()),
-  ('owner-1', 'venueowner', 'Venue Owner',   'owner@lapangin.id',  '$2b$12$qjcJ6wyuBSh0ymteRxyoa.TaJ5skk3uMhJEGN1AX/cQPDGzyJUQli', 'admin',       true, NOW(), NOW()),
+  ('admin-1', 'superadmin', 'Super Admin',   'admin@lapabook.id',  '$2b$10$c6oIJREEQCdxIc8mY/1T2uAxZA/uSIlyQ4KsdNxRlC0KnxW9tPvXS', 'super_admin', true, NOW(), NOW()),
+  ('owner-1', 'venueowner', 'Venue Owner',   'owner@lapabook.id',  '$2b$12$qjcJ6wyuBSh0ymteRxyoa.TaJ5skk3uMhJEGN1AX/cQPDGzyJUQli', 'admin',       true, NOW(), NOW()),
   ('admin-andi-greenfield', 'andiwijaya',   'Andi Wijaya',   'andi@greenfield.id',     '$2b$12$qjcJ6wyuBSh0ymteRxyoa.TaJ5skk3uMhJEGN1AX/cQPDGzyJUQli', 'admin', true, NOW(), NOW()),
   ('admin-budi-rahasian',   'budi',         'Budi Santoso',  'budi@rahasian.id',       '$2b$12$qjcJ6wyuBSh0ymteRxyoa.TaJ5skk3uMhJEGN1AX/cQPDGzyJUQli', 'admin', true, NOW(), NOW()),
   ('admin-charlie-arena',   'charlieputra', 'Charlie Putra', 'charlie@arenafutsal.id', '$2b$12$qjcJ6wyuBSh0ymteRxyoa.TaJ5skk3uMhJEGN1AX/cQPDGzyJUQli', 'admin', true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- ==================== VENUE OWNERS ====================
--- Fixed: owner@lapangin.id must have linked venue_owners record, otherwise authenticateOwner fails
+-- Fixed: owner@lapabook.id must have linked venue_owners record, otherwise authenticateOwner fails
 INSERT INTO venue_owners (id, admin_id, business_name, pic_name, phone, email, status, created_at, updated_at) VALUES
-  ('owner-demo-1',       'owner-1',               'Lapangin Demo Owner',     'Demo Owner',    '081234567890', 'owner@lapangin.id',      'active', NOW(), NOW()),
+  ('owner-demo-1',       'owner-1',               'Lapabook Demo Owner',     'Demo Owner',    '081234567890', 'owner@lapabook.id',      'active', NOW(), NOW()),
   ('owner-greenfield',   'admin-andi-greenfield', 'Greenfield Sports Club',  'Andi Wijaya',   '081234567890', 'andi@greenfield.id',     'active', NOW(), NOW()),
   ('owner-rahasian',     'admin-budi-rahasian',   'Rahasia Badminton Arena', 'Budi Santoso',  '082345678901', 'budi@rahasian.id',       'active', NOW(), NOW()),
   ('owner-arena-futsal', 'admin-charlie-arena',   'Arena Futsal Bandung',    'Charlie Putra', '083456789012', 'charlie@arenafutsal.id', 'active', NOW(), NOW())
@@ -194,9 +194,9 @@ ON CONFLICT (id) DO NOTHING;
 
 -- ==================== PAYMENT METHODS ====================
 INSERT INTO payment_methods (id, name, label, type, account_name, account_number, bank_name, is_active, instructions, created_at, updated_at) VALUES
-  ('pm-1', 'BCA Transfer', 'BCA Transfer', 'bank_transfer', 'PT Lapangin Indonesia', '1234567890', 'BCA', true,  'Transfer ke rekening BCA atas nama PT Lapangin Indonesia. Setelah transfer, kirim bukti pembayaran.', NOW(), NOW()),
-  ('pm-2', 'Mandiri Transfer', 'Mandiri Transfer', 'bank_transfer', 'PT Lapangin Indonesia', '0987654321', 'Mandiri', true, 'Transfer ke rekening Mandiri atas nama PT Lapangin Indonesia. Setelah transfer, kirim bukti pembayaran.', NOW(), NOW()),
-  ('pm-3', 'QRIS', 'QRIS', 'qris', 'PT Lapangin Indonesia', 'QRIS-LAPANGIN', NULL, true, 'Scan QR code yang diberikan. Setelah transfer, kirim bukti pembayaran.', NOW(), NOW())
+  ('pm-1', 'BCA Transfer', 'BCA Transfer', 'bank_transfer', 'PT Lapabook Indonesia', '1234567890', 'BCA', true,  'Transfer ke rekening BCA atas nama PT Lapabook Indonesia. Setelah transfer, kirim bukti pembayaran.', NOW(), NOW()),
+  ('pm-2', 'Mandiri Transfer', 'Mandiri Transfer', 'bank_transfer', 'PT Lapabook Indonesia', '0987654321', 'Mandiri', true, 'Transfer ke rekening Mandiri atas nama PT Lapabook Indonesia. Setelah transfer, kirim bukti pembayaran.', NOW(), NOW()),
+  ('pm-3', 'QRIS', 'QRIS', 'qris', 'PT Lapabook Indonesia', 'QRIS-LAPABOOK', NULL, true, 'Scan QR code yang diberikan. Setelah transfer, kirim bukti pembayaran.', NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 -- ── Customers ──
 INSERT INTO customers (name, email, phone, password_hash, is_verified, is_active, loyalty_points, total_spent, member_since) VALUES

@@ -78,7 +78,7 @@ export class PaymentService {
         },
       ],
       callbacks: {
-        finish: `/booking/success?code=${booking.bookingCode}`,
+        finish: `/checkout/success?code=${booking.bookingCode}`,
       },
     };
 

@@ -52,6 +52,10 @@ const POLLABLE_STATUSES: Booking["bookingStatus"][] = [
   "waiting_verification",
 ];
 
+function bookingApiUrl(code: string, phone: string) {
+  return `/api/bookings/${code}${phone ? `?phone=${encodeURIComponent(phone)}` : ""}`;
+}
+
 function formatCountdown(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
   const secs = seconds % 60;
@@ -177,6 +181,8 @@ function getStatusCard(
 function SuccessContent() {
   const searchParams = useSearchParams();
   const bookingCode = searchParams.get("code") ?? "";
+  // ph = phone hint from checkout redirect; keeps guest access after IDOR hardening (lookup 403s without phone)
+  const phoneParam = searchParams.get("ph") ?? "";
 
   const [booking, setBooking] = useState<PublicBooking | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
@@ -194,7 +200,7 @@ function SuccessContent() {
     if (!bookingCode) return null;
 
     try {
-      const res = await fetch(`/api/bookings/${bookingCode}`, {
+      const res = await fetch(bookingApiUrl(bookingCode, phoneParam), {
         cache: "no-store",
       });
 
@@ -212,7 +218,7 @@ function SuccessContent() {
     }
 
     return null;
-  }, [bookingCode]);
+  }, [bookingCode, phoneParam]);
 
   useEffect(() => {
     if (!bookingCode) return;
@@ -222,7 +228,7 @@ function SuccessContent() {
     async function loadInitialData() {
       try {
         const [bookingRes, paymentMethodsRes] = await Promise.all([
-          fetch(`/api/bookings/${bookingCode}`, {
+          fetch(bookingApiUrl(bookingCode, phoneParam), {
             signal: controller.signal,
             cache: "no-store",
           }),
@@ -256,7 +262,7 @@ function SuccessContent() {
     loadInitialData();
 
     return () => controller.abort();
-  }, [bookingCode]);
+  }, [bookingCode, phoneParam]);
 
   useEffect(() => {
     if (!booking || !POLLABLE_STATUSES.includes(booking.bookingStatus)) return;

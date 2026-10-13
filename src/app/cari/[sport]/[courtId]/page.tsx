@@ -2,6 +2,22 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import { getSportVisual } from "@/lib/sport-icons";
+import {
+  SearchX,
+  Home,
+  Sun,
+  TentTree,
+  MapPin,
+  Banknote,
+  Calendar,
+  PartyPopper,
+  Palmtree,
+  CalendarDays,
+  Camera,
+  Trophy,
+  Smartphone,
+} from "lucide-react";
 
 interface PricingRule {
   id: string;
@@ -75,7 +91,7 @@ export default function CourtDetailPage({ params }: { params: Promise<{ sport: s
   }, [courtId]);
 
   if (loading) return <div className="min-h-screen bg-slate-50 flex items-center justify-center"><div className="animate-pulse text-lg text-slate-400">Memuat...</div></div>;
-  if (!data) return <div className="min-h-screen bg-slate-50 flex items-center justify-center"><p className="text-5xl mb-4">😢</p><p className="text-slate-500">Lapangan tidak ditemukan</p></div>;
+  if (!data) return <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-2"><SearchX className="h-12 w-12 text-slate-300" aria-hidden="true" /><p className="text-slate-500">Lapangan tidak ditemukan</p></div>;
 
   const { court, venue, area, pricing, siblingCourts, bookingsByDate } = data;
   const slots = generateSlots(venue.openTime, venue.closeTime);
@@ -113,8 +129,7 @@ export default function CourtDetailPage({ params }: { params: Promise<{ sport: s
     });
   }
 
-  const sportEmojiMap: Record<string, string> = { futsal: "⚽", "minisoccer": "🥅", "mini-soccer": "🥅", badminton: "🏸", "bulu-tangkis": "🏸", padel: "🎾", tenis: "🎾", basket: "🏀" };
-  const emoji = sportEmojiMap[sportSlug] || "🏟️";
+  const { Icon: SportIcon } = getSportVisual(sportSlug);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -129,7 +144,7 @@ export default function CourtDetailPage({ params }: { params: Promise<{ sport: s
             <span className="text-white font-medium">{court.name}</span>
           </nav>
           <div className="flex items-center gap-3">
-            <span className="text-4xl">{emoji}</span>
+            <SportIcon className="h-10 w-10 text-white/80" aria-hidden="true" />
             <div>
               <h1 className="text-2xl font-black sm:text-3xl">{court.name}</h1>
               <p className="text-emerald-100 text-sm">{venue.name}{area ? ` · ${area.city}, ${area.province}` : ""}</p>
@@ -158,7 +173,7 @@ export default function CourtDetailPage({ params }: { params: Promise<{ sport: s
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-sm font-bold text-slate-900 mb-3">Informasi Lapangan</h2>
             <dl className="space-y-2 text-sm">
-              <div className="flex justify-between"><dt className="text-slate-500">Tipe</dt><dd className="font-medium text-slate-900">{court.indoorType === "indoor" ? "🏠 Indoor" : court.indoorType === "outdoor" ? "☀️ Outdoor" : "🏕️ Semi Outdoor"}</dd></div>
+              <div className="flex justify-between"><dt className="text-slate-500">Tipe</dt><dd className="font-medium text-slate-900 inline-flex items-center gap-1">{court.indoorType === "indoor" ? (<><Home className="h-3.5 w-3.5" aria-hidden="true" /> Indoor</>) : court.indoorType === "outdoor" ? (<><Sun className="h-3.5 w-3.5" aria-hidden="true" /> Outdoor</>) : (<><TentTree className="h-3.5 w-3.5" aria-hidden="true" /> Semi Outdoor</>)}</dd></div>
               {court.surfaceType && <div className="flex justify-between"><dt className="text-slate-500">Lantai</dt><dd className="font-medium text-slate-900">{court.surfaceType}</dd></div>}
               {court.capacity > 0 && <div className="flex justify-between"><dt className="text-slate-500">Kapasitas</dt><dd className="font-medium text-slate-900">{court.capacity} orang</dd></div>}
               <div className="flex justify-between"><dt className="text-slate-500">Jam Operasional</dt><dd className="font-medium text-slate-900">{venue.openTime?.slice(0, 5)} – {venue.closeTime?.slice(0, 5)}</dd></div>
@@ -178,7 +193,7 @@ export default function CourtDetailPage({ params }: { params: Promise<{ sport: s
 
         {/* Google Maps */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-bold text-slate-900 mb-3">📍 Lokasi</h2>
+          <h2 className="mb-3 flex items-center gap-1.5 text-sm font-bold text-slate-900"><MapPin className="h-4 w-4 text-blue-800" aria-hidden="true" /> Lokasi</h2>
           <div className="rounded-xl overflow-hidden border border-slate-100">
             <iframe
               title="Lokasi Venue"
@@ -205,7 +220,7 @@ export default function CourtDetailPage({ params }: { params: Promise<{ sport: s
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition"
             >
-              📱 Buka di Google Maps
+              <Smartphone className="h-4 w-4" aria-hidden="true" /> Buka di Google Maps
             </a>
 
           </div>
@@ -213,14 +228,14 @@ export default function CourtDetailPage({ params }: { params: Promise<{ sport: s
 
         {/* Pricing */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-bold text-slate-900 mb-3">💰 Daftar Harga</h2>
+          <h2 className="mb-3 flex items-center gap-1.5 text-sm font-bold text-slate-900"><Banknote className="h-4 w-4 text-blue-800" aria-hidden="true" /> Daftar Harga</h2>
           {pricing.length > 0 ? (
             <div className="divide-y divide-slate-100">
               {pricing.map(rule => (
                 <div key={rule.id} className="flex items-center justify-between py-2.5">
                   <div>
                     <span className="text-sm text-slate-700 font-medium">
-                      {rule.dayType === "weekday" ? "📅 Weekday" : rule.dayType === "weekend" ? "🎉 Weekend" : rule.dayType === "holiday" ? "🏖️ Hari Libur" : "📆 Semua Hari"}
+                      <span className="inline-flex items-center gap-1">{rule.dayType === "weekday" ? (<><Calendar className="h-3.5 w-3.5" aria-hidden="true" /> Weekday</>) : rule.dayType === "weekend" ? (<><PartyPopper className="h-3.5 w-3.5" aria-hidden="true" /> Weekend</>) : rule.dayType === "holiday" ? (<><Palmtree className="h-3.5 w-3.5" aria-hidden="true" /> Hari Libur</>) : (<><CalendarDays className="h-3.5 w-3.5" aria-hidden="true" /> Semua Hari</>)}</span>
                     </span>
                     <span className="text-xs text-slate-400 ml-2">{rule.startTime?.slice(0, 5)} – {rule.endTime?.slice(0, 5)}</span>
                   </div>
@@ -268,11 +283,11 @@ export default function CourtDetailPage({ params }: { params: Promise<{ sport: s
 
         {/* Photos Placeholder */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-bold text-slate-900 mb-3">📸 Foto Lapangan</h2>
+          <h2 className="mb-3 flex items-center gap-1.5 text-sm font-bold text-slate-900"><Camera className="h-4 w-4 text-blue-800" aria-hidden="true" /> Foto Lapangan</h2>
           <div className="grid grid-cols-3 gap-3">
             {[1, 2, 3].map(i => (
               <div key={i} className="aspect-video rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center border border-slate-100">
-                <span className="text-3xl opacity-30">{emoji}</span>
+                <SportIcon className="h-9 w-9 text-blue-800 opacity-30" aria-hidden="true" />
               </div>
             ))}
           </div>
@@ -281,7 +296,7 @@ export default function CourtDetailPage({ params }: { params: Promise<{ sport: s
 
         {/* Date & Slot Selection */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-bold text-slate-900 mb-4">📅 Pilih Tanggal & Jam</h2>
+          <h2 className="mb-4 flex items-center gap-1.5 text-sm font-bold text-slate-900"><Calendar className="h-4 w-4 text-blue-800" aria-hidden="true" /> Pilih Tanggal & Jam</h2>
 
           {/* Date selector */}
           <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-hide">
@@ -311,7 +326,7 @@ export default function CourtDetailPage({ params }: { params: Promise<{ sport: s
             href={`/booking/${sportSlug}/${venue.slug}/${court.slug}`}
             className="hidden sm:inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-emerald-700 transition mb-4"
           >
-            🏟️ Booking Sekarang
+            <Trophy className="h-4 w-4" aria-hidden="true" /> Booking Sekarang
           </Link>
 
           {/* Slots */}
@@ -341,7 +356,7 @@ export default function CourtDetailPage({ params }: { params: Promise<{ sport: s
         {/* Sibling Courts */}
         {siblingCourts.length > 0 && (
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-sm font-bold text-slate-900 mb-3">🏟️ Lapangan Lain di {venue.name}</h2>
+            <h2 className="mb-3 flex items-center gap-1.5 text-sm font-bold text-slate-900"><Trophy className="h-4 w-4 text-blue-800" aria-hidden="true" /> Lapangan Lain di {venue.name}</h2>
             <div className="grid gap-3 sm:grid-cols-2">
               {siblingCourts.map(sc => (
                 <Link
@@ -368,7 +383,7 @@ export default function CourtDetailPage({ params }: { params: Promise<{ sport: s
             href={`/booking/${sportSlug}/${venue.slug}/${court.slug}`}
             className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3 text-sm font-bold text-emerald-700 shadow-lg hover:bg-yellow-300 hover:text-emerald-800 transition-all hover:scale-105"
           >
-            🏟️ Booking Sekarang
+            <Trophy className="h-4 w-4" aria-hidden="true" /> Booking Sekarang
           </Link>
         </div>
       </main>
@@ -379,7 +394,7 @@ export default function CourtDetailPage({ params }: { params: Promise<{ sport: s
           href={`/booking/${sportSlug}/${venue.slug}/${court.slug}`}
           className="flex items-center justify-center gap-2 w-full rounded-xl bg-emerald-600 py-3.5 text-base font-bold text-white shadow-md hover:bg-emerald-700 transition"
         >
-          🏟️ Booking Sekarang
+          <Trophy className="h-4 w-4" aria-hidden="true" /> Booking Sekarang
         </Link>
       </div>
     </div>

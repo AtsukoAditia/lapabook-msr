@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { MessageCircle } from "lucide-react";
 
 interface Conversation {
   id: string;
@@ -147,7 +148,7 @@ export default function SupportPage() {
         <div className="space-y-2">
           {conversations.length === 0 && !showNew ? (
             <div className="text-center py-16 text-gray-500">
-              <p className="text-4xl mb-3">💬</p>
+              <MessageCircle className="mx-auto mb-3 h-10 w-10 text-gray-300" aria-hidden="true" />
               <p className="font-medium">Belum ada percakapan</p>
               <p className="text-sm mt-1">Klik &ldquo;+ Baru&rdquo; untuk memulai chat dengan tim support</p>
             </div>

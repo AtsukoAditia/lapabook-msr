@@ -33,11 +33,14 @@ export async function GET(request: NextRequest) {
     );
     const venueRatingMap = new Map(activeVenuesEarly.map((v, i) => [v.id, ratingEntries[i]]));
 
-    // Find sport by slug
-    const sport = sports.find((s) => s.slug === sportSlug && s.isActive);
-    if (!sport) {
+    // Find sport by slug; optional — tanpa param list semua sport
+    const sport = sportSlug
+      ? sports.find((s) => s.slug === sportSlug && s.isActive)
+      : null;
+    if (sportSlug && !sport) {
       return NextResponse.json({ courts: [], total: 0, page, limit });
     }
+    const sportIdById = new Map(sports.map((s) => [s.id, s]));
 
     // Filter active venues
     const activeVenues = venues.filter(
@@ -47,7 +50,7 @@ export async function GET(request: NextRequest) {
 
     // Build enriched court list
     let results = courts
-      .filter((c) => c.sportId === sport.id && c.isActive && activeVenueIds.has(c.venueId))
+      .filter((c) => (sport ? c.sportId === sport.id : true) && c.isActive && activeVenueIds.has(c.venueId))
       .map((court) => {
         const venue = activeVenues.find((v) => v.id === court.venueId)!;
         const area = areas.find((a) => a.id === venue.areaId);
@@ -61,10 +64,13 @@ export async function GET(request: NextRequest) {
 
         const venueRating = venueRatingMap.get(venue.id) || { avgRating: 0, reviewCount: 0 };
 
+        const courtSportSlug = sportIdById.get(court.sportId)?.slug || "";
+
         return {
           courtId: court.id,
           courtName: court.name,
           courtSlug: court.slug,
+          sportSlug: courtSportSlug,
           surfaceType: court.surfaceType,
           indoorType: court.indoorType,
           capacity: court.capacity,

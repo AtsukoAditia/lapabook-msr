@@ -7,12 +7,12 @@ export async function GET() {
   const cookieStore = await cookies();
   const token = cookieStore.get(OWNER_TOKEN_NAME)?.value;
   const session = token ? await verifyToken(token) : null;
-  if (!session || session.role !== "owner") {
+  if (!session || session.role !== "owner" || !session.ownerId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const adapter = getDatabaseAdapter();
-  const venues = await adapter.getVenuesByOwner(session.userId);
+  const venues = await adapter.getVenuesByOwner(session.ownerId);
   const courts: Array<{ id: string; name: string; venueId: string; basePrice: number }> = [];
   const allRules: Array<{ id: string; courtId: string; dayType: string; startTime: string; endTime: string; pricePerHour: number; priority: number }> = [];
 

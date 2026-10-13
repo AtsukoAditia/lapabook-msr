@@ -19,6 +19,7 @@ const navItems = [
   { href: "/admin", label: "Dashboard", icon: "📊" },
   { href: "/admin/sports", label: "Olahraga", icon: "🏸" },
   { href: "/admin/bookings", label: "Booking", icon: "📋" },
+  { href: "/admin/payments", label: "Payments", icon: "💳" },
   { href: "/admin/courts", label: "Lapangan", icon: "🏟️" },
   { href: "/admin/owners", label: "Owner", icon: "👤" },
   { href: "/admin/venues", label: "Venue Approval", icon: "🏢" },

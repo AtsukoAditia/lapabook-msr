@@ -17,6 +17,7 @@ import {
   ChevronDown,
   Menu,
   X,
+  Users,
 } from "lucide-react";
 
 type User = {
@@ -80,6 +81,9 @@ export default function Navbar() {
             <NavLink href="/booking/futsal" active={pathname.startsWith("/booking")}>
               <Calendar className="h-4 w-4" aria-hidden="true" /> Booking
             </NavLink>
+            <NavLink href="/mabar" active={pathname.startsWith("/mabar")}>
+              <Users className="h-4 w-4" aria-hidden="true" /> Mabar
+            </NavLink>
           </div>
 
           {/* Right side */}
@@ -119,6 +123,9 @@ export default function Navbar() {
                         </Link>
                         <Link href="/profile/bookings" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                           <ClipboardList className="h-4 w-4" aria-hidden="true" /> Booking Saya
+                        </Link>
+                        <Link href="/profile/mabar" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                          <Users className="h-4 w-4" aria-hidden="true" /> Mabar Saya
                         </Link>
                       </>
                     )}
@@ -185,6 +192,9 @@ export default function Navbar() {
             <MobileNavLink href="/booking/futsal" onClick={() => setMobileOpen(false)}>
               <Calendar className="h-4 w-4" aria-hidden="true" /> Booking Lapangan
             </MobileNavLink>
+            <MobileNavLink href="/mabar" onClick={() => setMobileOpen(false)}>
+              <Users className="h-4 w-4" aria-hidden="true" /> Mabar
+            </MobileNavLink>
 
             {user ? (
               <>
@@ -204,6 +214,9 @@ export default function Navbar() {
                     </MobileNavLink>
                     <MobileNavLink href="/profile/bookings" onClick={() => setMobileOpen(false)}>
                       <ClipboardList className="h-4 w-4" aria-hidden="true" /> Booking Saya
+                    </MobileNavLink>
+                    <MobileNavLink href="/profile/mabar" onClick={() => setMobileOpen(false)}>
+                      <Users className="h-4 w-4" aria-hidden="true" /> Mabar Saya
                     </MobileNavLink>
                   </>
                 )}

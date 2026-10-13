@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken, ADMIN_TOKEN_NAME } from "@/lib/auth/jwt";
 import { getDatabaseAdapter } from "@/lib/adapters";
+import { Pool } from "pg";
+
+const globalForPg = globalThis as unknown as { __pgPoolAdminCommission?: Pool };
+const pool = globalForPg.__pgPoolAdminCommission ?? new Pool({ connectionString: process.env.DATABASE_URL });
+if (!globalForPg.__pgPoolAdminCommission) globalForPg.__pgPoolAdminCommission = pool;
 
 export async function GET() {
   try {
@@ -13,20 +18,67 @@ export async function GET() {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    if (process.env.DATABASE_PROVIDER === "postgres") {
+      const { rows } = await pool.query(
+        `SELECT v.id, v.name, v.commission_rate, v.platform_fee_type, v.platform_fee_value,
+                COALESCE(b.cnt, 0)::int AS booking_count,
+                COALESCE(b.revenue, 0)::float AS total_revenue
+         FROM venues v
+         LEFT JOIN LATERAL (
+           SELECT COUNT(*) AS cnt, SUM(total_price) AS revenue
+           FROM bookings
+           WHERE venue_id = v.id AND booking_status IN ('confirmed','completed')
+         ) b ON true
+         ORDER BY total_revenue DESC`);
+
+      const venues = rows.map((r) => {
+        const rate = r.commission_rate ?? 10;
+        const feeType = r.platform_fee_type ?? "percentage";
+        const feeValue = r.platform_fee_value ?? 0;
+        let totalCommission: number;
+        if (feeType === "fixed") {
+          totalCommission = r.booking_count * feeValue;
+        } else {
+          totalCommission = Math.round(r.total_revenue * (rate / 100));
+        }
+        return {
+          venueId: r.id,
+          venueName: r.name,
+          commissionRate: rate,
+          platformFeeType: feeType,
+          platformFeeValue: feeValue,
+          totalRevenue: r.total_revenue,
+          totalCommission,
+          ownerPayout: r.total_revenue - totalCommission,
+          bookingCount: r.booking_count,
+        };
+      });
+
+      const totalRevenue = venues.reduce((s, v) => s + v.totalRevenue, 0);
+      const totalCommission = venues.reduce((s, v) => s + v.totalCommission, 0);
+
+      return NextResponse.json({
+        summary: {
+          totalRevenue,
+          totalCommission,
+          ownerPayout: totalRevenue - totalCommission,
+          venueCount: venues.length,
+        },
+        venues,
+      });
+    }
+
+    // Fallback mock/sheets
     const adapter = getDatabaseAdapter();
-    const [venues, bookings, sports] = await Promise.all([
+    const [venues, bookings] = await Promise.all([
       adapter.getVenues(),
       adapter.getBookings(),
-      adapter.getSports(),
     ]);
 
     const confirmed = bookings.filter(
       (b) => b.bookingStatus === "confirmed" || b.bookingStatus === "completed"
     );
 
-    const venueMap = new Map(venues.map((v) => [v.id, v]));
-
-    // Per-venue commission summary
     const byVenue = venues.map((v) => {
       const venueBookings = confirmed.filter((b) => b.venueId === v.id);
       const totalRevenue = venueBookings.reduce((s, b) => s + b.totalPrice, 0);

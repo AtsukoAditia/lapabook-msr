@@ -6,6 +6,24 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import BookingSteps from "@/components/booking/BookingSteps";
 import { ReviewForm } from "@/components/reviews";
 import type { Booking, PaymentMethod } from "@/lib/types/domain";
+import type { LucideIcon } from "lucide-react";
+import {
+  Hourglass,
+  Search,
+  CheckCircle2,
+  PartyPopper,
+  AlarmClock,
+  XCircle,
+  Ban,
+  Pin,
+  Lightbulb,
+  CreditCard,
+  MessageCircle,
+  Home,
+  Calendar,
+  UploadCloud,
+  TriangleAlert,
+} from "lucide-react";
 
 const POLL_INTERVAL_MS = 5000;
 
@@ -57,7 +75,7 @@ function getHeader(booking: PublicBooking | null) {
 
   if (booking.bookingStatus === "completed") {
     return {
-      title: "Selesai Bermain! 🎉",
+      title: "Selesai Bermain!",
       subtitle: "Terima kasih sudah bermain di Lapabook. Jangan lupa beri review!",
     };
   }
@@ -87,7 +105,7 @@ function getStatusCard(
   booking: PublicBooking,
   countdown: number | null,
 ): {
-  icon: string;
+  Icon: LucideIcon;
   title: string;
   body: string;
   className: string;
@@ -96,7 +114,7 @@ function getStatusCard(
   switch (booking.bookingStatus) {
     case "waiting_payment":
       return {
-        icon: "⏳",
+        Icon: Hourglass,
         title: "Menunggu Pembayaran",
         body:
           "Booking masih sementara. Slot ditahan sampai countdown selesai dan baru valid setelah admin mengonfirmasi pembayaran.",
@@ -105,7 +123,7 @@ function getStatusCard(
       };
     case "waiting_verification":
       return {
-        icon: "🔍",
+        Icon: Search,
         title: "Menunggu Verifikasi Admin",
         body:
           "Bukti transfer sudah diterima. Admin sedang memverifikasi pembayaranmu.",
@@ -113,42 +131,42 @@ function getStatusCard(
       };
     case "confirmed":
       return {
-        icon: "✅",
+        Icon: CheckCircle2,
         title: "Booking Dikonfirmasi",
         body: "Pembayaran sudah diverifikasi. Jadwal sudah valid.",
         className: "border-emerald-200 bg-emerald-50 text-emerald-800",
       };
     case "completed":
       return {
-        icon: "🎉",
+        Icon: PartyPopper,
         title: "Selesai Bermain!",
         body: "Booking selesai. Terima kasih sudah bermain! Poin loyalty sudah masuk. Ajak teman pakai referral untuk bonus poin.",
         className: "border-emerald-200 bg-emerald-50 text-emerald-800",
       };
     case "expired":
       return {
-        icon: "⏰",
+        Icon: AlarmClock,
         title: "Booking Kadaluarsa",
         body: "Waktu pembayaran telah habis. Silakan buat booking baru.",
         className: "border-red-200 bg-red-50 text-red-800",
       };
     case "rejected":
       return {
-        icon: "❌",
+        Icon: XCircle,
         title: "Booking Ditolak",
         body: "Pembayaran tidak dapat diverifikasi. Silakan hubungi admin.",
         className: "border-red-200 bg-red-50 text-red-800",
       };
     case "cancelled":
       return {
-        icon: "🚫",
+        Icon: Ban,
         title: "Booking Dibatalkan",
         body: "Booking ini sudah dibatalkan. Silakan buat booking baru.",
         className: "border-slate-200 bg-slate-50 text-slate-800",
       };
     default:
       return {
-        icon: "📌",
+        Icon: Pin,
         title: "Booking Terkirim",
         body: "Status booking sedang diperbarui.",
         className: "border-slate-200 bg-white text-slate-800",
@@ -374,7 +392,7 @@ function SuccessContent() {
     return (
       <div className="flex min-h-[50vh] items-center justify-center bg-slate-50 px-4 text-center">
         <div>
-          <p className="text-3xl">🔎</p>
+          <Search className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
           <h1 className="mt-2 text-lg font-bold text-slate-900">
             Kode Booking Belum Ada
           </h1>
@@ -396,7 +414,7 @@ function SuccessContent() {
     return (
       <div className="flex min-h-[50vh] items-center justify-center bg-slate-50 px-4 text-center">
         <div>
-          <p className="text-3xl">🔍</p>
+          <Search className="mx-auto h-9 w-9 text-slate-400" aria-hidden="true" />
           <h1 className="mt-2 text-lg font-bold text-slate-900">
             Booking Tidak Ditemukan
           </h1>
@@ -441,12 +459,10 @@ function SuccessContent() {
       <BookingSteps
         currentStep={6}
         steps={[
-          { number: 1, label: "Pilih Olahraga", href: "/booking", icon: "🏆" },
-          { number: 2, label: "Pilih Lapangan", href: "/booking", icon: "🏟️" },
-          { number: 3, label: "Pilih Jam Main", icon: "⏰" },
-          { number: 4, label: "Data Pelanggan", icon: "👤" },
-          { number: 5, label: "Pembayaran", icon: "💳" },
-          { number: 6, label: "Konfirmasi", icon: "✅" },
+          { number: 1, label: "Pilih Olahraga", href: "/cari" },
+          { number: 2, label: "Pilih Lapangan & Jam", href: "/cari" },
+          { number: 3, label: "Checkout", href: "/checkout" },
+          { number: 4, label: "Konfirmasi" },
         ]}
         title={header.title}
         subtitle={header.subtitle}
@@ -454,7 +470,7 @@ function SuccessContent() {
 
       <main className="page-enter page-enter-slide-up mx-auto max-w-lg px-4 pt-6 pb-10">
         <section className={`mb-6 rounded-2xl border p-5 text-center ${statusCard.className}`}>
-          <p className="text-3xl">{statusCard.icon}</p>
+          <statusCard.Icon className="mx-auto h-9 w-9" aria-hidden="true" />
           <h2 className="mt-2 text-lg font-bold">{statusCard.title}</h2>
           {statusCard.countdownText && (
             <p className="mt-2 text-3xl font-extrabold">
@@ -507,7 +523,8 @@ function SuccessContent() {
           {/* Unique Code Explanation */}
           <div className="border-t border-dashed border-amber-300 bg-amber-50 px-5 py-3 text-center">
             <p className="text-xs text-amber-700">
-              💡 <strong>Nominal unik:</strong> Transfer tepat <strong>Rp {booking.totalPrice.toLocaleString("id-ID")}</strong> agar admin bisa langsung mengenali booking kamu.
+              <Lightbulb className="mr-1 inline h-3.5 w-3.5 align-text-bottom" aria-hidden="true" />
+              <strong>Nominal unik:</strong> Transfer tepat <strong>Rp {booking.totalPrice.toLocaleString("id-ID")}</strong> agar admin bisa langsung mengenali booking kamu.
             </p>
           </div>
         </section>
@@ -515,8 +532,9 @@ function SuccessContent() {
         {canSubmitProof && (
           <section className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-3">
-              <h2 className="text-sm font-bold text-white">
-                💳 Instruksi Pembayaran
+              <h2 className="flex items-center gap-2 text-sm font-bold text-white">
+                <CreditCard className="h-4 w-4" aria-hidden="true" />
+                Instruksi Pembayaran
               </h2>
             </div>
 
@@ -602,7 +620,9 @@ function SuccessContent() {
                   </label>
                 </div>
                 {error && (
-                  <p className="mt-1.5 text-xs text-red-500">⚠️ {error}</p>
+                  <p className="mt-1.5 flex items-center gap-1 text-xs text-red-500">
+                    <TriangleAlert className="h-3.5 w-3.5" aria-hidden="true" /> {error}
+                  </p>
                 )}
               </div>
 
@@ -612,7 +632,13 @@ function SuccessContent() {
                 disabled={submittingProof || !proofFile}
                 className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-200 transition hover:from-emerald-700 hover:to-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {submittingProof ? "Mengirim..." : "📤 Kirim Bukti Transfer"}
+                {submittingProof ? (
+                  "Mengirim..."
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    <UploadCloud className="h-4 w-4" aria-hidden="true" /> Kirim Bukti Transfer
+                  </span>
+                )}
               </button>
 
               {proofSubmitted && (
@@ -627,8 +653,9 @@ function SuccessContent() {
         {/* WhatsApp Chat Button */}
         <section className="mb-6 overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
           <div className="bg-gradient-to-r from-green-500 to-green-600 px-5 py-3">
-            <h2 className="text-sm font-bold text-white">
-              💬 Butuh Bantuan?
+            <h2 className="flex items-center gap-2 text-sm font-bold text-white">
+              <MessageCircle className="h-4 w-4" aria-hidden="true" />
+              Butuh Bantuan?
             </h2>
           </div>
           <div className="p-5">
@@ -663,15 +690,16 @@ function SuccessContent() {
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Link
             href="/"
-            className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-emerald-200 transition hover:from-emerald-700 hover:to-teal-700"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-emerald-200 transition hover:from-emerald-700 hover:to-teal-700"
           >
-            🏠 Kembali ke Beranda
+            <Home className="h-4 w-4" aria-hidden="true" /> Kembali ke Beranda
           </Link>
           <Link
-            href="/booking"
-            className="rounded-xl border-2 border-slate-300 bg-white px-6 py-3.5 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            href="/cari"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-slate-300 bg-white px-6 py-3.5 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
-            {isFinalOrInactive ? "📅 Booking Baru" : "📅 Booking Lagi"}
+            <Calendar className="h-4 w-4" aria-hidden="true" />
+            {isFinalOrInactive ? "Booking Baru" : "Booking Lagi"}
           </Link>
         </div>
       </main>

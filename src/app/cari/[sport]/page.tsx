@@ -3,7 +3,18 @@
 import { use, useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { sportEmoji } from "@/lib/sport-icons";
+import { getSportVisual } from "@/lib/sport-icons";
+import {
+  Search,
+  Home,
+  Sun,
+  TentTree,
+  MapPin,
+  Users,
+  Clock,
+  Heart,
+  Trophy,
+} from "lucide-react";
 
 interface CourtResult {
   courtId: string;
@@ -198,7 +209,7 @@ export default function SearchPage({
   };
 
   const sportName = sportSlug.charAt(0).toUpperCase() + sportSlug.slice(1).replace(/-/g, " ");
-  const emoji = sportEmoji[sportSlug] || "🏟️";
+  const { Icon: SportIcon } = getSportVisual(sportSlug);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -212,7 +223,7 @@ export default function SearchPage({
             ← Beranda
           </Link>
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-4xl">{emoji}</span>
+            <SportIcon className="h-10 w-10 text-white/80" aria-hidden="true" />
             <h1 className="text-2xl font-black sm:text-3xl">{sportName}</h1>
           </div>
           <p className="text-emerald-100">
@@ -333,7 +344,7 @@ export default function SearchPage({
           </div>
         ) : courts.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-5xl mb-4">🔍</p>
+            <Search className="mx-auto mb-4 h-12 w-12 text-slate-300" aria-hidden="true" />
             <p className="text-lg font-semibold text-slate-700 mb-2">
               Tidak ada lapangan ditemukan
             </p>
@@ -358,7 +369,7 @@ export default function SearchPage({
                 >
                   {/* Placeholder image */}
                   <div className="h-40 bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center relative">
-                    <span className="text-6xl opacity-30">{emoji}</span>
+                    <SportIcon className="h-14 w-14 opacity-30 text-blue-800" aria-hidden="true" />
                     <span className={`absolute top-3 right-3 rounded-full px-2.5 py-1 text-xs font-bold ${
                       court.indoorType === "indoor"
                         ? "bg-blue-100 text-blue-700"
@@ -366,7 +377,13 @@ export default function SearchPage({
                           ? "bg-amber-100 text-amber-700"
                           : "bg-purple-100 text-purple-700"
                     }`}>
-                      {court.indoorType === "indoor" ? "🏠 Indoor" : court.indoorType === "outdoor" ? "☀️ Outdoor" : "🏕️ Semi Outdoor"}
+                      {court.indoorType === "indoor" ? (
+                        <span className="inline-flex items-center gap-1"><Home className="h-3 w-3" aria-hidden="true" /> Indoor</span>
+                      ) : court.indoorType === "outdoor" ? (
+                        <span className="inline-flex items-center gap-1"><Sun className="h-3 w-3" aria-hidden="true" /> Outdoor</span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1"><TentTree className="h-3 w-3" aria-hidden="true" /> Semi Outdoor</span>
+                      )}
                     </span>
                     <button
                       onClick={(e) => {
@@ -377,7 +394,14 @@ export default function SearchPage({
                       className="absolute top-3 left-3 rounded-full bg-white/90 p-1.5 shadow-sm hover:bg-white transition"
                       aria-label={favoriteVenueIds.has(court.venueId) ? "Hapus dari favorit" : "Tambah ke favorit"}
                     >
-                      <span className="text-lg">{favoriteVenueIds.has(court.venueId) ? "❤️" : "🤍"}</span>
+                      <Heart
+                        className={`h-5 w-5 transition ${
+                          favoriteVenueIds.has(court.venueId)
+                            ? "fill-red-500 text-red-500"
+                            : "text-slate-400"
+                        }`}
+                        aria-hidden="true"
+                      />
                     </button>
                   </div>
 
@@ -386,10 +410,16 @@ export default function SearchPage({
                       {court.courtName}
                     </h3>
                     <p className="text-sm text-slate-500 mb-1 truncate">
-                      🏟️ {court.venueName}
+                      <span className="inline-flex items-center gap-1">
+                        <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <span className="truncate">{court.venueName}</span>
+                      </span>
                     </p>
                     <p className="text-xs text-slate-400 mb-3 truncate">
-                      📍 {court.areaCity || court.venueAddress || "Indonesia"}
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" />
+                        <span className="truncate">{court.areaCity || court.venueAddress || "Indonesia"}</span>
+                      </span>
                     </p>
                     <StarRating rating={court.avgRating} count={court.reviewCount} />
 
@@ -401,11 +431,11 @@ export default function SearchPage({
                       )}
                       {court.capacity > 0 && (
                         <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-                          👥 {court.capacity} org
+                          <Users className="mr-1 inline h-3 w-3 align-text-bottom" aria-hidden="true" /> {court.capacity} org
                         </span>
                       )}
                       <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-                        ⏰ {court.openTime?.slice(0, 5)}–{court.closeTime?.slice(0, 5)}
+                        <Clock className="mr-1 inline h-3 w-3 align-text-bottom" aria-hidden="true" /> {court.openTime?.slice(0, 5)}–{court.closeTime?.slice(0, 5)}
                       </span>
                     </div>
 

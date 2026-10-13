@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { CheckCircle2, Repeat } from "lucide-react";
 
 interface Court { courtId: string; courtName: string; venueId: string; venueName: string; minPrice: number; maxPrice: number; }
 interface Sport { id: string; name: string; }
@@ -113,7 +114,7 @@ export default function RecurringBookingPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl p-8 shadow-lg max-w-md w-full text-center">
-          <div className="text-5xl mb-4">✅</div>
+          <div className="mb-4"><CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600" aria-hidden="true" /></div>
           <h2 className="text-xl font-bold mb-2">Booking Berulang Berhasil!</h2>
           <p className="text-gray-600 mb-6">{success}</p>
           <Link href="/profile/bookings" className="block w-full py-3 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700">
@@ -129,7 +130,7 @@ export default function RecurringBookingPage() {
       <div className="bg-white border-b px-6 py-4 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto">
           <Link href="/booking" className="text-emerald-600 text-sm hover:underline">← Kembali</Link>
-          <h1 className="text-lg font-bold mt-1">🔄 Booking Berulang</h1>
+          <h1 className="mt-1 flex items-center gap-2 text-lg font-bold"><Repeat className="h-5 w-5 text-blue-800" aria-hidden="true" /> Booking Berulang</h1>
         </div>
       </div>
 

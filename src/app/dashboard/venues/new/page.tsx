@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const SPORTS_OPTIONS = [
   { id: "futsal", label: "Futsal" },
@@ -54,11 +54,56 @@ const EMPTY_FORM: VenueForm = {
 };
 
 export default function NewVenuePage() {
+  return (
+    <Suspense fallback={<div className="max-w-2xl mx-auto p-6 text-gray-500">Memuat...</div>}>
+      <VenueFormPage />
+    </Suspense>
+  );
+}
+
+function VenueFormPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("edit");
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<VenueForm>(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
+  const [loadingEdit, setLoadingEdit] = useState(!!editId);
   const [error, setError] = useState("");
+
+  // Edit mode: pre-fill form from owner's venue list
+  useEffect(() => {
+    if (!editId) return;
+    fetch("/api/owner/venues")
+      .then((r) => r.json())
+      .then((data) => {
+        // ponytail: filter-from-list; add GET /api/owner/venues/[id] only if list grows large.
+        const v = (data.venues ?? []).find((x: Record<string, unknown>) => x.id === editId);
+        if (!v) {
+          setError("Venue tidak ditemukan");
+          return;
+        }
+        let facilities: string[] = [];
+        try {
+          facilities = Array.isArray(v.facilities) ? v.facilities : JSON.parse(v.facilities ?? "[]");
+        } catch {
+          facilities = [];
+        }
+        setForm({
+          name: v.name ?? "",
+          description: v.description ?? "",
+          address: v.address ?? "",
+          phone: v.phone ?? "",
+          mapsUrl: v.mapsUrl ?? "",
+          sports: [],
+          facilities,
+          openTime: String(v.openTime ?? "06:00").slice(0, 5),
+          closeTime: String(v.closeTime ?? "23:00").slice(0, 5),
+        });
+      })
+      .catch(() => setError("Gagal memuat venue"))
+      .finally(() => setLoadingEdit(false));
+  }, [editId]);
 
   function update<K extends keyof VenueForm>(key: K, val: VenueForm[K]) {
     setForm((prev) => ({ ...prev, [key]: val }));
@@ -76,26 +121,45 @@ export default function NewVenuePage() {
       setError("Nama dan alamat wajib diisi");
       return;
     }
+    if (!editId && form.sports.length === 0) {
+      setError("Pilih minimal 1 olahraga");
+      return;
+    }
     setSubmitting(true);
     setError("");
     try {
       const res = await fetch("/api/owner/venues", {
-        method: "POST",
+        method: editId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          description: form.description,
-          address: form.address,
-          phone: form.phone,
-          mapsUrl: form.mapsUrl,
-          facilities: form.facilities,
-          openTime: form.openTime,
-          closeTime: form.closeTime,
-        }),
+        body: JSON.stringify(
+          editId
+            ? {
+                id: editId,
+                name: form.name,
+                description: form.description,
+                address: form.address,
+                phone: form.phone,
+                mapsUrl: form.mapsUrl,
+                facilities: form.facilities,
+                openTime: form.openTime,
+                closeTime: form.closeTime,
+              }
+            : {
+                name: form.name,
+                description: form.description,
+                address: form.address,
+                phone: form.phone,
+                mapsUrl: form.mapsUrl,
+                sports: form.sports,
+                facilities: form.facilities,
+                openTime: form.openTime,
+                closeTime: form.closeTime,
+              }
+        ),
       });
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Gagal membuat venue");
+        setError(data.error || "Gagal menyimpan venue");
         return;
       }
       router.push("/dashboard/venues");
@@ -111,8 +175,8 @@ export default function NewVenuePage() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-gray-900">Tambah Venue</h1>
-        <p className="text-gray-500 text-sm mt-1">Daftarkan venue baru Anda</p>
+        <h1 className="text-2xl font-black text-gray-900">{editId ? "Edit Venue" : "Tambah Venue"}</h1>
+        <p className="text-gray-500 text-sm mt-1">{editId ? "Perbarui data venue Anda" : "Daftarkan venue baru Anda"}</p>
       </div>
 
       {/* Step indicator */}
@@ -133,6 +197,11 @@ export default function NewVenuePage() {
         ))}
       </div>
 
+      {loadingEdit ? (
+        <div className="bg-white rounded-2xl p-12 text-center border border-gray-100 text-gray-500">
+          Memuat data venue...
+        </div>
+      ) : (
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
         {error && (
           <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-xl">{error}</div>
@@ -341,11 +410,12 @@ export default function NewVenuePage() {
               disabled={submitting}
               className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {submitting ? "Mengirim..." : "Kirim untuk Review"}
+              {submitting ? "Menyimpan..." : editId ? "Simpan Perubahan" : "Kirim untuk Review"}
             </button>
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

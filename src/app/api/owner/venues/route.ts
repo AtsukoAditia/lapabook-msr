@@ -47,20 +47,41 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, address, areaId, phone, description, facilities, openTime, closeTime } = body;
+    const { name, address, areaId, phone, description, facilities, openTime, closeTime, mapsUrl, sports } = body;
 
     if (!name || !address) {
       return NextResponse.json({ error: "name dan address wajib diisi" }, { status: 400 });
+    }
+    if (!Array.isArray(sports) || sports.length === 0) {
+      return NextResponse.json({ error: "Pilih minimal 1 olahraga" }, { status: 400 });
     }
 
     const id = `venue-${Date.now()}`;
     const slug = slugify(name);
 
     await pool.query(
-      `INSERT INTO venues (id, name, slug, address, area_id, phone, description, facilities, open_time, close_time, owner_id, approval_status, is_active)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending_review', true)`,
-      [id, name, slug, address, areaId || null, phone || null, description || null, facilities ? JSON.stringify(facilities) : null, openTime || null, closeTime || null, session.ownerId]
+      `INSERT INTO venues (id, name, slug, address, area_id, phone, description, facilities, open_time, close_time, owner_id, approval_status, is_active, maps_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending_review', true, $12)`,
+      [id, name, slug, address, areaId || null, phone || null, description || null, facilities ? JSON.stringify(facilities) : null, openTime || null, closeTime || null, session.ownerId, mapsUrl || ""]
     );
+
+    // Auto-create one court per selected sport so the venue isn't stuck without courts.
+    // ponytail: default price/surface only; owner edits per-court later via dashboard courts page.
+    const adapter = getDatabaseAdapter();
+    const allSports = await adapter.getSports();
+    for (const sportValue of sports) {
+      // UI sends slugs ("futsal"); resolve to real sports.id ("sport-futsal") for the FK.
+      const sport = allSports.find((s) => s.slug === sportValue || s.id === sportValue);
+      if (!sport) continue;
+      const courtId = `court-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const courtSlug = slugify(`${sport.slug}-court-1`);
+      await pool.query(
+        `INSERT INTO courts (id, venue_id, sport_id, name, slug, surface_type, indoor_type, capacity, base_price, is_active)
+         VALUES ($1, $2, $3, $4, $5, '', 'outdoor', 0, 100000, true)
+         ON CONFLICT (venue_id, slug) DO NOTHING`,
+        [courtId, id, sport.id, `${sport.name} Court 1`, courtSlug]
+      );
+    }
 
     return NextResponse.json({ success: true, id, slug }, { status: 201 });
   } catch (error) {
@@ -81,7 +102,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, name, address, areaId, phone, description, facilities, openTime, closeTime } = body;
+    const { id, name, address, areaId, phone, description, facilities, openTime, closeTime, mapsUrl } = body;
 
     if (!id) {
       return NextResponse.json({ error: "id wajib diisi" }, { status: 400 });
@@ -108,9 +129,10 @@ export async function PUT(request: NextRequest) {
         facilities = COALESCE($8, facilities),
         open_time = COALESCE($9, open_time),
         close_time = COALESCE($10, close_time),
+        maps_url = COALESCE($11, maps_url),
         updated_at = NOW()
        WHERE id = $1`,
-      [id, name || null, slug || null, address || null, areaId || null, phone || null, description || null, facilities ? JSON.stringify(facilities) : null, openTime || null, closeTime || null]
+      [id, name || null, slug || null, address || null, areaId || null, phone || null, description || null, facilities ? JSON.stringify(facilities) : null, openTime || null, closeTime || null, mapsUrl || null]
     );
 
     return NextResponse.json({ success: true });

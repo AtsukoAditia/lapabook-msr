@@ -41,5 +41,6 @@ export function sanitizeBookingInput(body: Record<string, unknown>) {
     endTime: String(body.endTime || "").replace(/[^0-9:]/g, "").slice(0, 5),
     durationMinutes: Math.min(Math.max(Number(body.durationMinutes) || 60, 30), 480),
     notes: sanitizeHTML(String(body.notes || "").trim()).slice(0, 500),
+    voucherCode: String(body.voucherCode || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 50),
   };
 }

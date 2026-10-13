@@ -6,6 +6,7 @@ import type {
   CreatePricingRuleInput,
   UpdatePricingRuleInput,
   CreateBlockedSlotInput,
+  VoucherRow,
 } from "./database-adapter";
 import type {
   Booking,
@@ -296,6 +297,11 @@ export class PostgresAdapter implements DatabaseAdapter {
     return rows[0] ? mapRow<Venue>(rows[0]) : null;
   }
 
+  async getVenueBySlug(slug: string): Promise<Venue | null> {
+    const rows = await query<Record<string, unknown>>("SELECT * FROM venues WHERE slug = $1 AND approval_status = 'approved'", [slug]);
+    return rows[0] ? mapRow<Venue>(rows[0]) : null;
+  }
+
   // ── Courts ──
   async getCourts(): Promise<Court[]> {
     const rows = await query<Record<string, unknown>>("SELECT * FROM courts WHERE is_active = true");
@@ -423,12 +429,30 @@ export class PostgresAdapter implements DatabaseAdapter {
     const ownerPayout = input.totalPrice - commissionAmount;
 
     const { rows } = await pool.query(
-      `INSERT INTO bookings (id, booking_code, customer_name, customer_phone, customer_email, user_id, venue_id, court_id, sport_id, booking_date, start_time, end_time, duration_minutes, total_price, booking_status, payment_status, notes, expires_at, commission_amount, owner_payout)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,'waiting_payment','unpaid',$15,(NOW() + INTERVAL '15 minutes'),$16,$17)
+      `INSERT INTO bookings (id, booking_code, customer_name, customer_phone, customer_email, user_id, venue_id, court_id, sport_id, booking_date, start_time, end_time, duration_minutes, total_price, booking_status, payment_status, notes, expires_at, commission_amount, owner_payout, voucher_code)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,'waiting_payment','unpaid',$15,(NOW() + INTERVAL '15 minutes'),$16,$17,$18)
        RETURNING *`,
-      [id, code, input.customerName, input.customerPhone, input.customerEmail || null, input.userId || null, input.venueId, input.courtId, input.sportId, input.bookingDate, input.startTime, input.endTime, input.durationMinutes, input.totalPrice, input.notes || null, commissionAmount, ownerPayout],
+      [id, code, input.customerName, input.customerPhone, input.customerEmail || null, input.userId || null, input.venueId, input.courtId, input.sportId, input.bookingDate, input.startTime, input.endTime, input.durationMinutes, input.totalPrice, input.notes || null, commissionAmount, ownerPayout, input.voucherCode || null],
     );
     return mapBooking(rows[0]);
+  }
+
+  // ── Vouchers ──
+  async getVoucherByCode(code: string): Promise<VoucherRow | null> {
+    const r = await queryOne<Record<string, unknown>>(
+      "SELECT * FROM vouchers WHERE code = $1",
+      [code.toUpperCase()],
+    );
+    if (!r) return null;
+    return snakeToCamel(r) as unknown as VoucherRow;
+  }
+
+  async incrementVoucherUsage(code: string): Promise<boolean> {
+    const r = await queryOne<{ id: string }>(
+      "UPDATE vouchers SET used_count = used_count + 1 WHERE code = $1 AND is_active = true AND (max_uses IS NULL OR used_count < max_uses) RETURNING id",
+      [code.toUpperCase()],
+    );
+    return Boolean(r);
   }
 
   async updateBookingStatus(id: string, status: Booking["bookingStatus"], paymentStatus?: Booking["paymentStatus"]): Promise<Booking> {

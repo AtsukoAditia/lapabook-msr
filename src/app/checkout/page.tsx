@@ -54,6 +54,12 @@ function CheckoutContent() {
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submittingOnline, setSubmittingOnline] = useState(false);
+
+  // Voucher
+  const [voucherInput, setVoucherInput] = useState("");
+  const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discount: number; label?: string | null } | null>(null);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
+  const [voucherChecking, setVoucherChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConflict, setIsConflict] = useState(false);
   const [snapToken, setSnapToken] = useState<string | null>(null);
@@ -109,7 +115,38 @@ function CheckoutContent() {
   const fallbackTotal = court
     ? Math.round(durationHours * court.basePrice)
     : 0;
-  const totalPrice = pricingInfo?.finalTotal ?? fallbackTotal;
+  const preDiscountTotal = pricingInfo?.finalTotal ?? fallbackTotal;
+  const voucherDiscount = appliedVoucher ? Math.min(appliedVoucher.discount, preDiscountTotal) : 0;
+  const totalPrice = Math.max(0, preDiscountTotal - voucherDiscount);
+
+  async function applyVoucher() {
+    if (!voucherInput.trim()) return;
+    setVoucherError(null);
+    setVoucherChecking(true);
+    try {
+      const res = await fetch("/api/vouchers/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: voucherInput.trim(), totalAmount: preDiscountTotal }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.valid) {
+        setVoucherError(data?.error ?? "Kode voucher tidak berlaku.");
+        return;
+      }
+      setAppliedVoucher({ code: String(voucherInput.trim()).toUpperCase(), discount: Number(data.discountAmount), label: data.label ?? null });
+      setVoucherError(null);
+    } catch {
+      setVoucherError("Gagal memeriksa voucher.");
+    } finally {
+      setVoucherChecking(false);
+    }
+  }
+
+  function removeVoucher() {
+    setAppliedVoucher(null);
+    setVoucherError(null);
+  }
 
   function validate(): string | null {
     if (!court) return "Data lapangan tidak valid.";
@@ -135,6 +172,7 @@ function CheckoutContent() {
         endTime,
         durationMinutes,
         notes: notes.trim() || undefined,
+        voucherCode: appliedVoucher?.code || undefined,
       }),
     });
 
@@ -314,6 +352,55 @@ function CheckoutContent() {
         />
       </div>
 
+      {/* Voucher */}
+      <div>
+        <label htmlFor="co-voucher" className="mb-1.5 block text-sm font-semibold text-slate-700">
+          Voucher <span className="text-xs font-normal text-slate-400">(opsional)</span>
+        </label>
+        {!appliedVoucher ? (
+          <div className="flex gap-2">
+            <input
+              id="co-voucher"
+              type="text"
+              value={voucherInput}
+              onChange={(e) => setVoucherInput(e.target.value)}
+              placeholder="Masukkan kode voucher"
+              className="flex-1 rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-200"
+            />
+            <button
+              type="button"
+              onClick={applyVoucher}
+              disabled={voucherChecking}
+              className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
+            >
+              {voucherChecking ? "Cek..." : "Apply"}
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+            <div>
+              <p className="text-sm font-semibold text-emerald-900">{appliedVoucher.code}</p>
+              {appliedVoucher.label && (
+                <p className="text-xs text-emerald-700">{appliedVoucher.label}</p>
+              )}
+              <p className="text-xs text-emerald-700">Hemat {formatPrice(voucherDiscount)}</p>
+            </div>
+            <button
+              type="button"
+              onClick={removeVoucher}
+              className="rounded-lg border border-emerald-300 bg-white px-3 py-2 text-xs font-medium text-emerald-800"
+            >
+              Hapus
+            </button>
+          </div>
+        )}
+        {voucherError && (
+          <p className="mt-2 flex items-center gap-2 text-xs text-red-500">
+            <TriangleAlert className="h-3.5 w-3.5" aria-hidden="true" /> {voucherError}
+          </p>
+        )}
+      </div>
+
       {/* CTA */}
       <div className="space-y-3 pt-2">
         <button
@@ -432,6 +519,13 @@ function CheckoutContent() {
             )}
           </div>
         </div>
+
+        {appliedVoucher && (
+          <div className="mt-2 flex items-center justify-between rounded-lg bg-emerald-50 px-3 py-2">
+            <span className="text-xs font-medium text-emerald-800">Voucher {appliedVoucher.code}</span>
+            <span className="text-xs font-semibold text-emerald-700">-{formatPrice(voucherDiscount)}</span>
+          </div>
+        )}
       </div>
     </>
   );

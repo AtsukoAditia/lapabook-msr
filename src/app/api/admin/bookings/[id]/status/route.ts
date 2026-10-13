@@ -1,5 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { cookies } from "next/headers";
 import { getDatabaseAdapter } from "@/lib/adapters";
+import { verifyToken, ADMIN_TOKEN_NAME } from "@/lib/auth/jwt";
+import { logAudit } from "@/lib/audit";
 import type { Booking } from "@/lib/types/domain";
 
 const VALID_STATUSES: Booking["bookingStatus"][] = [
@@ -38,6 +41,24 @@ export async function PATCH(
       status as Booking["bookingStatus"],
       paymentStatus as Booking["paymentStatus"] | undefined,
     );
+
+    // Audit trail: siapa mengubah status booking
+    try {
+      const cookieStore = await cookies();
+      const adminSession = await verifyToken(cookieStore.get(ADMIN_TOKEN_NAME)?.value ?? "");
+      if (adminSession) {
+        await logAudit(
+          adminSession.userId,
+          adminSession.role,
+          "booking.status_update",
+          "booking",
+          id,
+          { status, paymentStatus, bookingCode: booking.bookingCode },
+        );
+      }
+    } catch {
+      // best-effort
+    }
 
     // Add loyalty points when booking is confirmed or completed
     if (POINTS_EARNING_STATUSES.includes(status as Booking["bookingStatus"])) {

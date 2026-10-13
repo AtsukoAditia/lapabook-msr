@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Pool } from "pg";
+import { cookies } from "next/headers";
+import { verifyToken, ADMIN_TOKEN_NAME } from "@/lib/auth/jwt";
+import { logAudit } from "@/lib/audit";
 
 const globalForPg = globalThis as unknown as { __pgPool?: Pool };
 const pool = globalForPg.__pgPool ?? new Pool({ connectionString: process.env.DATABASE_URL });
@@ -24,6 +27,24 @@ export async function PATCH(
       `UPDATE venues SET approval_status = $2, is_active = $3, updated_at = NOW() WHERE id = $1`,
       [id, status, status === "active"],
     );
+
+    // Audit trail: approve/reject venue
+    try {
+      const cookieStore = await cookies();
+      const adminSession = await verifyToken(cookieStore.get(ADMIN_TOKEN_NAME)?.value ?? "");
+      if (adminSession) {
+        await logAudit(
+          adminSession.userId,
+          adminSession.role,
+          "venue.approval",
+          "venue",
+          id,
+          { status },
+        );
+      }
+    } catch {
+      // best-effort
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

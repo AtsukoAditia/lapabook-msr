@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { PaymentService } from "@/lib/services/payment-service";
+import { verifyToken, ADMIN_TOKEN_NAME } from "@/lib/auth/jwt";
+import { logAudit } from "@/lib/audit";
 
 const paymentService = new PaymentService();
 
@@ -22,6 +25,24 @@ async function handlePaymentAction(request: NextRequest, { params }: RouteContex
       action === "confirm"
         ? await paymentService.confirmPayment(id, "admin")
         : await paymentService.rejectPayment(id, "admin");
+
+    // Audit trail: konfirmasi/penolakan pembayaran manual
+    try {
+      const cookieStore = await cookies();
+      const adminSession = await verifyToken(cookieStore.get(ADMIN_TOKEN_NAME)?.value ?? "");
+      if (adminSession) {
+        await logAudit(
+          adminSession.userId,
+          adminSession.role,
+          `payment.${action}`,
+          "booking",
+          id,
+          { bookingCode: booking.bookingCode },
+        );
+      }
+    } catch {
+      // best-effort
+    }
 
     return NextResponse.json({ success: true, booking });
   } catch (error) {

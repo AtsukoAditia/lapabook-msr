@@ -14,6 +14,19 @@ const OWNER_API_ROUTES = ["/api/owner"];
 const CUSTOMER_ROUTES = ["/profile"];
 const CUSTOMER_API_ROUTES = ["/api/customer"];
 
+// staff TIDAK boleh mutasi route ini — hanya admin/super_admin
+const STAFF_BLOCKED_MUTATIONS = [
+  "/api/admin/payments",
+  "/api/admin/venues",
+  "/api/admin/pricing",
+  "/api/admin/bookings",
+  "/api/admin/owners",
+  "/api/admin/commission",
+  "/api/admin/reviews",
+];
+
+const MUTATION_METHODS = ["POST", "PATCH", "PUT", "DELETE"];
+
 function matchRoute(pathname: string, routes: string[]): boolean {
   return routes.some((r) => pathname === r || pathname.startsWith(r + "/"));
 }
@@ -28,14 +41,20 @@ async function hasRole(token: string | undefined, role: string): Promise<boolean
   return session.role === role;
 }
 
+async function getSessionRole(token: string | undefined) {
+  if (!token) return null;
+  const s = await verifyToken(token);
+  return s?.role ?? null;
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const adminSecret = process.env.ADMIN_SECRET_PATH;
-  if (!adminSecret) {
-    // Fail closed in production — no fallback secret
-    if (process.env.NODE_ENV === "production") throw new Error("ADMIN_SECRET_PATH missing");
+  if (!adminSecret && process.env.NODE_ENV === "production") {
+    throw new Error("ADMIN_SECRET_PATH missing");
   }
-  const effectiveSecret = adminSecret || "5b08d37a8d376d3f97ec3972";
+  // dev-only fallback — jelas bukan production secret
+  const effectiveSecret = adminSecret || "dev-only-do-not-deploy";
   const isSecretPath = pathname === `/${effectiveSecret}` || pathname.startsWith(`/${effectiveSecret}/`);
   if (isSecretPath) {
     const token = request.cookies.get(ADMIN_TOKEN_NAME)?.value;
@@ -75,6 +94,19 @@ export async function middleware(request: NextRequest) {
     const token = request.cookies.get(ADMIN_TOKEN_NAME)?.value;
     if (!(await hasRole(token, "admin"))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    // staff: read-only di route sensitif — mutasi = 403
+    if (
+      MUTATION_METHODS.includes(request.method) &&
+      matchRoute(pathname, STAFF_BLOCKED_MUTATIONS)
+    ) {
+      const role = await getSessionRole(token);
+      if (role === "staff") {
+        return NextResponse.json(
+          { error: "Staff tidak berhak melakukan mutasi pada resource ini" },
+          { status: 403 },
+        );
+      }
     }
     return NextResponse.next();
   }

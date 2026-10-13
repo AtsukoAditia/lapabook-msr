@@ -18,9 +18,11 @@ export async function GET(request: Request) {
 
   // Determine caller context from referer to prioritize correctly
   // Owner dashboard calls should prefer owner token, even if admin token also exists
+  // ponytail: referer heuristics rapuh (bisa difalsukan) — idealnya client kirim ?context= eksplisit
   const referer = request.headers.get("referer") || "";
   const isOwnerContext = referer.includes("/dashboard");
-  const isAdminContext = referer.includes("/admin") || referer.includes("/5b08d37a8d376d3f97ec3972");
+  const adminSecret = process.env.ADMIN_SECRET_PATH || "dev-only-do-not-deploy";
+  const isAdminContext = referer.includes("/admin") || referer.includes(`/${adminSecret}`);
 
   let session = null;
   let source: "admin" | "owner" | "customer" | null = null;

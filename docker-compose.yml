@@ -29,3 +29,5 @@ services:
 
 volumes:
   postgres_data:
+    external: true
+    name: lapangin-msr_postgres_data  # ponytail: reuse data lama; rename volume fisik butuh export/import, tidak worth it

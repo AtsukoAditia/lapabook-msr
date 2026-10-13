@@ -298,7 +298,8 @@ export class PostgresAdapter implements DatabaseAdapter {
   }
 
   async getVenueBySlug(slug: string): Promise<Venue | null> {
-    const rows = await query<Record<string, unknown>>("SELECT * FROM venues WHERE slug = $1 AND approval_status = 'approved'", [slug]);
+    // ponytail: tanpa filter approval_status di sini — page-level memutuskan render
+    const rows = await query<Record<string, unknown>>("SELECT * FROM venues WHERE slug = $1", [slug]);
     return rows[0] ? mapRow<Venue>(rows[0]) : null;
   }
 

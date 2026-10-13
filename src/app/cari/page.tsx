@@ -1,9 +1,6 @@
 "use client";
 
-// ponytail: skip prerender karena useSearchParams butuh Suspense; wrap Suspense saat mau static generation lagi
-export const dynamic = "force-dynamic";
-
-import { useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSportVisual } from "@/lib/sport-icons";
@@ -31,6 +28,14 @@ interface CourtResult {
 const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
 export default function CariPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <CariContent />
+    </Suspense>
+  );
+}
+
+function CariContent() {
   const router = useRouter();
   const sp = useSearchParams();
   const [courts, setCourts] = useState<CourtResult[]>([]);

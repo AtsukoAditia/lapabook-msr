@@ -8,7 +8,7 @@ if (!globalForPg.__pgPool) globalForPg.__pgPool = pool;
 export async function GET() {
   try {
     const { rows } = await pool.query(
-      `SELECT id, name, email, phone, loyalty_points, total_spent, member_since, created_at
+      `SELECT id, name, email, phone, loyalty_points, total_spent, member_since, created_at, is_active
        FROM customers
        ORDER BY created_at DESC`
     );
@@ -29,6 +29,7 @@ export async function GET() {
         loyaltyTier,
         totalSpent: r.total_spent || 0,
         memberSince: r.member_since || r.created_at,
+        isActive: r.is_active,
       };
     });
 

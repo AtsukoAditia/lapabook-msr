@@ -1,14 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 
-export default function AdminSettingsPage() {
-  const [saved, setSaved] = useState(false);
+interface Settings {
+  platform_fee_default?: number;
+  settlement_cutoff_hour?: number;
+  app_name?: string;
+}
 
-  function handleSave() {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+export default function AdminSettingsPage() {
+  const [settings, setSettings] = useState<Settings>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((r) => r.json())
+      .then((d) => setSettings(d.settings ?? {}))
+      .catch(() => setError("Gagal memuat pengaturan"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleSave() {
+    setSaving(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ settings }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        setError(d.error ?? "Gagal menyimpan");
+        return;
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch {
+      setError("Gagal menyimpan pengaturan");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-40 animate-pulse rounded-xl bg-slate-200" />
+          ))}
+        </div>
+      </AdminLayout>
+    );
   }
 
   return (
@@ -17,106 +65,74 @@ export default function AdminSettingsPage() {
 
       {saved && (
         <div className="mb-4 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700">
-          ✅ Pengaturan berhasil disimpan (demo)
+          ✅ Pengaturan berhasil disimpan
+        </div>
+      )}
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          {error}
         </div>
       )}
 
       <div className="space-y-6">
-        {/* App Info */}
         <section className="rounded-xl border border-slate-200 bg-white p-5">
           <h2 className="mb-4 text-lg font-semibold text-slate-700">
             Informasi Aplikasi
           </h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-500">
-                Nama Aplikasi
-              </label>
-              <input
-                type="text"
-                defaultValue="Lapabook"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-500">
-                URL Aplikasi
-              </label>
-              <input
-                type="text"
-                defaultValue="https://lapabook.vercel.app"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
-            </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-500">
+              Nama Aplikasi
+            </label>
+            <input
+              type="text"
+              value={settings.app_name ?? ""}
+              onChange={(e) => setSettings({ ...settings, app_name: e.target.value })}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
           </div>
         </section>
 
-        {/* Operating Hours */}
         <section className="rounded-xl border border-slate-200 bg-white p-5">
           <h2 className="mb-4 text-lg font-semibold text-slate-700">
-            Jam Operasional
+            Platform
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-500">
-                Jam Buka
+                Platform Fee Default (%)
               </label>
               <input
-                type="time"
-                defaultValue="08:00"
+                type="number"
+                min={0}
+                max={100}
+                value={settings.platform_fee_default ?? 10}
+                onChange={(e) => setSettings({ ...settings, platform_fee_default: Number(e.target.value) })}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
               />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-500">
-                Jam Tutup
+                Settlement Cutoff Hour (0-23)
               </label>
               <input
-                type="time"
-                defaultValue="22:00"
+                type="number"
+                min={0}
+                max={23}
+                value={settings.settlement_cutoff_hour ?? 23}
+                onChange={(e) => setSettings({ ...settings, settlement_cutoff_hour: Number(e.target.value) })}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
               />
             </div>
           </div>
         </section>
 
-        {/* Database */}
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="mb-4 text-lg font-semibold text-slate-700">
-            Database
-          </h2>
-          <div className="mb-3 flex items-center gap-2">
-            <span className="inline-block h-3 w-3 rounded-full bg-emerald-500" />
-            <span className="text-sm text-slate-600">
-              Provider: <span className="font-mono font-medium">mock</span>
-            </span>
-          </div>
-          <p className="text-xs text-slate-400">
-            Ubah DATABASE_PROVIDER di .env.local untuk beralih ke Google Sheets
-            atau PostgreSQL
-          </p>
-        </section>
-
-        {/* Danger Zone */}
-        <section className="rounded-xl border border-red-200 bg-red-50 p-5">
-          <h2 className="mb-4 text-lg font-semibold text-red-700">
-            Danger Zone
-          </h2>
-          <p className="mb-3 text-sm text-red-600">
-            Aksi di bawah ini tidak dapat dibatalkan.
-          </p>
-          <button className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">
-            🗑️ Reset Semua Data (Demo)
-          </button>
-        </section>
-
-        {/* Save */}
         <div className="flex justify-end">
           <button
             onClick={handleSave}
-            className="rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+            disabled={saving}
+            className="rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
           >
-            💾 Simpan Pengaturan
+            {saving ? "Menyimpan..." : "💾 Simpan Pengaturan"}
           </button>
         </div>
       </div>

@@ -128,6 +128,45 @@ export default function AdminBookingsPage() {
     }
   }
 
+  function exportCsv() {
+    const headers = [
+      "bookingCode",
+      "customerName",
+      "customerPhone",
+      "venue",
+      "court",
+      "date",
+      "startTime",
+      "endTime",
+      "totalPrice",
+      "status",
+    ];
+    const rows = filtered.map((b) => [
+      b.bookingCode,
+      b.customerName,
+      b.customerPhone,
+      b.venueId,
+      b.courtId,
+      b.bookingDate,
+      b.startTime,
+      b.endTime,
+      b.totalPrice,
+      b.bookingStatus,
+    ]);
+    const escape = (v: string | number) => {
+      const s = String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const csv = [headers.join(","), ...rows.map((r) => r.map(escape).join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `bookings-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   const filtered = bookings.filter((b) => {
     if (filterStatus !== "all" && b.bookingStatus !== filterStatus) return false;
     if (searchCode && !b.bookingCode.toLowerCase().includes(searchCode.toLowerCase())) return false;
@@ -152,6 +191,15 @@ export default function AdminBookingsPage() {
             <p className="mt-1 text-sm text-blue-100">
               {bookings.length} total booking · {statusCounts.pending ?? 0} menunggu konfirmasi
             </p>
+          </div>
+          <div className="flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 backdrop-blur-sm">
+            <button
+              disabled={bookings.length === 0}
+              onClick={exportCsv}
+              className="text-sm font-semibold text-white hover:underline disabled:opacity-40"
+            >
+              ⬇️ Export CSV
+            </button>
           </div>
           <div className="flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 backdrop-blur-sm">
             <span className="text-lg">🔄</span>

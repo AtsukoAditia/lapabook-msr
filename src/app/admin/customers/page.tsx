@@ -12,6 +12,7 @@ interface Customer {
   loyaltyTier: string;
   totalSpent: number;
   memberSince: string;
+  isActive: boolean;
 }
 
 const TIER_LABELS: Record<string, { label: string; color: string; icon: string }> = {
@@ -24,6 +25,30 @@ const TIER_LABELS: Record<string, { label: string; color: string; icon: string }
 export default function AdminCustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  async function toggleBan(customer: Customer) {
+    const action = customer.isActive ? "ban" : "unban";
+    if (action === "ban" && !confirm(`Ban customer ${customer.name}? Mereka tidak bisa login sampai di-unban.`)) return;
+    setTogglingId(customer.id);
+    try {
+      const res = await fetch(`/api/admin/customers/${customer.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        alert(d.error ?? "Gagal update status");
+        return;
+      }
+      setCustomers((prev) => prev.map((c) => (c.id === customer.id ? { ...c, isActive: action === "unban" } : c)));
+    } catch {
+      alert("Gagal update status customer");
+    } finally {
+      setTogglingId(null);
+    }
+  }
 
   useEffect(() => {
     fetch("/api/admin/customers")
@@ -97,6 +122,13 @@ export default function AdminCustomersPage() {
                         <p className="text-xs text-gray-500">Total Belanja</p>
                         <p className="text-sm font-bold text-emerald-600">Rp {customer.totalSpent.toLocaleString("id-ID")}</p>
                       </div>
+                      <button
+                        disabled={togglingId === customer.id}
+                        onClick={() => toggleBan(customer)}
+                        className={`rounded-xl px-3 py-1.5 text-xs font-bold text-white shadow-sm transition disabled:opacity-50 ${customer.isActive ? "bg-red-500 hover:bg-red-600" : "bg-emerald-500 hover:bg-emerald-600"}`}
+                      >
+                        {togglingId === customer.id ? "⏳" : customer.isActive ? "⛔ Ban" : "✅ Unban"}
+                      </button>
                     </div>
                   </div>
                 </div>

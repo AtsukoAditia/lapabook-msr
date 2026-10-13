@@ -367,6 +367,10 @@ export class MockAdapter implements DatabaseAdapter {
     return mockVenues.find((v) => v.id === id) ?? null;
   }
 
+  async getVenueBySlug(slug: string): Promise<Venue | null> {
+    return mockVenues.find((v) => v.slug === slug) ?? null;
+  }
+
   async getVenuesByOwner(ownerId: string): Promise<Venue[]> {
     return mockVenues.filter((v) => v.ownerId === ownerId);
   }

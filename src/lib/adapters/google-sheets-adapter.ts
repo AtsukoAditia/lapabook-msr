@@ -263,6 +263,18 @@ export class GoogleSheetsAdapter implements DatabaseAdapter {
     return found ?? null;
   }
 
+  async getVenueBySlug(slug: string): Promise<Venue | null> {
+    const doc = await getSpreadsheet();
+    const sheet = doc.sheetsByTitle["venues"];
+    if (!sheet) return null;
+
+    const rows = await sheet.getRows();
+    const found = rows
+      .map((row) => rowToVenue(row.toObject()))
+      .find((v) => v.slug === slug);
+    return found ?? null;
+  }
+
   async getCourts(): Promise<Court[]> {
     const doc = await getSpreadsheet();
     const sheet = doc.sheetsByTitle["courts"];

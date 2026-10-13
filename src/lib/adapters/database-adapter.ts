@@ -133,6 +133,7 @@ export interface DatabaseAdapter {
   getVenuesByArea(areaId: string, sportId?: string): Promise<Venue[]>;
   getVenuesByOwner(ownerId: string): Promise<Venue[]>;
   getVenueById(id: string): Promise<Venue | null>;
+  getVenueBySlug(slug: string): Promise<Venue | null>;
 
   // Courts
   getCourts(): Promise<Court[]>;

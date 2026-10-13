@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getDatabaseAdapter } from "@/lib/adapters";
 import { formatPrice } from "@/lib/mock-data";
@@ -20,7 +20,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { venueId } = await params;
   const adapter = getDatabaseAdapter();
   const venue = await adapter.getVenueById(venueId).catch(() => null);
-  if (!venue) return { title: "Venue tidak ditemukan — Lapabook" };
+  if (!venue) {
+    const bySlug = await adapter.getVenueBySlug(venueId).catch(() => null);
+    if (!bySlug) return { title: "Venue tidak ditemukan — Lapabook" };
+    return {
+      title: `${bySlug.name} — Booking Lapangan | Lapabook`,
+      description: `Booking lapangan di ${bySlug.name}, ${bySlug.address}. Buka ${bySlug.openTime}-${bySlug.closeTime}. Pilih court & jam langsung.`,
+    };
+  }
   return {
     title: `${venue.name} — Booking Lapangan | Lapabook`,
     description: `Booking lapangan di ${venue.name}, ${venue.address}. Buka ${venue.openTime}-${venue.closeTime}. Pilih court & jam langsung.`,
@@ -32,13 +39,21 @@ export default async function VenuePage({ params, searchParams }: Props) {
   const { court: courtSlug } = await searchParams;
   const adapter = getDatabaseAdapter();
 
-  const [venue, courts, sports] = await Promise.all([
-    adapter.getVenueById(venueId),
-    adapter.getCourtsByVenue(venueId),
+  let venue = await adapter.getVenueById(venueId);
+
+  // Canonical by id — slug URL 308 → /venue/{id}
+  if (!venue) {
+    const bySlug = await adapter.getVenueBySlug(venueId);
+    if (!bySlug) return notFound();
+    permanentRedirect(`/venue/${bySlug.id}`);
+  }
+
+  const [courts, sports] = await Promise.all([
+    adapter.getCourtsByVenue(venue.id),
     adapter.getSports(),
   ]);
 
-  if (!venue || !venue.isActive) return notFound();
+  if (!venue.isActive) return notFound();
 
   const activeCourts = courts.filter((c) => c.isActive);
   const minPrice = activeCourts.length

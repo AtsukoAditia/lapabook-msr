@@ -296,6 +296,11 @@ export class PostgresAdapter implements DatabaseAdapter {
     return rows[0] ? mapRow<Venue>(rows[0]) : null;
   }
 
+  async getVenueBySlug(slug: string): Promise<Venue | null> {
+    const rows = await query<Record<string, unknown>>("SELECT * FROM venues WHERE slug = $1", [slug]);
+    return rows[0] ? mapRow<Venue>(rows[0]) : null;
+  }
+
   // ── Courts ──
   async getCourts(): Promise<Court[]> {
     const rows = await query<Record<string, unknown>>("SELECT * FROM courts WHERE is_active = true");

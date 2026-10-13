@@ -94,7 +94,7 @@ export default function VenueBookingClient({
       court: selectedCourt.slug,
       duration: String(slotCount),
     });
-    router.push(`/booking/form?${params.toString()}`);
+    router.push(`/checkout?${params.toString()}`);
   }
 
   if (activeCourts.length === 0) {

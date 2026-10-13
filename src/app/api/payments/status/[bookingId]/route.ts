@@ -27,6 +27,15 @@ export async function GET(
       return NextResponse.json({ error: "Booking tidak ditemukan." }, { status: 404 });
     }
 
+    // IDOR fix: customer cuma boleh cek booking miliknya; admin/super_admin full access.
+    // Guest booking (userId kosong) tidak bisa diverifikasi kepemilikan → 403, kecuali admin.
+    const isAdmin = session.role === "admin" || session.role === "super_admin";
+    if (!isAdmin) {
+      if (!booking.userId || booking.userId !== session.userId) {
+        return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+      }
+    }
+
     return NextResponse.json({
       bookingId: booking.id,
       bookingCode: booking.bookingCode,

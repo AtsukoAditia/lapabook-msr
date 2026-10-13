@@ -431,6 +431,11 @@ export class MockAdapter implements DatabaseAdapter {
     return getBookings().filter((b) => b.courtId === courtId && b.bookingDate === date);
   }
 
+  async getBookingsByVenueIds(venueIds: string[]): Promise<Booking[]> {
+    const set = new Set(venueIds);
+    return getBookings().filter((b) => set.has(b.venueId));
+  }
+
   async createBooking(input: CreateBookingInput): Promise<Booking> {
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 15 * 60 * 1000);

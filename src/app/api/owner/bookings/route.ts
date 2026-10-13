@@ -20,18 +20,15 @@ export async function GET(request: Request) {
 
     const adapter = getDatabaseAdapter();
 
-    // Get owner's venues
+    // Owner venues + bookings — DB-side filter (bukan tarik semua lalu filter in-memory)
     const venues = await adapter.getVenuesByOwner(session.ownerId);
-    const venueIds = new Set(venues.map(v => v.id));
+    const venueIdList = venues.map(v => v.id);
+    const venueIds = new Set(venueIdList);
 
-    // Get all courts for owner's venues
     const allCourts = await adapter.getAllCourts();
     const ownerCourts = allCourts.filter(c => venueIds.has(c.venueId));
-    const courtIds = new Set(ownerCourts.map(c => c.id));
 
-    // Get all bookings for owner's courts
-    const allBookings = await adapter.getBookings();
-    let ownerBookings = allBookings.filter(b => courtIds.has(b.courtId));
+    let ownerBookings = await adapter.getBookingsByVenueIds(venueIdList);
 
     // Filter by status
     if (status !== "all") {

@@ -57,3 +57,7 @@ blob-report/
 # Uploaded files
 public/uploads/
 graphify-out/
+
+# payment proofs (signed route dir)
+/uploads/
+!/public/uploads/

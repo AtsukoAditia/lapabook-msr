@@ -5,7 +5,8 @@ import { getClientIP, checkRateLimit, bookingLimiter } from "@/lib/security";
 import { verifyToken, CUSTOMER_TOKEN_NAME } from "@/lib/auth/jwt";
 import { cookies } from "next/headers";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "payments");
+// ponytail: di luar public/ (jangan ke-serve static tanpa auth) — served via /uploads/payments/[filename] signed route
+const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads", "payments");
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"];
 const ALLOWED_EXT = new Set(["jpg", "jpeg", "png", "webp", "gif", "pdf"]);

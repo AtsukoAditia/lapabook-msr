@@ -26,8 +26,11 @@ services:
       DISABLE_RATE_LIMIT: "true"
     ports:
       - "3000:3000"
+    volumes:
+      - uploads_data:/app/uploads  # payment proofs — di luar public/, served via signed route; persist antar rebuild (sebelumnya hilang tiap rebuild!)
 
 volumes:
   postgres_data:
     external: true
     name: lapangin-msr_postgres_data  # ponytail: reuse data lama; rename volume fisik butuh export/import, tidak worth it
+  uploads_data:

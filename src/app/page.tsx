@@ -225,7 +225,7 @@ export default function HomePage() {
             const vCourts = courts.filter(c => c.venueId === v.id);
             const minPrice = vCourts.length ? Math.min(...vCourts.map(c => c.basePrice)) : 0;
             return (
-              <Link key={v.id} href={`/cari/futsal`} className="group rounded-2xl border border-slate-200 bg-white overflow-hidden hover:shadow-lg hover:border-blue-300 transition">
+              <Link key={v.id} href={`/venue/${v.id}`} className="group rounded-2xl border border-slate-200 bg-white overflow-hidden hover:shadow-lg hover:border-blue-300 transition">
                 <div className="h-28 bg-gradient-to-br from-blue-700 to-blue-900 relative">
                   <div className="absolute inset-0 bg-black/10" aria-hidden="true" />
                   <div className="absolute bottom-3 left-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-slate-800">{vCourts.length} lapangan • {v.openTime}-{v.closeTime}</div>

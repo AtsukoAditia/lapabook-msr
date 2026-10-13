@@ -13,6 +13,10 @@ type Props = {
   courtSlug: string;
   openTime: string;
   closeTime: string;
+  /** Optional callback: dipanggil setiap seleksi/date berubah. Untuk venue page + sticky bar. */
+  onSelectionChange?: (selection: { date: string; slots: Slot[] }) => void;
+  /** Sembunyikan tombol Continue built-in (untuk parent yang render CTA sendiri, mis. sticky bar). */
+  hideContinue?: boolean;
 };
 
 function timeToMinutes(t: string): number {
@@ -77,6 +81,8 @@ export default function SlotSelector({
   courtSlug,
   openTime,
   closeTime,
+  onSelectionChange,
+  hideContinue,
 }: Props) {
   const router = useRouter();
   const dates = (() => { const d = getNext7Days(); return d; })();
@@ -228,6 +234,13 @@ export default function SlotSelector({
   const sortedSelectedSlots = [...selectedSlots].sort(
     (a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)
   );
+
+  // Notify parent on selection/date change
+  useEffect(() => {
+    if (!onSelectionChange) return;
+    onSelectionChange({ date: selectedDate, slots: selectedSlots });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSlots, selectedDate]);
   const timeRange =
     sortedSelectedSlots.length > 0
       ? `${sortedSelectedSlots[0].startTime} - ${sortedSelectedSlots[sortedSelectedSlots.length - 1].endTime}`
@@ -337,20 +350,22 @@ export default function SlotSelector({
         💡 Pilih beberapa jam berurutan untuk booking lebih lama
       </p>
 
-      {/* Continue button */}
-      <button
-        onClick={handleContinue}
-        disabled={selectedSlots.length === 0 || loadingSlots}
-        className={`w-full rounded-xl py-3 text-sm font-semibold transition ${
-          selectedSlots.length > 0 && !loadingSlots
-            ? "bg-emerald-600 text-white shadow hover:bg-emerald-700"
-            : "cursor-not-allowed bg-slate-200 text-slate-400"
-        }`}
-      >
-        {selectedSlots.length > 0
-          ? `Lanjut Booking — ${totalDuration} jam (${timeRange})`
-          : "Pilih jam terlebih dahulu"}
-      </button>
+      {/* Continue button — sembunyikan jika parent render CTA sendiri */}
+      {!hideContinue && (
+        <button
+          onClick={handleContinue}
+          disabled={selectedSlots.length === 0 || loadingSlots}
+          className={`w-full rounded-xl py-3 text-sm font-semibold transition ${
+            selectedSlots.length > 0 && !loadingSlots
+              ? "bg-orange-600 text-white shadow hover:bg-orange-500 cursor-pointer"
+              : "cursor-not-allowed bg-slate-200 text-slate-400"
+          }`}
+        >
+          {selectedSlots.length > 0
+            ? `Lanjut Booking — ${totalDuration} jam (${timeRange})`
+            : "Pilih jam terlebih dahulu"}
+        </button>
+      )}
     </div>
   );
 }

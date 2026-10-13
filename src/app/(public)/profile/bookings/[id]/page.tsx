@@ -217,7 +217,7 @@ export default function BookingDetailPage() {
         {booking.bookingStatus === "waiting_payment" && (
           <div className="space-y-2">
             <a
-              href={`/booking/form?booking=${booking.bookingCode}`}
+              href={`/checkout?booking=${booking.bookingCode}`}
               className="block w-full text-center py-3 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700"
             >
               Upload Bukti Bayar

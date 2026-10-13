@@ -226,7 +226,7 @@ export default function SlotSelector({
       court: courtSlug,
       duration: String(sortedSlots.length),
     });
-    router.push(`/booking/form?${params.toString()}`);
+    router.push(`/checkout?${params.toString()}`);
   }
 
   // Calculate total duration

@@ -227,6 +227,7 @@ export default function ProfilePage() {
             {[
               { href: "/profile/bookings", icon: "📋", label: "Booking" },
               { href: "/profile/mabar", icon: "🤝", label: "Mabar" },
+              { href: "/profile/wallet", icon: "💰", label: "Wallet" },
               { href: "/profile/reviews", icon: "⭐", label: "Ulasan" },
               { href: "/profile/favorites", icon: "❤️", label: "Favorit" },
               { href: "/support", icon: "💬", label: "Bantuan" },

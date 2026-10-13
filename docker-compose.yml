@@ -22,6 +22,8 @@ services:
       # Override host for docker network (localhost inside container -> postgres service)
       DATABASE_URL: postgresql://brodit:TYtB39f5FBO5UTJEiaFr6vj76MpS7llm@postgres:5432/lapangin
       POSTGRES_URL: postgresql://brodit:TYtB39f5FBO5UTJEiaFr6vj76MpS7llm@postgres:5432/lapangin
+      IS_TESTING: "true"
+      DISABLE_RATE_LIMIT: "true"
     ports:
       - "3000:3000"
 

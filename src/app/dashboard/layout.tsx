@@ -38,7 +38,9 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
     }
 
     let cancelled = false;
-    fetch("/api/auth/session")
+    // FIX: Use dedicated owner session endpoint to avoid admin-token shadowing
+    // This endpoint only checks owner_auth_token cookie
+    fetch("/api/auth/owner/session")
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return;
@@ -132,15 +134,17 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
             <div className="flex items-center gap-3 px-4 py-2">
               <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
-                <span className="text-emerald-700 font-bold text-sm">{session.email[0].toUpperCase()}</span>
+                <span className="text-emerald-700 font-bold text-sm">{(session.email || 'O')[0].toUpperCase()}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">{session.email}</p>
                 <p className="text-xs text-gray-500">Owner</p>
               </div>
               <button
-                onClick={() => {
+                onClick={async () => {
+                  try { await fetch("/api/auth/owner/logout", { method: "POST" }); } catch {}
                   document.cookie = "owner_auth_token=; path=/; max-age=0";
+                  // Also clear any stale admin token that may shadow? No — keep admin separate
                   router.replace("/dashboard/login");
                 }}
                 className="text-gray-400 hover:text-red-500 transition-colors"

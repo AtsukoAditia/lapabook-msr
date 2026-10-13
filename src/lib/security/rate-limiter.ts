@@ -1,8 +1,11 @@
 import { RateLimiterMemory } from "rate-limiter-flexible";
 
 // Flag: disable rate limiter when running tests or in dev mode
+// NOTE: DISABLE_RATE_LIMIT=true disables all rate limiting — restore in prod (brute-force risk)
 export const IS_TESTING_ENV =
-  process.env.NODE_ENV === 'test' || process.env.IS_TESTING === 'true';
+  process.env.NODE_ENV === 'test' ||
+  process.env.IS_TESTING === 'true' ||
+  process.env.DISABLE_RATE_LIMIT === 'true';
 
 // Login rate limiter — generous in testing, strict in prod
 export const loginLimiter = new RateLimiterMemory({

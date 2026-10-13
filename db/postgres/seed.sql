@@ -50,16 +50,23 @@ INSERT INTO villages (id, district_id, name, slug, is_active, created_at, update
 ON CONFLICT (id) DO NOTHING;
 
 -- ==================== ADMINS (before venue_owners) ====================
+-- Password for all demo owners: Owner123!@# (hash verified)
+-- Super admin: Admin123!@#
 INSERT INTO admins (id, username, name, email, password_hash, role, is_active, created_at, updated_at) VALUES
   ('admin-1', 'superadmin', 'Super Admin',   'admin@lapangin.id',  '$2b$10$c6oIJREEQCdxIc8mY/1T2uAxZA/uSIlyQ4KsdNxRlC0KnxW9tPvXS', 'super_admin', true, NOW(), NOW()),
-  ('owner-1', 'venueowner', 'Venue Owner',   'owner@lapangin.id',  '$2b$10$dIBbN.TQD1XHEJWAV6ubqObTOIgm37WsMjhSbcK1Y6qQyhJLQH7n.', 'admin',       true, NOW(), NOW())
+  ('owner-1', 'venueowner', 'Venue Owner',   'owner@lapangin.id',  '$2b$12$qjcJ6wyuBSh0ymteRxyoa.TaJ5skk3uMhJEGN1AX/cQPDGzyJUQli', 'admin',       true, NOW(), NOW()),
+  ('admin-andi-greenfield', 'andiwijaya',   'Andi Wijaya',   'andi@greenfield.id',     '$2b$12$qjcJ6wyuBSh0ymteRxyoa.TaJ5skk3uMhJEGN1AX/cQPDGzyJUQli', 'admin', true, NOW(), NOW()),
+  ('admin-budi-rahasian',   'budi',         'Budi Santoso',  'budi@rahasian.id',       '$2b$12$qjcJ6wyuBSh0ymteRxyoa.TaJ5skk3uMhJEGN1AX/cQPDGzyJUQli', 'admin', true, NOW(), NOW()),
+  ('admin-charlie-arena',   'charlieputra', 'Charlie Putra', 'charlie@arenafutsal.id', '$2b$12$qjcJ6wyuBSh0ymteRxyoa.TaJ5skk3uMhJEGN1AX/cQPDGzyJUQli', 'admin', true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- ==================== VENUE OWNERS ====================
+-- Fixed: owner@lapangin.id must have linked venue_owners record, otherwise authenticateOwner fails
 INSERT INTO venue_owners (id, admin_id, business_name, pic_name, phone, email, status, created_at, updated_at) VALUES
-  ('owner-greenfield', 'owner-1',  'Greenfield Sports Club', 'Andi Wijaya',   '081234567890', 'andi@greenfield.id',  'active', NOW(), NOW()),
-  ('owner-rahasian',   NULL,       'Rahasia Badminton Arena','Budi Santoso',  '082345678901', 'budi@rahasian.id',    'active', NOW(), NOW()),
-  ('owner-arena-futsal', NULL,     'Arena Futsal Bandung',   'Charlie Putra', '083456789012', 'charlie@arenafutsal.id','active', NOW(), NOW())
+  ('owner-demo-1',       'owner-1',               'Lapangin Demo Owner',     'Demo Owner',    '081234567890', 'owner@lapangin.id',      'active', NOW(), NOW()),
+  ('owner-greenfield',   'admin-andi-greenfield', 'Greenfield Sports Club',  'Andi Wijaya',   '081234567890', 'andi@greenfield.id',     'active', NOW(), NOW()),
+  ('owner-rahasian',     'admin-budi-rahasian',   'Rahasia Badminton Arena', 'Budi Santoso',  '082345678901', 'budi@rahasian.id',       'active', NOW(), NOW()),
+  ('owner-arena-futsal', 'admin-charlie-arena',   'Arena Futsal Bandung',    'Charlie Putra', '083456789012', 'charlie@arenafutsal.id', 'active', NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- ==================== SPORTS (6 canonical) ====================

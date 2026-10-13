@@ -9,7 +9,22 @@ if (!globalForPg.__pgPool) globalForPg.__pgPool = pool;
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // IDOR fix: list members (+email) hanya untuk sesama member
+    const cookieStore = await cookies();
+    const token = cookieStore.get(CUSTOMER_TOKEN_NAME)?.value;
+    const session = token ? await verifyToken(token) : null;
+    if (!session || session.role !== "customer") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
+    const check = await pool.query(
+      `SELECT 1 FROM team_wallet_members WHERE wallet_id = $1 AND customer_id = $2 LIMIT 1`,
+      [id, session.userId]);
+    if (check.rows.length === 0) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const { rows } = await pool.query(
       `SELECT twm.*, cu.name as customer_name, cu.email as customer_email
        FROM team_wallet_members twm LEFT JOIN customers cu ON cu.id = twm.customer_id

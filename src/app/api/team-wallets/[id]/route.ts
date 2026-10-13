@@ -9,6 +9,14 @@ if (!globalForPg.__pgPool) globalForPg.__pgPool = pool;
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // IDOR fix: wallet detail + members hanya untuk member/owner — saldo & email orang bukan data publik
+    const cookieStore = await cookies();
+    const token = cookieStore.get(CUSTOMER_TOKEN_NAME)?.value;
+    const session = token ? await verifyToken(token) : null;
+    if (!session || session.role !== "customer") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
     const { rows } = await pool.query(
       `SELECT tw.*, vo.name as owner_name
@@ -16,6 +24,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
        LEFT JOIN customers vo ON vo.id = tw.owner_customer_id
        WHERE tw.id = $1`, [id]);
     if (rows.length === 0) return NextResponse.json({ error: "Wallet tidak ditemukan" }, { status: 404 });
+
+    // Hanya member atau owner yang boleh lihat detail
+    const memberCheck = await pool.query(
+      `SELECT 1 FROM team_wallet_members WHERE wallet_id = $1 AND customer_id = $2 LIMIT 1`,
+      [id, session.userId]);
+    if (memberCheck.rows.length === 0) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const members = await pool.query(
       `SELECT twm.*, c.name as customer_name, c.avatar as customer_avatar

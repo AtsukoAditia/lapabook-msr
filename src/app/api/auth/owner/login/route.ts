@@ -1,18 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { OWNER_TOKEN_NAME, createToken } from "@/lib/auth/jwt";
 import { authenticateOwner } from "@/lib/auth/service";
-import { loginLimiter, getClientIP, checkRateLimit } from "@/lib/security";
+import { getClientIP, isLoginBlocked, recordLoginFail, resetLoginFail } from "@/lib/security";
 
 export async function POST(request: NextRequest) {
   try {
     const ip = getClientIP(request);
-    const rateLimited = await checkRateLimit(loginLimiter, ip);
-    if (rateLimited) {
-      return NextResponse.json(
-        { error: `Terlalu banyak percobaan. Coba lagi dalam ${rateLimited.retryAfter} detik.` },
-        { status: 429 },
-      );
-    }
 
     const { email, password } = await request.json();
     if (!email || !password) {
@@ -22,15 +15,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Rate limit: 5 gagal / 10 menit per IP+email
+    const failKey = `${ip}:${String(email).toLowerCase()}`;
+    const blocked = await isLoginBlocked(failKey);
+    if (blocked) {
+      const menit = Math.ceil(blocked.retryAfter / 60);
+      return NextResponse.json(
+        { error: `Terlalu banyak percobaan login. Coba lagi dalam ${menit} menit.` },
+        { status: 429 },
+      );
+    }
+
     const result = await authenticateOwner(email, password);
     if (!result) {
+      await recordLoginFail(failKey);
       return NextResponse.json(
         { error: "Email atau password salah, atau akun bukan owner" },
         { status: 401 },
       );
     }
 
-    await loginLimiter.delete(ip);
+    await resetLoginFail(failKey);
 
     const token = await createToken({
       userId: result.admin.id,

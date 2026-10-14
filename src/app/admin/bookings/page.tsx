@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import Pagination from "@/components/admin/Pagination";
 import WhatsAppButton from "@/components/notifications/WhatsAppButton";
 import type { Booking } from "@/lib/types/domain";
 
@@ -30,30 +31,41 @@ export default function AdminBookingsPage() {
   const [searchCode, setSearchCode] = useState<string>("");
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const LIMIT = 25;
 
-  const fetchBookings = useCallback(async () => {
+  const fetchBookings = useCallback(async (p: number) => {
     try {
-      const res = await fetch("/api/admin/bookings");
+      const res = await fetch(`/api/admin/bookings?page=${p}&limit=${LIMIT}`);
       const data = await res.json();
-      return (data.bookings ?? []) as Booking[];
+      // envelope baru: { success, data, pagination }
+      return {
+        bookings: (data.data ?? []) as Booking[],
+        pagination: data.pagination ?? { page: p, limit: LIMIT, total: 0, totalPages: 1 },
+      };
     } catch (err) {
       console.error("Failed to fetch bookings:", err);
-      return [] as Booking[];
+      return { bookings: [] as Booking[], pagination: { page: p, limit: LIMIT, total: 0, totalPages: 1 } };
     }
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-    fetchBookings().then((result) => {
+    setLoading(true);
+    fetchBookings(page).then(({ bookings: b, pagination }) => {
       if (!cancelled) {
-        setBookings(result);
+        setBookings(b);
+        setTotalPages(pagination.totalPages);
+        setTotal(pagination.total);
         setLoading(false);
       }
     });
     return () => {
       cancelled = true;
     };
-  }, [fetchBookings]);
+  }, [page, fetchBookings]);
 
   async function updateStatus(id: string, status: string) {
     setUpdatingId(id);
@@ -70,7 +82,10 @@ export default function AdminBookingsPage() {
         return;
       }
 
-      setBookings(await fetchBookings());
+      const { bookings: b, pagination } = await fetchBookings(page);
+      setBookings(b);
+      setTotalPages(pagination.totalPages);
+      setTotal(pagination.total);
     } catch (err) {
       console.error("Failed to update:", err);
       alert("Gagal update status");
@@ -94,7 +109,10 @@ export default function AdminBookingsPage() {
         return;
       }
 
-      setBookings(await fetchBookings());
+      const { bookings: b, pagination } = await fetchBookings(page);
+      setBookings(b);
+      setTotalPages(pagination.totalPages);
+      setTotal(pagination.total);
     } catch (err) {
       console.error("Failed to confirm payment:", err);
       alert("Gagal konfirmasi pembayaran");
@@ -119,7 +137,10 @@ export default function AdminBookingsPage() {
         return;
       }
 
-      setBookings(await fetchBookings());
+      const { bookings: b, pagination } = await fetchBookings(page);
+      setBookings(b);
+      setTotalPages(pagination.totalPages);
+      setTotal(pagination.total);
     } catch (err) {
       console.error("Failed to reject payment:", err);
       alert("Gagal tolak pembayaran");
@@ -167,6 +188,8 @@ export default function AdminBookingsPage() {
     URL.revokeObjectURL(url);
   }
 
+  // ponytail: filter client-side dalam halaman aktif saja (25 rows);
+  //           upgrade ke server-side filter query param bila butuh cross-page search.
   const filtered = bookings.filter((b) => {
     if (filterStatus !== "all" && b.bookingStatus !== filterStatus) return false;
     if (searchCode && !b.bookingCode.toLowerCase().includes(searchCode.toLowerCase())) return false;
@@ -206,8 +229,10 @@ export default function AdminBookingsPage() {
             <button
               onClick={async () => {
                 setLoading(true);
-                const result = await fetchBookings();
-                setBookings(result);
+                const { bookings: b, pagination } = await fetchBookings(page);
+                setBookings(b);
+                setTotalPages(pagination.totalPages);
+                setTotal(pagination.total);
                 setLoading(false);
               }}
               className="text-sm font-semibold text-white hover:underline"
@@ -476,6 +501,8 @@ export default function AdminBookingsPage() {
           })}
         </div>
       )}
+
+      <Pagination page={page} totalPages={totalPages} total={total} onPageChange={setPage} />
     </AdminLayout>
   );
 }

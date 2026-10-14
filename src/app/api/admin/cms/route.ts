@@ -1,47 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readFile, writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { cookies } from "next/headers";
+import { verifyToken, ADMIN_TOKEN_NAME } from "@/lib/auth/jwt";
+import { getAllCmsPages, updateCmsPage, CMS_KEYS } from "@/lib/cms";
+import { logAudit } from "@/lib/audit";
 
-const CMS_FILE = path.join(process.cwd(), "data", "cms-pages.json");
-
-async function ensureDir() {
-  await mkdir(path.dirname(CMS_FILE), { recursive: true });
-}
-
-async function getPages() {
-  try {
-    const raw = await readFile(CMS_FILE, "utf-8").catch(() => "{}");
-    return JSON.parse(raw);
-  } catch {
-    return {};
-  }
+async function requireAdmin() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(ADMIN_TOKEN_NAME)?.value;
+  if (!token) return null;
+  const session = await verifyToken(token);
+  if (!session || !["admin", "super_admin"].includes(session.role)) return null;
+  return session;
 }
 
 export async function GET() {
-  const pages = await getPages();
-  return NextResponse.json({ pages });
+  try {
+    const session = await requireAdmin();
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const pages = await getAllCmsPages();
+    return NextResponse.json({ success: true, data: pages });
+  } catch (error) {
+    console.error("CMS GET error:", error);
+    return NextResponse.json({ error: "Gagal mengambil data" }, { status: 500 });
+  }
 }
 
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { slug, ...rest } = body;
+    const session = await requireAdmin();
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    if (!slug) {
-      return NextResponse.json({ error: "Slug wajib diisi" }, { status: 400 });
+    const body = await request.json();
+    const { key, title, body: pageBody } = body;
+
+    if (!key || !(CMS_KEYS as readonly string[]).includes(key)) {
+      return NextResponse.json({ error: `Key harus salah satu dari: ${CMS_KEYS.join(", ")}` }, { status: 400 });
     }
 
-    await ensureDir();
-    const pages = await getPages();
-    pages[slug] = {
-      ...rest,
-      slug,
-      updatedAt: new Date().toISOString(),
-    };
+    const updated = await updateCmsPage(
+      key,
+      typeof title === "string" ? title : "",
+      typeof pageBody === "string" ? pageBody : "",
+      session.email || session.userId || "admin",
+    );
 
-    await writeFile(CMS_FILE, JSON.stringify(pages, null, 2));
-    return NextResponse.json({ success: true, page: pages[slug] });
-  } catch {
+    logAudit(
+      session.userId || session.email || "admin",
+      session.role,
+      "update_cms",
+      "cms_content",
+      key,
+      { title: updated.title },
+    ).catch(() => {});
+
+    return NextResponse.json({ success: true, data: updated });
+  } catch (error) {
+    console.error("CMS PUT error:", error);
     return NextResponse.json({ error: "Gagal menyimpan" }, { status: 500 });
   }
 }

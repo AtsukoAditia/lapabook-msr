@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CheckCircle2, Save } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 interface Settings {
@@ -64,8 +65,8 @@ export default function AdminSettingsPage() {
       <h1 className="mb-6 text-2xl font-bold text-slate-800">Pengaturan</h1>
 
       {saved && (
-        <div className="mb-4 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700">
-          ✅ Pengaturan berhasil disimpan
+        <div className="mb-4 flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700">
+          <CheckCircle2 aria-hidden={true} className="h-4 w-4 flex-shrink-0" /> Pengaturan berhasil disimpan
         </div>
       )}
       {error && (
@@ -132,7 +133,13 @@ export default function AdminSettingsPage() {
             disabled={saving}
             className="rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
           >
-            {saving ? "Menyimpan..." : "💾 Simpan Pengaturan"}
+            <span className="flex items-center gap-2">
+              {saving ? "Menyimpan..." : (
+                <>
+                  <Save aria-hidden={true} className="h-4 w-4" /> Simpan Pengaturan
+                </>
+              )}
+            </span>
           </button>
         </div>
       </div>

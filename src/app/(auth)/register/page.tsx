@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Zap, Trophy, PartyPopper, Gift, CheckCircle2 } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -76,7 +77,7 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
             <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
-              <span className="text-white font-black text-2xl">⚡</span>
+              <Zap className="h-5 w-5 text-white" aria-hidden={true} />
             </div>
             <h1 className="text-3xl font-black text-gray-900">
               Arena<span className="text-emerald-600">Book</span>
@@ -90,7 +91,7 @@ export default function RegisterPage() {
           onSubmit={handleSubmit}
           className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8"
         >
-          <h2 className="text-xl font-bold text-gray-900 mb-2">🏆 Daftar Akun Baru</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Daftar Akun Baru</h2>
           <p className="text-sm text-gray-500 mb-6">Dapatkan poin reward setiap booking!</p>
 
           {error && (
@@ -193,7 +194,7 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full mt-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:from-emerald-500 hover:to-teal-500 transition-all shadow-lg disabled:opacity-50"
           >
-            {loading ? "Memproses..." : "🎉 Daftar Sekarang"}
+            {loading ? "Memproses..." : "Daftar Sekarang"}
           </button>
 
           <div className="mt-6 text-center">
@@ -208,19 +209,19 @@ export default function RegisterPage() {
 
         {/* Benefits */}
         <div className="mt-6 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-100">
-          <p className="text-sm font-semibold text-emerald-800 mb-2 text-center">🎁 Keuntungan Member</p>
+          <p className="text-sm font-semibold text-emerald-800 mb-2 text-center">Keuntungan Member</p>
           <ul className="text-xs text-emerald-700 space-y-1">
             <li className="flex items-center gap-2">
-              <span>✅</span> Dapatkan 1 poin per Rp 1.000 transaksi
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden={true} /> Dapatkan 1 poin per Rp 1.000 transaksi
             </li>
             <li className="flex items-center gap-2">
-              <span>✅</span> Tukar poin untuk diskon booking
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden={true} /> Tukar poin untuk diskon booking
             </li>
             <li className="flex items-center gap-2">
-              <span>✅</span> Bonus jam gratis di level Gold
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden={true} /> Bonus jam gratis di level Gold
             </li>
             <li className="flex items-center gap-2">
-              <span>✅</span> Riwayat booking tersimpan
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden={true} /> Riwayat booking tersimpan
             </li>
           </ul>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CheckCircle2 } from "lucide-react";
 
 interface WhatsAppButtonProps {
   bookingId: string;
@@ -14,7 +15,7 @@ export default function WhatsAppButton({
   bookingId,
   phone,
   type = "confirm",
-  label = "📱 Kirim WhatsApp",
+  label = "Kirim WhatsApp",
   className = "",
 }: WhatsAppButtonProps) {
   const [loading, setLoading] = useState(false);
@@ -52,8 +53,9 @@ export default function WhatsAppButton({
 
   if (sent) {
     return (
-      <span className={`text-sm text-green-600 font-medium ${className}`}>
-        ✅ Terkirim
+      <span className={`inline-flex items-center gap-1.5 text-sm text-green-600 font-medium ${className}`}>
+        <CheckCircle2 className="h-4 w-4" aria-hidden={true} />
+        Terkirim
       </span>
     );
   }

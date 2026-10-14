@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PartyPopper } from "lucide-react";
 import StarRating from "./StarRating";
 
 interface ReviewFormProps {
@@ -110,7 +111,9 @@ export default function ReviewForm({ bookingId, venueId, courtId, onSuccess }: R
   if (success) {
     return (
       <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-        <div className="text-4xl mb-2">🎉</div>
+        <div className="flex justify-center mb-2">
+          <PartyPopper className="h-10 w-10 text-green-600" aria-hidden={true} />
+        </div>
         <h3 className="text-lg font-semibold text-green-800 mb-1">Review Terkirim!</h3>
         <p className="text-green-600">Terima kasih atas review kamu.</p>
       </div>

@@ -2,6 +2,7 @@ import { readFile } from "fs/promises";
 import path from "path";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Zap, Lock, ClipboardList, Phone, Home, type LucideIcon } from "lucide-react";
 
 const SETTINGS_FILE = path.join(process.cwd(), "data", "seo-settings.json");
 const CMS_FILE = path.join(process.cwd(), "data", "cms-pages.json");
@@ -63,12 +64,12 @@ Membuat akses ke fasilitas olahraga semudah memesan makanan. Kami percaya bahwa 
 
 ## Apa yang Kami Tawarkan
 
-- 🏟️ **Ribuan lapangan** — futsal, badminton, basket, tenis, padel, mini soccer
-- 📍 **Filter lokasi** — cari berdasarkan area/kota/kelurahan
-- 💰 **Harga transparan** — lihat harga real-time sebelum booking
-- ⏰ **Booking instan** — pilih jam, bayar, langsung main
-- 🏆 **Gamifikasi** — kumpulkan poin, tukar reward, naik level
-- 🌧️ **Adaptif cuaca** — diskon otomatis untuk lapangan outdoor saat hujan
+- **Ribuan lapangan** — futsal, badminton, basket, tenis, padel, mini soccer
+- **Filter lokasi** — cari berdasarkan area/kota/kelurahan
+- **Harga transparan** — lihat harga real-time sebelum booking
+- **Booking instan** — pilih jam, bayar, langsung main
+- **Gamifikasi** — kumpulkan poin, tukar reward, naik level
+- **Adaptif cuaca** — diskon otomatis untuk lapangan outdoor saat hujan
 
 ## Untuk Pemilik Lapangan
 
@@ -101,7 +102,7 @@ export default async function TentangPage() {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">⚡</span>
+              <Zap className="h-4 w-4 text-white" aria-hidden={true} />
             </div>
             <span className="text-lg font-black text-gray-900">Lapang<span className="text-emerald-600">in</span></span>
           </Link>
@@ -122,17 +123,20 @@ export default async function TentangPage() {
         </article>
 
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { href: "/kebijakan", label: "Kebijakan & Privasi", icon: "🔒" },
-            { href: "/syarat", label: "Syarat & Ketentuan", icon: "📋" },
-            { href: "/kontak", label: "Kontak Kami", icon: "📞" },
-            { href: "/", label: "Kembali ke Beranda", icon: "🏠" },
-          ].map((item) => (
-            <Link key={item.href} href={item.href} className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md transition-shadow">
-              <span className="text-2xl block mb-2">{item.icon}</span>
-              <span className="text-sm font-medium text-gray-700">{item.label}</span>
-            </Link>
-          ))}
+          {([
+            { href: "/kebijakan", label: "Kebijakan & Privasi", icon: Lock },
+            { href: "/syarat", label: "Syarat & Ketentuan", icon: ClipboardList },
+            { href: "/kontak", label: "Kontak Kami", icon: Phone },
+            { href: "/", label: "Kembali ke Beranda", icon: Home },
+          ] as { href: string; label: string; icon: LucideIcon }[]).map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link key={item.href} href={item.href} className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md transition-shadow">
+                <Icon className="h-6 w-6 mx-auto mb-2 text-emerald-600" aria-hidden={true} />
+                <span className="text-sm font-medium text-gray-700">{item.label}</span>
+              </Link>
+            );
+          })}
         </div>
       </main>
     </div>

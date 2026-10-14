@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { Bell } from "lucide-react";
 import type { NotificationLog } from "@/lib/types/domain";
 
 export default function NotificationBell() {
@@ -151,7 +152,9 @@ export default function NotificationBell() {
               </div>
             ) : notifications.length === 0 ? (
               <div className="py-12 text-center">
-                <p className="text-3xl mb-2">🔔</p>
+                <div className="flex justify-center mb-2">
+                  <Bell className="h-8 w-8 text-gray-300" aria-hidden={true} />
+                </div>
                 <p className="text-sm text-gray-500">Belum ada notifikasi</p>
               </div>
             ) : (

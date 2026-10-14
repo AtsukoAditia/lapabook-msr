@@ -3,6 +3,26 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  BarChart3,
+  Volleyball,
+  ClipboardList,
+  CreditCard,
+  Building2,
+  User,
+  Building,
+  Wallet,
+  Search,
+  FileText,
+  TrendingUp,
+  Landmark,
+  Users,
+  Settings,
+  Home,
+  LogOut,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
 import NotificationBell from "@/components/admin/NotificationBell";
 
 interface AdminLayoutProps {
@@ -15,21 +35,21 @@ interface AdminSession {
   email: string;
 }
 
-const navItems = [
-  { href: "/admin", label: "Dashboard", icon: "📊" },
-  { href: "/admin/sports", label: "Olahraga", icon: "🏸" },
-  { href: "/admin/bookings", label: "Booking", icon: "📋" },
-  { href: "/admin/payments", label: "Payments", icon: "💳" },
-  { href: "/admin/courts", label: "Lapangan", icon: "🏟️" },
-  { href: "/admin/owners", label: "Owner", icon: "👤" },
-  { href: "/admin/venues", label: "Venue Approval", icon: "🏢" },
-  { href: "/admin/pricing", label: "Harga", icon: "💰" },
-  { href: "/admin/seo", label: "SEO", icon: "🔍" },
-  { href: "/admin/cms", label: "CMS", icon: "📝" },
-  { href: "/admin/analytics", label: "Analytics", icon: "📈" },
-  { href: "/admin/commission", label: "Komisi", icon: "🏦" },
-  { href: "/admin/customers", label: "Pelanggan", icon: "👥" },
-  { href: "/admin/settings", label: "Pengaturan", icon: "⚙️" },
+const navItems: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: "/admin", label: "Dashboard", icon: BarChart3 },
+  { href: "/admin/sports", label: "Olahraga", icon: Volleyball },
+  { href: "/admin/bookings", label: "Booking", icon: ClipboardList },
+  { href: "/admin/payments", label: "Payments", icon: CreditCard },
+  { href: "/admin/courts", label: "Lapangan", icon: Building2 },
+  { href: "/admin/owners", label: "Owner", icon: User },
+  { href: "/admin/venues", label: "Venue Approval", icon: Building },
+  { href: "/admin/pricing", label: "Harga", icon: Wallet },
+  { href: "/admin/seo", label: "SEO", icon: Search },
+  { href: "/admin/cms", label: "CMS", icon: FileText },
+  { href: "/admin/analytics", label: "Analytics", icon: TrendingUp },
+  { href: "/admin/commission", label: "Komisi", icon: Landmark },
+  { href: "/admin/customers", label: "Pelanggan", icon: Users },
+  { href: "/admin/settings", label: "Pengaturan", icon: Settings },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
@@ -77,7 +97,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <span className="text-white font-black text-2xl">⚡</span>
+            <Zap className="h-7 w-7 text-white" aria-hidden={true} />
           </div>
           <p className="text-gray-500 font-medium">Memuat...</p>
         </div>
@@ -102,7 +122,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </button>
             <Link href="/admin" className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">⚡</span>
+                <Zap className="h-4 w-4 text-white" aria-hidden={true} />
               </div>
               <span className="text-lg font-black text-white hidden sm:block">
                 Lapang<span className="text-emerald-400">in</span>
@@ -120,16 +140,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             )}
             <Link
               href="/"
-              className="text-sm text-gray-400 hover:text-white transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
             >
-              🏠 Situs
+              <Home className="h-4 w-4" aria-hidden={true} />
+              Situs
             </Link>
             <NotificationBell />
             <button
               onClick={handleLogout}
-              className="text-sm text-gray-400 hover:text-red-400 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-red-400 transition-colors"
             >
-              🚪 Keluar
+              <LogOut className="h-4 w-4" aria-hidden={true} />
+              Keluar
             </button>
           </div>
         </div>
@@ -146,6 +168,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     pathname === item.href ||
                     (item.href !== "/admin" &&
                       pathname.startsWith(item.href));
+                  const Icon = item.icon;
 
                   return (
                     <li key={item.href}>
@@ -157,7 +180,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                             : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                         }`}
                       >
-                        <span className="text-lg">{item.icon}</span>
+                        <Icon className="h-4 w-4" aria-hidden={true} />
                         {item.label}
                       </Link>
                     </li>
@@ -182,6 +205,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                         pathname === item.href ||
                         (item.href !== "/admin" &&
                           pathname.startsWith(item.href));
+                      const Icon = item.icon;
 
                       return (
                         <li key={item.href}>
@@ -194,7 +218,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                             }`}
                           >
-                            <span className="text-lg">{item.icon}</span>
+                            <Icon className="h-4 w-4" aria-hidden={true} />
                             {item.label}
                           </Link>
                         </li>
@@ -213,6 +237,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 const isActive =
                   pathname === item.href ||
                   (item.href !== "/admin" && pathname.startsWith(item.href));
+                const Icon = item.icon;
                 return (
                   <Link
                     key={item.href}
@@ -223,7 +248,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                         : "text-gray-400 hover:text-gray-600"
                     }`}
                   >
-                    <span className="text-lg">{item.icon}</span>
+                    <Icon className="h-5 w-5" aria-hidden={true} />
                     <span className="text-[10px]">{item.label}</span>
                   </Link>
                 );

@@ -69,6 +69,7 @@ export interface CreateBookingInput {
   notes?: string;
   userId?: string;
   voucherCode?: string;
+  downPaymentType?: "full" | "dp50";
 }
 
 export interface VoucherRow {
@@ -204,7 +205,7 @@ export interface DatabaseAdapter {
 
   // Payment Proof
   submitPaymentProof(bookingId: string, proofUrl: string): Promise<Booking>;
-  confirmPayment(bookingId: string, actorId?: string): Promise<Booking>;
+  confirmPayment(bookingId: string, actorId?: string, amount?: number): Promise<Booking>;
   rejectPayment(bookingId: string, actorId?: string): Promise<Booking>;
 
   // Notifications

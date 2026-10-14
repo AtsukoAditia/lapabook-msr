@@ -4,6 +4,8 @@ import path from "path";
 import { getClientIP, checkRateLimit, bookingLimiter } from "@/lib/security";
 import { verifyToken, CUSTOMER_TOKEN_NAME } from "@/lib/auth/jwt";
 import { cookies } from "next/headers";
+import { BookingService } from "@/lib/services/booking-service";
+import { getDatabaseAdapter } from "@/lib/adapters";
 
 // ponytail: di luar public/ (jangan ke-serve static tanpa auth) — served via /uploads/payments/[filename] signed route
 const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads", "payments");
@@ -32,15 +34,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Require customer auth for upload
+    // Auth: customer session, ATAU guest dengan bookingCode+phone yang cocok
+    // ponytail: guest tier pakai pola lookup /api/bookings/[id] — upload tanpa login
+    //           dilarang; bug sebelumnya 401 untuk guest booking (checkout terlihat 500).
     const cookieStore = await cookies();
     const token = cookieStore.get(CUSTOMER_TOKEN_NAME)?.value;
     const session = token ? await verifyToken(token) : null;
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const formData = await request.formData();
+
+    if (!session) {
+      const bookingCode = String(formData.get("bookingCode") || "").slice(0, 20);
+      const phone = String(formData.get("phone") || "").replace(/[^0-9+]/g, "").slice(0, 20);
+      if (!bookingCode || !phone) {
+        return NextResponse.json({ error: "Login diperlukan, atau sertakan kode booking + nomor telepon." }, { status: 401 });
+      }
+      const adapter = getDatabaseAdapter();
+      const service = new BookingService(adapter);
+      const booking = await service.getBookingByCode(bookingCode);
+      if (!booking) {
+        return NextResponse.json({ error: "Booking tidak ditemukan." }, { status: 404 });
+      }
+      const normalize = (p: string) => p.replace(/[^0-9]/g, "");
+      const inputPhone = normalize(phone);
+      const storedPhone = normalize(booking.customerPhone);
+      const match =
+        inputPhone === storedPhone ||
+        inputPhone === "62" + storedPhone.replace(/^0/, "") ||
+        "62" + inputPhone.replace(/^0/, "") === storedPhone;
+      if (!match) {
+        return NextResponse.json({ error: "Verifikasi nomor telepon gagal." }, { status: 403 });
+      }
+    }
+
     const file = formData.get("file") as File | null;
 
     if (!file) {

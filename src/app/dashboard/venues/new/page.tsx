@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Check, MapPin, Phone, Clock } from "lucide-react";
 
 const SPORTS_OPTIONS = [
   { id: "futsal", label: "Futsal" },
@@ -188,7 +189,7 @@ function VenueFormPage() {
                 step >= s ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-500"
               }`}
             >
-              {step > s ? "✓" : s}
+              {step > s ? <Check aria-hidden={true} className="h-4 w-4" /> : s}
             </div>
             {s < 3 && (
               <div className={`h-0.5 flex-1 rounded ${step > s ? "bg-emerald-600" : "bg-gray-200"}`} />
@@ -358,9 +359,9 @@ function VenueFormPage() {
                   <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">Menunggu Review</span>
                 </div>
                 {form.description && <p className="text-sm text-gray-600">{form.description}</p>}
-                <p className="text-sm text-gray-500">📍 {form.address || "(Belum diisi)"}</p>
-                {form.phone && <p className="text-sm text-gray-500">📞 {form.phone}</p>}
-                <p className="text-sm text-gray-500">⏰ {form.openTime} – {form.closeTime}</p>
+                <p className="flex items-center gap-1.5 text-sm text-gray-500"><MapPin aria-hidden={true} className="h-4 w-4" /> {form.address || "(Belum diisi)"}</p>
+                {form.phone && <p className="flex items-center gap-1.5 text-sm text-gray-500"><Phone aria-hidden={true} className="h-4 w-4" /> {form.phone}</p>}
+                <p className="flex items-center gap-1.5 text-sm text-gray-500"><Clock aria-hidden={true} className="h-4 w-4" /> {form.openTime} – {form.closeTime}</p>
                 {form.sports.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {form.sports.map((s) => (

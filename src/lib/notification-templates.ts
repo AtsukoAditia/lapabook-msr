@@ -48,7 +48,7 @@ const templates: Record<NotificationType, (v: TemplateVars) => TemplateResult> =
   }),
 
   booking_confirmed: (v) => ({
-    subject: `Booking ${v.bookingCode} Dikonfirmasi ✅`,
+    subject: `Booking ${v.bookingCode} Dikonfirmasi`,
     message:
       `Halo ${v.customerName},\n\n` +
       `Booking Anda telah dikonfirmasi.\n\n` +
@@ -87,7 +87,7 @@ const templates: Record<NotificationType, (v: TemplateVars) => TemplateResult> =
   }),
 
   payment_confirmed: (v) => ({
-    subject: `Pembayaran ${v.bookingCode} Dikonfirmasi ✅`,
+    subject: `Pembayaran ${v.bookingCode} Dikonfirmasi`,
     message:
       `Halo ${v.customerName},\n\n` +
       `Pembayaran untuk booking ${v.bookingCode} telah dikonfirmasi.\n\n` +

@@ -771,6 +771,47 @@ export class GoogleSheetsAdapter implements DatabaseAdapter {
     return rowToBooking(targetRow.toObject());
   }
 
+  async requestRefund(bookingId: string, reason?: string): Promise<Booking> {
+    const doc = await getSpreadsheet();
+    const sheet = doc.sheetsByTitle["bookings"];
+    if (!sheet) throw new Error("Bookings sheet not found");
+    const rows = await sheet.getRows();
+    const targetRow = rows.find((r) => r.get("id") === bookingId);
+    if (!targetRow) throw new Error(`Booking with id ${bookingId} not found`);
+    targetRow.set("payment_status", "refund_requested");
+    if (reason) targetRow.set("refund_reason", reason);
+    targetRow.set("updated_at", new Date().toISOString());
+    await targetRow.save();
+    return rowToBooking(targetRow.toObject());
+  }
+
+  async approveRefund(bookingId: string, _actorId?: string): Promise<Booking> {
+    const doc = await getSpreadsheet();
+    const sheet = doc.sheetsByTitle["bookings"];
+    if (!sheet) throw new Error("Bookings sheet not found");
+    const rows = await sheet.getRows();
+    const targetRow = rows.find((r) => r.get("id") === bookingId);
+    if (!targetRow) throw new Error(`Booking with id ${bookingId} not found`);
+    targetRow.set("payment_status", "refunded");
+    targetRow.set("booking_status", "cancelled");
+    targetRow.set("updated_at", new Date().toISOString());
+    await targetRow.save();
+    return rowToBooking(targetRow.toObject());
+  }
+
+  async rejectRefund(bookingId: string, _actorId?: string): Promise<Booking> {
+    const doc = await getSpreadsheet();
+    const sheet = doc.sheetsByTitle["bookings"];
+    if (!sheet) throw new Error("Bookings sheet not found");
+    const rows = await sheet.getRows();
+    const targetRow = rows.find((r) => r.get("id") === bookingId);
+    if (!targetRow) throw new Error(`Booking with id ${bookingId} not found`);
+    targetRow.set("payment_status", "paid");
+    targetRow.set("updated_at", new Date().toISOString());
+    await targetRow.save();
+    return rowToBooking(targetRow.toObject());
+  }
+
   // ── Notifications ──
   async getNotificationLogs(bookingId?: string): Promise<NotificationLog[]> {
     const doc = await getSpreadsheet();

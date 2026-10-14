@@ -207,6 +207,9 @@ export interface DatabaseAdapter {
   submitPaymentProof(bookingId: string, proofUrl: string): Promise<Booking>;
   confirmPayment(bookingId: string, actorId?: string, amount?: number): Promise<Booking>;
   rejectPayment(bookingId: string, actorId?: string): Promise<Booking>;
+  requestRefund(bookingId: string, reason?: string): Promise<Booking>;
+  approveRefund(bookingId: string, actorId?: string): Promise<Booking>;
+  rejectRefund(bookingId: string, actorId?: string): Promise<Booking>;
 
   // Notifications
   getNotificationLogs(bookingId?: string): Promise<NotificationLog[]>;

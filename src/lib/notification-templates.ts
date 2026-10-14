@@ -131,6 +131,33 @@ const templates: Record<NotificationType, (v: TemplateVars) => TemplateResult> =
       `Silakan review di dashboard admin.`,
   }),
 
+  refund_requested: (v) => ({
+    subject: `Refund ${v.bookingCode} Diajukan`,
+    message:
+      `Halo ${v.customerName},\n\n` +
+      `Pengajuan refund untuk booking ${v.bookingCode} telah kami terima.\n\n` +
+      `Admin akan memproses maksimal 1x24 jam. Kami kabari hasilnya via WhatsApp ini.\n\n` +
+      `Lapabook`,
+  }),
+
+  refund_approved: (v) => ({
+    subject: `Refund ${v.bookingCode} Disetujui`,
+    message:
+      `Halo ${v.customerName},\n\n` +
+      `Pengajuan refund untuk booking ${v.bookingCode} (${formatCurrency(v.totalPrice)}) DISETUJUI.\n\n` +
+      `Dana dikembalikan ke rekening/e-wallet asal maksimal 3 hari kerja.\n\n` +
+      `Lapabook`,
+  }),
+
+  refund_rejected: (v) => ({
+    subject: `Refund ${v.bookingCode} Ditolak`,
+    message:
+      `Halo ${v.customerName},\n\n` +
+      `Mohon maaf, pengajuan refund untuk booking ${v.bookingCode} DITOLAK.\n\n` +
+      `Silakan hubungi admin untuk detail atau banding.\n\n` +
+      `Lapabook`,
+  }),
+
   admin_payment_proof: (v) => ({
     subject: `[Admin] Bukti Pembayaran: ${v.bookingCode}`,
     message:

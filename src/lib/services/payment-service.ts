@@ -1,6 +1,6 @@
 import { getDatabaseAdapter } from "@/lib/adapters";
 import type { Booking, PaymentMethod } from "@/lib/types/domain";
-import { recordWhatsAppConfirmLink } from "./notification-service";
+import { recordWhatsAppConfirmLink, sendPaymentConfirmation, sendBookingRejection, sendRefundUpdate } from "./notification-service";
 
 // ponvian: midtrans-client has no types, any is unavoidable
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -226,7 +226,60 @@ export class PaymentService {
 
     // Fire-and-forget: WA confirm link row in notification_logs.
     void recordWhatsAppConfirmLink(updated, updated.venueId);
+    // Best-effort WA ke customer — jangan block flow utama.
+    try { await sendPaymentConfirmation(updated); } catch { /* non-blocking */ }
 
+    return updated;
+  }
+
+  async requestRefund(bookingId: string, reason?: string, actorId?: string): Promise<Booking> {
+    const updated = await this.adapter.requestRefund(bookingId, reason);
+    await this.adapter.createAuditLog({
+      action: "refund_requested",
+      targetType: "booking",
+      targetId: bookingId,
+      actorType: "customer",
+      actorId,
+      details: `Refund requested for booking ${updated.bookingCode}${reason ? `: ${reason}` : ""}`,
+      newValue: "refund_requested",
+    });
+    try { await sendRefundUpdate(updated, "refund_requested"); } catch { /* non-blocking */ }
+    return updated;
+  }
+
+  async approveRefund(bookingId: string, actorId?: string): Promise<Booking> {
+    const booking = await this.adapter.getBookingById(bookingId);
+    if (!booking) throw new Error("Booking not found");
+    const updated = await this.adapter.approveRefund(bookingId, actorId);
+    await this.adapter.createAuditLog({
+      action: "refund_approved",
+      targetType: "booking",
+      targetId: bookingId,
+      actorType: "admin",
+      actorId,
+      details: `Refund approved for booking ${booking.bookingCode}`,
+      previousValue: booking.paymentStatus,
+      newValue: "refunded",
+    });
+    try { await sendRefundUpdate(updated, "refund_approved"); } catch { /* non-blocking */ }
+    return updated;
+  }
+
+  async rejectRefund(bookingId: string, actorId?: string): Promise<Booking> {
+    const booking = await this.adapter.getBookingById(bookingId);
+    if (!booking) throw new Error("Booking not found");
+    const updated = await this.adapter.rejectRefund(bookingId, actorId);
+    await this.adapter.createAuditLog({
+      action: "refund_rejected",
+      targetType: "booking",
+      targetId: bookingId,
+      actorType: "admin",
+      actorId,
+      details: `Refund rejected for booking ${booking.bookingCode}`,
+      previousValue: booking.paymentStatus,
+      newValue: updated.paymentStatus,
+    });
+    try { await sendRefundUpdate(updated, "refund_rejected"); } catch { /* non-blocking */ }
     return updated;
   }
 
@@ -239,6 +292,8 @@ export class PaymentService {
     }
 
     const updated = await this.adapter.rejectPayment(bookingId, actorId);
+
+    try { await sendBookingRejection(updated); } catch { /* non-blocking */ }
 
     await this.adapter.createAuditLog({
       action: "payment_rejected",

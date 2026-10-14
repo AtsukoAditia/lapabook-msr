@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Wallet } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 interface CommissionVenue {
@@ -77,7 +78,9 @@ export default function CommissionPage() {
     <AdminLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">💰 Pengaturan Komisi</h1>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Wallet aria-hidden={true} className="h-6 w-6 text-emerald-600" /> Pengaturan Komisi
+          </h1>
           <p className="text-gray-500 text-sm">Kelola komisi platform per venue</p>
         </div>
 

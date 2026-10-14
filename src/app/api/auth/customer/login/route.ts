@@ -1,20 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateCustomer } from "@/lib/auth/service";
 import { createToken, CUSTOMER_TOKEN_NAME } from "@/lib/auth/jwt";
-import { loginLimiter, getClientIP, checkRateLimit } from "@/lib/security";
+import { getClientIP, isLoginBlocked, recordLoginFail, resetLoginFail } from "@/lib/security";
 
 export async function POST(request: NextRequest) {
   try {
     const ip = getClientIP(request);
-
-    // Rate limit
-    const rateLimited = await checkRateLimit(loginLimiter, ip);
-    if (rateLimited) {
-      return NextResponse.json(
-        { success: false, error: `Terlalu banyak percobaan. Coba lagi dalam ${rateLimited.retryAfter} detik.` },
-        { status: 429 },
-      );
-    }
 
     const { email, password } = await request.json();
 
@@ -25,17 +16,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Rate limit: 5 gagal / 10 menit per IP+email
+    const failKey = `${ip}:${String(email).toLowerCase()}`;
+    const blocked = await isLoginBlocked(failKey);
+    if (blocked) {
+      const menit = Math.ceil(blocked.retryAfter / 60);
+      return NextResponse.json(
+        { success: false, error: `Terlalu banyak percobaan login. Coba lagi dalam ${menit} menit.` },
+        { status: 429 },
+      );
+    }
+
     const customer = await authenticateCustomer(email, password);
 
     if (!customer) {
+      await recordLoginFail(failKey);
       return NextResponse.json(
         { success: false, error: "Email atau password salah" },
         { status: 401 },
       );
     }
 
-    // Reset rate limit on successful login
-    await loginLimiter.delete(ip);
+    // Sukses → reset counter
+    await resetLoginFail(failKey);
 
     const token = await createToken({
       userId: customer.id,

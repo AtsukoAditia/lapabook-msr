@@ -52,3 +52,41 @@ export async function checkRateLimit(
     return { limited: true, retryAfter };
   }
 }
+
+// Login-fail limiter — 5 gagal / 10 menit per IP+email; sukses reset counter.
+// ponytail: in-memory; upgrade ke Redis/DB bila multi-instance deploy.
+export const loginFailLimiter = new RateLimiterMemory({
+  points: 5,
+  duration: 600, // 10 menit
+  keyPrefix: "loginfail",
+});
+
+// cek apakah key diblok (tanpa consume)
+export async function isLoginBlocked(key: string): Promise<{ blocked: true; retryAfter: number } | null> {
+  if (IS_TESTING_ENV) return null;
+  const res = await loginFailLimiter.get(key);
+  if (res && res.remainingPoints <= 0) {
+    return { blocked: true, retryAfter: Math.ceil(res.msBeforeNext / 1000) };
+  }
+  return null;
+}
+
+// catat 1 kegagalan
+export async function recordLoginFail(key: string): Promise<void> {
+  if (IS_TESTING_ENV) return;
+  try {
+    await loginFailLimiter.consume(key);
+  } catch {
+    /* sudah habis — isLoginBlocked akan jaga */
+  }
+}
+
+// reset counter setelah login sukses
+export async function resetLoginFail(key: string): Promise<void> {
+  if (IS_TESTING_ENV) return;
+  try {
+    await loginFailLimiter.delete(key);
+  } catch {
+    /* ignore */
+  }
+}

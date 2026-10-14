@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Mail, MessageSquare, Smartphone, Bell, type LucideIcon } from "lucide-react";
 import type { NotificationLog } from "@/lib/types/domain";
 
 export default function NotificationsPage() {
@@ -84,21 +85,16 @@ export default function NotificationsPage() {
     return labels[type] || type;
   }
 
-  function getChannelIcon(channel: string) {
-    switch (channel) {
-      case "email":
-        return "📧";
-      case "whatsapp":
-        return "💬";
-      case "sms":
-        return "📱";
-      case "in_app":
-        return "🔔";
-      case "web_push":
-        return "🔔";
-      default:
-        return "📩";
-    }
+  const channelIcons: Record<string, LucideIcon> = {
+    email: Mail,
+    whatsapp: MessageSquare,
+    sms: Smartphone,
+    in_app: Bell,
+    web_push: Bell,
+  };
+
+  function getChannelIcon(channel: string): LucideIcon {
+    return channelIcons[channel] || Mail;
   }
 
   function formatDateTime(dateStr: string) {
@@ -167,9 +163,10 @@ export default function NotificationsPage() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
-                  <span className="mt-0.5 text-xl">
-                    {getChannelIcon(notif.channel)}
-                  </span>
+                  {(() => {
+                    const ChannelIcon = getChannelIcon(notif.channel);
+                    return <ChannelIcon aria-hidden={true} className="mt-0.5 h-5 w-5 text-gray-400" />;
+                  })()}
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-sm font-semibold text-gray-900">

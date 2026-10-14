@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { LandPlot, Camera, AlertTriangle, X } from "lucide-react";
 
 interface Court {
   id: string;
@@ -166,7 +167,7 @@ export default function VenuePhotosPage() {
           </Link>
         </div>
         <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">
-          <p className="text-5xl mb-4">🏟️</p>
+          <LandPlot aria-hidden={true} className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <p className="text-lg font-bold text-gray-700">Venue belum punya lapangan</p>
           <p className="text-gray-500 text-sm mt-1">Tambahkan lapangan terlebih dahulu.</p>
         </div>
@@ -178,7 +179,7 @@ export default function VenuePhotosPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">📸 Foto Lapangan</h1>
+          <h1 className="flex items-center gap-2 text-2xl font-black text-gray-900"><Camera aria-hidden={true} className="h-6 w-6" /> Foto Lapangan</h1>
           <p className="text-gray-500 text-sm mt-1">Kelola foto untuk setiap lapangan</p>
         </div>
         <Link href="/dashboard/venues" className="text-emerald-600 text-sm font-medium hover:underline">
@@ -204,7 +205,7 @@ export default function VenuePhotosPage() {
 
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-          <p className="text-sm font-medium text-red-700">⚠️ {error}</p>
+          <p className="flex items-center gap-1.5 text-sm font-medium text-red-700"><AlertTriangle aria-hidden={true} className="h-4 w-4" /> {error}</p>
         </div>
       )}
 
@@ -235,7 +236,7 @@ export default function VenuePhotosPage() {
                 <span className="text-sm text-gray-500">Mengupload...</span>
               ) : (
                 <>
-                  <span className="text-2xl">📷</span>
+                  <Camera aria-hidden={true} className="h-6 w-6 text-gray-500" />
                   <span className="text-sm font-medium text-gray-700">
                     Pilih foto (max 5MB, format gambar)
                   </span>
@@ -270,7 +271,7 @@ export default function VenuePhotosPage() {
                   onClick={() => handleDelete(photo.id)}
                   className="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                 >
-                  ✕
+                  <X aria-hidden={true} className="h-3 w-3" />
                 </button>
               </div>
             ))}

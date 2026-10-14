@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import BarChart from "@/components/charts/BarChart";
+import { Wallet, ClipboardList, BarChart3, TrendingUp } from "lucide-react";
 
 interface RevenueByCourt {
   label: string;
@@ -124,8 +125,8 @@ export default function OwnerAnalyticsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white text-lg">
-              💰
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white">
+              <Wallet aria-hidden={true} className="h-5 w-5" />
             </div>
             <span className="text-sm font-medium text-gray-500">
               Bulan Ini
@@ -142,8 +143,8 @@ export default function OwnerAnalyticsPage() {
 
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white text-lg">
-              📋
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white">
+              <ClipboardList aria-hidden={true} className="h-5 w-5" />
             </div>
             <span className="text-sm font-medium text-gray-500">
               Total Booking
@@ -157,8 +158,8 @@ export default function OwnerAnalyticsPage() {
 
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-lg">
-              📊
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white">
+              <BarChart3 aria-hidden={true} className="h-5 w-5" />
             </div>
             <span className="text-sm font-medium text-gray-500">
               Occupancy Rate
@@ -172,8 +173,8 @@ export default function OwnerAnalyticsPage() {
 
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center text-white text-lg">
-              📈
+            <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center text-white">
+              <TrendingUp aria-hidden={true} className="h-5 w-5" />
             </div>
             <span className="text-sm font-medium text-gray-500">
               Bulan Lalu

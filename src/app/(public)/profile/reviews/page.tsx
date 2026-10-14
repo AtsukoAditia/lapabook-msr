@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Star, Pencil } from "lucide-react";
 
 interface ReviewItem {
   id: string;
@@ -15,8 +16,14 @@ interface ReviewItem {
 
 function Stars({ rating }: { rating: number }) {
   return (
-    <span className="text-amber-400">
-      {"★".repeat(rating)}{"☆".repeat(5 - rating)}
+    <span className="inline-flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((s) => (
+        <Star
+          key={s}
+          className={`h-4 w-4 ${s <= rating ? "text-amber-400 fill-amber-400" : "text-slate-200"}`}
+          aria-hidden={true}
+        />
+      ))}
     </span>
   );
 }
@@ -67,7 +74,7 @@ export default function MyReviewsPage() {
       <div className="max-w-2xl mx-auto px-4 py-4 space-y-3">
         {reviews.length === 0 ? (
           <div className="text-center py-16 text-gray-500">
-            <p className="text-4xl mb-3">✍️</p>
+            <Pencil className="mx-auto mb-3 h-10 w-10 text-gray-300" aria-hidden={true} />
             <p className="font-medium">Belum ada ulasan</p>
             <p className="text-sm mt-1">Tulis ulasan setelah selesai booking</p>
           </div>

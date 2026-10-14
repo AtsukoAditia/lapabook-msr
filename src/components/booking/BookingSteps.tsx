@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
+import { Trophy, LandPlot, Clock, User, CreditCard, CheckCircle2 } from "lucide-react";
 
 export type Step = {
   number: number;
   label: string;
   href?: string;
-  icon?: string;
+  icon?: LucideIcon;
 };
 
 type BookingStepsProps = {
@@ -17,12 +19,12 @@ type BookingStepsProps = {
 };
 
 const DEFAULT_STEPS: Step[] = [
-  { number: 1, label: "Pilih Olahraga", href: "/booking", icon: "🏆" },
-  { number: 2, label: "Pilih Lapangan", href: "/booking", icon: "🏟️" },
-  { number: 3, label: "Pilih Jam Main", icon: "⏰" },
-  { number: 4, label: "Data Pelanggan", icon: "👤" },
-  { number: 5, label: "Pembayaran", icon: "💳" },
-  { number: 6, label: "Konfirmasi", icon: "✅" },
+  { number: 1, label: "Pilih Olahraga", href: "/booking", icon: Trophy },
+  { number: 2, label: "Pilih Lapangan", href: "/booking", icon: LandPlot },
+  { number: 3, label: "Pilih Jam Main", icon: Clock },
+  { number: 4, label: "Data Pelanggan", icon: User },
+  { number: 5, label: "Pembayaran", icon: CreditCard },
+  { number: 6, label: "Konfirmasi", icon: CheckCircle2 },
 ];
 
 export default function BookingSteps({
@@ -79,7 +81,7 @@ export default function BookingSteps({
                               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
                           ) : (
-                            <span className={iconClass}>{step.icon}</span>
+                            step.icon ? <step.icon aria-hidden={true} className={`h-5 w-5 ${iconClass}`} /> : null
                           )}
                         </span>
                         {isCurrent && (
@@ -99,7 +101,7 @@ export default function BookingSteps({
                               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
                           ) : (
-                            <span className={iconClass}>{step.icon}</span>
+                            step.icon ? <step.icon aria-hidden={true} className={`h-5 w-5 ${iconClass}`} /> : null
                           )}
                         </span>
                         {isCurrent && (
@@ -147,7 +149,10 @@ export default function BookingSteps({
             })}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-2xl">{steps[currentStep - 1]?.icon}</span>
+            {(() => {
+              const Icon = steps[currentStep - 1]?.icon;
+              return Icon ? <Icon aria-hidden={true} className="h-5 w-5 text-white" /> : null;
+            })()}
             <span className="text-white text-xs font-semibold">
               {steps[currentStep - 1]?.label}
             </span>

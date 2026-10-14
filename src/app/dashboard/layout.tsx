@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import type { LucideIcon } from "lucide-react";
+import { BarChart3, ClipboardList, LandPlot, Building2, TrendingUp, Settings, Zap, LogOut } from "lucide-react";
 
 interface OwnerLayoutProps {
   children: React.ReactNode;
@@ -15,13 +17,13 @@ interface OwnerSession {
   ownerId: string;
 }
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: "📊" },
-  { href: "/dashboard/bookings", label: "Booking", icon: "📋" },
-  { href: "/dashboard/courts", label: "Lapangan", icon: "🏟️" },
-  { href: "/dashboard/venues", label: "Venue Saya", icon: "🏢" },
-  { href: "/dashboard/analytics", label: "Analytics", icon: "📈" },
-  { href: "/dashboard/settings", label: "Pengaturan", icon: "⚙️" },
+const navItems: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
+  { href: "/dashboard/bookings", label: "Booking", icon: ClipboardList },
+  { href: "/dashboard/courts", label: "Lapangan", icon: LandPlot },
+  { href: "/dashboard/venues", label: "Venue Saya", icon: Building2 },
+  { href: "/dashboard/analytics", label: "Analytics", icon: TrendingUp },
+  { href: "/dashboard/settings", label: "Pengaturan", icon: Settings },
 ];
 
 export default function OwnerLayout({ children }: OwnerLayoutProps) {
@@ -81,7 +83,7 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">⚡</span>
+            <Zap aria-hidden={true} className="h-4 w-4 text-white" />
           </div>
           <span className="font-black text-gray-900">Owner</span>
         </Link>
@@ -101,7 +103,7 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
           <div className="p-6 border-b border-gray-100">
             <Link href="/dashboard" className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-md">
-                <span className="text-white font-black text-lg">⚡</span>
+                <Zap aria-hidden={true} className="h-5 w-5 text-white" />
               </div>
               <div>
                 <h1 className="font-black text-gray-900 text-lg">Lapabook</h1>
@@ -124,7 +126,7 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                 >
-                  <span className="text-lg">{item.icon}</span>
+                  <item.icon aria-hidden={true} className="h-5 w-5" />
                   {item.label}
                 </Link>
               );
@@ -150,7 +152,7 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
                 className="text-gray-400 hover:text-red-500 transition-colors"
                 title="Logout"
               >
-                🚪
+                <LogOut aria-hidden={true} className="h-5 w-5" />
               </button>
             </div>
           </div>

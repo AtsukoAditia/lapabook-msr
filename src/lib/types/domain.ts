@@ -177,9 +177,12 @@ export interface Booking {
     | "dp_paid"
     | "paid"
     | "rejected"
-    | "refunded";
+    | "refunded"
+    | "refund_requested";
   paymentProofUrl?: string;
   paymentRejectionReason?: string;
+  refundReason?: string;
+  refundRequestedAt?: string;
   paymentMethod?: "manual" | "midtrans";
   midtransOrderId?: string;
   midtransTransactionId?: string;
@@ -226,7 +229,10 @@ export type AuditLogAction =
   | "blocked_slot_deleted"
   | "payment_proof_submitted"
   | "payment_confirmed"
-  | "payment_rejected";
+  | "payment_rejected"
+  | "refund_requested"
+  | "refund_approved"
+  | "refund_rejected";
 
 export interface PaymentMethod {
   id: string;
@@ -274,7 +280,10 @@ export type NotificationType =
   | "payment_rejected"
   | "reminder_before_booking"
   | "admin_new_booking"
-  | "admin_payment_proof";
+  | "admin_payment_proof"
+  | "refund_requested"
+  | "refund_approved"
+  | "refund_rejected";
 
 export type NotificationStatus = "pending" | "sent" | "failed" | "read";
 

@@ -264,6 +264,22 @@ export async function sendAdminPaymentProofAlert(
 }
 
 /**
+ * Send refund_requested / refund_approved / refund_rejected WA ke customer.
+ * Best-effort: sendNotification sudah log + catch internal.
+ */
+export async function sendRefundUpdate(
+  booking: Booking,
+  type: "refund_requested" | "refund_approved" | "refund_rejected",
+): Promise<NotificationLog> {
+  return sendNotification({
+    type,
+    channel: "whatsapp",
+    booking,
+    recipient: booking.customerPhone,
+  });
+}
+
+/**
  * Get all notification logs, optionally filtered by booking
  */
 export async function getNotificationLogs(

@@ -14,9 +14,9 @@ async function handlePaymentAction(request: NextRequest, { params }: RouteContex
     const body = await request.json();
     const { action } = body as { action?: string };
 
-    if (!action || !["confirm", "reject"].includes(action)) {
+    if (!action || !["confirm", "reject", "refund-approve", "refund-reject"].includes(action)) {
       return NextResponse.json(
-        { error: 'action harus "confirm" atau "reject"' },
+        { error: 'action harus "confirm", "reject", "refund-approve", atau "refund-reject"' },
         { status: 400 },
       );
     }
@@ -24,7 +24,11 @@ async function handlePaymentAction(request: NextRequest, { params }: RouteContex
     const booking =
       action === "confirm"
         ? await paymentService.confirmPayment(id, "admin")
-        : await paymentService.rejectPayment(id, "admin");
+        : action === "reject"
+          ? await paymentService.rejectPayment(id, "admin")
+          : action === "refund-approve"
+            ? await paymentService.approveRefund(id, "admin")
+            : await paymentService.rejectRefund(id, "admin");
 
     // Audit trail: konfirmasi/penolakan pembayaran manual
     try {

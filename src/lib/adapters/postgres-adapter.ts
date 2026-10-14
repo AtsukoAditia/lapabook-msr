@@ -139,6 +139,8 @@ function mapBooking(row: Record<string, unknown>): Booking {
     paymentStatus: r.paymentStatus as Booking["paymentStatus"],
     paymentProofUrl: (r.paymentProofUrl as string) || undefined,
     paymentRejectionReason: (r.paymentRejectionReason as string) || undefined,
+    refundReason: (r.refundReason as string) || undefined,
+    refundRequestedAt: r.refundRequestedAt ? fmtTs(r.refundRequestedAt) : undefined,
     notes: (r.notes as string) || undefined,
     userId: (r.userId as string) || undefined,
     rescheduledFrom: (r.rescheduledFrom as Booking["rescheduledFrom"]) || undefined,
@@ -611,6 +613,48 @@ export class PostgresAdapter implements DatabaseAdapter {
 
   async rejectPayment(bookingId: string, _actorId?: string): Promise<Booking> {
     const r = await queryOne<Record<string, unknown>>("UPDATE bookings SET payment_status = 'rejected', booking_status = 'rejected', payment_rejected_at = NOW(), updated_at = NOW() WHERE id = $1 RETURNING *", [bookingId]);
+    if (!r) throw new Error(`Booking not found: ${bookingId}`);
+    return mapBooking(r);
+  }
+
+  async requestRefund(bookingId: string, reason?: string): Promise<Booking> {
+    const current = await this.getBookingById(bookingId);
+    if (!current) throw new Error(`Booking not found: ${bookingId}`);
+    const st = current.paymentStatus as string;
+    if (st !== "paid" && st !== "dp_paid") {
+      throw new Error("Refund hanya untuk booking paid/dp_paid.");
+    }
+    const r = await queryOne<Record<string, unknown>>(
+      "UPDATE bookings SET payment_status = 'refund_requested', refund_reason = $2, refund_requested_at = NOW(), updated_at = NOW() WHERE id = $1 RETURNING *",
+      [bookingId, reason || null],
+    );
+    if (!r) throw new Error(`Booking not found: ${bookingId}`);
+    return mapBooking(r);
+  }
+
+  async approveRefund(bookingId: string, _actorId?: string): Promise<Booking> {
+    const current = await this.getBookingById(bookingId);
+    if (!current) throw new Error(`Booking not found: ${bookingId}`);
+    if (current.paymentStatus !== "refund_requested") throw new Error("Tidak ada pengajuan refund.");
+    const r = await queryOne<Record<string, unknown>>(
+      "UPDATE bookings SET payment_status = 'refunded', booking_status = 'cancelled', updated_at = NOW() WHERE id = $1 RETURNING *",
+      [bookingId],
+    );
+    if (!r) throw new Error(`Booking not found: ${bookingId}`);
+    return mapBooking(r);
+  }
+
+  async rejectRefund(bookingId: string, _actorId?: string): Promise<Booking> {
+    const current = await this.getBookingById(bookingId);
+    if (!current) throw new Error(`Booking not found: ${bookingId}`);
+    if (current.paymentStatus !== "refund_requested") throw new Error("Tidak ada pengajuan refund.");
+    // Kembali ke status bayar sebelumnya — pakai paid_amount: lunas → paid, sebagian → dp_paid.
+    const paid = current.paidAmount ?? 0;
+    const back = paid >= current.totalPrice && paid > 0 ? "paid" : "dp_paid";
+    const r = await queryOne<Record<string, unknown>>(
+      "UPDATE bookings SET payment_status = $2, updated_at = NOW() WHERE id = $1 RETURNING *",
+      [bookingId, back],
+    );
     if (!r) throw new Error(`Booking not found: ${bookingId}`);
     return mapBooking(r);
   }

@@ -570,6 +570,32 @@ export class MockAdapter implements DatabaseAdapter {
     return { ...store[index] };
   }
 
+  async requestRefund(bookingId: string, reason?: string): Promise<Booking> {
+    const store = getBookings();
+    const index = store.findIndex((b) => b.id === bookingId);
+    if (index === -1) throw new Error(`Booking not found: ${bookingId}`);
+    store[index] = { ...store[index], paymentStatus: "refund_requested", refundReason: reason, refundRequestedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    return { ...store[index] };
+  }
+
+  async approveRefund(bookingId: string, _actorId?: string): Promise<Booking> {
+    const store = getBookings();
+    const index = store.findIndex((b) => b.id === bookingId);
+    if (index === -1) throw new Error(`Booking not found: ${bookingId}`);
+    store[index] = { ...store[index], paymentStatus: "refunded", bookingStatus: "cancelled", updatedAt: new Date().toISOString() };
+    return { ...store[index] };
+  }
+
+  async rejectRefund(bookingId: string, _actorId?: string): Promise<Booking> {
+    const store = getBookings();
+    const index = store.findIndex((b) => b.id === bookingId);
+    if (index === -1) throw new Error(`Booking not found: ${bookingId}`);
+    const paid = store[index].paidAmount ?? 0;
+    const back = paid >= store[index].totalPrice && paid > 0 ? "paid" : "dp_paid";
+    store[index] = { ...store[index], paymentStatus: back, updatedAt: new Date().toISOString() };
+    return { ...store[index] };
+  }
+
   // ── Notifications ──
   async getNotificationLogs(bookingId?: string): Promise<NotificationLog[]> {
     if (bookingId) return getNotifications().filter((n) => n.bookingId === bookingId);

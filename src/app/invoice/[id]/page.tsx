@@ -62,6 +62,7 @@ function statusLabel(s: string): string {
     waiting_confirmation: "Menunggu Konfirmasi",
     dp_paid: "DP Dibayar",
     refunded: "Dikembalikan",
+    refund_requested: "Refund Diajukan",
   };
   return map[s] ?? s;
 }

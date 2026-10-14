@@ -257,7 +257,13 @@ export default function WalletDetailPage() {
           />
         )}
         {tab === "transactions" && <TransactionsTab walletId={wallet.id} />}
-        {tab === "split" && <SplitTab wallet={wallet} showToast={showToast} />}
+        {tab === "split" && (
+          <SplitTab
+            wallet={wallet}
+            isOwner={sessionUserId !== null && wallet.owner_customer_id === sessionUserId}
+            showToast={showToast}
+          />
+        )}
       </div>
     </div>
   );
@@ -672,7 +678,15 @@ function TransactionsTab({ walletId }: { walletId: string }) {
 
 /* ---------- Split Tab ---------- */
 
-function SplitTab({ wallet, showToast }: { wallet: WalletDetail; showToast: (m: string) => void }) {
+function SplitTab({
+  wallet,
+  isOwner,
+  showToast,
+}: {
+  wallet: WalletDetail;
+  isOwner: boolean;
+  showToast: (m: string) => void;
+}) {
   const members = useMemo(() => wallet.members ?? [], [wallet.members]);
   const [bookingId, setBookingId] = useState("");
   const [total, setTotal] = useState("");
@@ -683,6 +697,35 @@ function SplitTab({ wallet, showToast }: { wallet: WalletDetail; showToast: (m: 
   const [formError, setFormError] = useState("");
   const [splits, setSplits] = useState<Split[]>([]);
   const [splitsLoading, setSplitsLoading] = useState(true);
+  const [marking, setMarking] = useState<string | null>(null);
+
+  async function markPaid(splitId: string, customerId: string) {
+    const key = `${splitId}:${customerId}`;
+    setMarking(key);
+    try {
+      const res = await fetch(`/api/team-wallets/${wallet.id}/splits/${splitId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "mark_paid", customerId }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (res.status === 409) {
+        showToast("Sudah lunas");
+        await loadSplits();
+        return;
+      }
+      if (!res.ok) {
+        showToast(d.error || "Gagal menandai lunas");
+        return;
+      }
+      showToast("Ditandai lunas");
+      await loadSplits();
+    } catch {
+      showToast("Terjadi kesalahan jaringan");
+    } finally {
+      setMarking(null);
+    }
+  }
 
   const loadSplits = useCallback(async () => {
     const res = await fetch(`/api/team-wallets/${wallet.id}/splits`);
@@ -929,6 +972,15 @@ function SplitTab({ wallet, showToast }: { wallet: WalletDetail; showToast: (m: 
                           >
                             {m.status === "paid" ? "Lunas" : "Pending"}
                           </span>
+                          {isOwner && m.status === "pending" && (
+                            <button
+                              onClick={() => markPaid(s.id, m.customerId)}
+                              disabled={marking !== null}
+                              className="text-xs font-semibold bg-accent-600 hover:bg-accent-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded-lg transition"
+                            >
+                              {marking === `${s.id}:${m.customerId}` ? "Memproses..." : "Tandai Lunas"}
+                            </button>
+                          )}
                         </div>
                       </div>
                     ))}

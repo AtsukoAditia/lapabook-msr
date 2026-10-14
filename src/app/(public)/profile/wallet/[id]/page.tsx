@@ -101,6 +101,7 @@ export default function WalletDetailPage() {
   const [error, setError] = useState("");
   const [tab, setTab] = useState<Tab>("members");
   const [toast, setToast] = useState("");
+  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
 
   const loadWallet = useCallback(async () => {
     const res = await fetch(`/api/team-wallets/${walletId}`);
@@ -118,9 +119,19 @@ export default function WalletDetailPage() {
 
   useEffect(() => {
     // Auth check (detail GET is open, mutations are not)
-    fetch("/api/auth/session").then((r) => {
-      if (!r.ok) router.push("/login");
-    });
+    fetch("/api/auth/session")
+      .then((r) => {
+        if (!r.ok) {
+          router.push("/login");
+          return null;
+        }
+        return r.json();
+      })
+      .then((d) => {
+        if (!d?.user?.userId) router.push("/login");
+        else setSessionUserId(d.user.userId as string);
+      })
+      .catch(() => {});
     loadWallet()
       .catch(() => setError("Gagal memuat wallet"))
       .finally(() => setLoading(false));
@@ -214,7 +225,14 @@ export default function WalletDetailPage() {
         {tab === "members" && (
           <MembersTab wallet={wallet} onChanged={loadWallet} showToast={showToast} />
         )}
-        {tab === "deposits" && <DepositsTab walletId={wallet.id} showToast={showToast} />}
+        {tab === "deposits" && (
+          <DepositsTab
+            walletId={wallet.id}
+            isOwner={sessionUserId !== null && wallet.owner_customer_id === sessionUserId}
+            onChanged={loadWallet}
+            showToast={showToast}
+          />
+        )}
         {tab === "transactions" && <TransactionsTab walletId={wallet.id} />}
         {tab === "split" && <SplitTab wallet={wallet} showToast={showToast} />}
       </div>
@@ -388,13 +406,24 @@ function MembersTab({
 
 /* ---------- Deposits Tab ---------- */
 
-function DepositsTab({ walletId, showToast }: { walletId: string; showToast: (m: string) => void }) {
+function DepositsTab({
+  walletId,
+  isOwner,
+  onChanged,
+  showToast,
+}: {
+  walletId: string;
+  isOwner: boolean;
+  onChanged: () => Promise<void>;
+  showToast: (m: string) => void;
+}) {
   const [deposits, setDeposits] = useState<Deposit[]>([]);
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [confirming, setConfirming] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/team-wallets/${walletId}/deposits`);
@@ -406,6 +435,26 @@ function DepositsTab({ walletId, showToast }: { walletId: string; showToast: (m:
   useEffect(() => {
     load().catch(() => {}).finally(() => setLoading(false));
   }, [load]);
+
+  async function confirmDeposit(depositId: string) {
+    setConfirming(depositId);
+    try {
+      const res = await fetch(`/api/team-wallets/${walletId}/deposits/${depositId}/confirm`, {
+        method: "POST",
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        showToast(d.error || "Gagal konfirmasi deposit");
+        return;
+      }
+      showToast("Deposit dikonfirmasi");
+      await Promise.all([load(), onChanged()]);
+    } catch {
+      showToast("Terjadi kesalahan jaringan");
+    } finally {
+      setConfirming(null);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -497,14 +546,25 @@ function DepositsTab({ walletId, showToast }: { walletId: string; showToast: (m:
             {deposits.map((d) => {
               const st = DEPOSIT_STATUS[d.status] ?? { label: d.status, cls: "bg-gray-100 text-gray-700" };
               return (
-                <div key={d.id} className="flex items-center justify-between p-4">
+                <div key={d.id} className="flex items-center justify-between gap-3 p-4">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-gray-800">{formatIDR(Number(d.amount) || 0)}</p>
                     <p className="text-xs text-gray-400">
                       {d.from_customer_name ?? "Member"} • {formatDate(d.created_at)}
                     </p>
                   </div>
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 ${st.cls}`}>{st.label}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${st.cls}`}>{st.label}</span>
+                    {isOwner && d.status === "pending" && (
+                      <button
+                        onClick={() => confirmDeposit(d.id)}
+                        disabled={confirming !== null}
+                        className="text-xs font-semibold bg-accent-600 hover:bg-accent-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded-lg transition"
+                      >
+                        {confirming === d.id ? "Memproses..." : "Konfirmasi"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}

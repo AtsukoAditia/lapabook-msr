@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { Lock, Check } from "lucide-react";
 
 interface BookingDetail {
   id: string;
@@ -127,7 +128,7 @@ export default function BookingDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 px-4 py-16">
         <div className="max-w-lg mx-auto text-center">
-          <p className="text-4xl mb-3">🔒</p>
+          <Lock className="mx-auto mb-3 h-10 w-10 text-gray-300" aria-hidden={true} />
           <p className="text-gray-600 mb-4">{error}</p>
           <input
             type="tel"
@@ -186,7 +187,7 @@ export default function BookingDetailPage() {
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
                   i <= currentStep ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-400"
                 }`}>
-                  {i < currentStep ? "✓" : i + 1}
+                  {i < currentStep ? <Check className="h-3 w-3" aria-hidden={true} /> : i + 1}
                 </div>
                 {i < STATUS_STEPS.length - 1 && (
                   <div className={`flex-1 h-0.5 mx-0.5 ${i < currentStep ? "bg-emerald-600" : "bg-gray-200"}`} />

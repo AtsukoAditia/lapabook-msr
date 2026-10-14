@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { LucideIcon } from "lucide-react";
-import { BarChart3, ClipboardList, LandPlot, Building2, TrendingUp, Settings, Zap, LogOut } from "lucide-react";
+import { BarChart3, ClipboardList, LandPlot, Building2, TrendingUp, Settings, Wallet, Zap, LogOut } from "lucide-react";
 
 interface OwnerLayoutProps {
   children: React.ReactNode;
@@ -23,6 +23,7 @@ const navItems: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/dashboard/courts", label: "Lapangan", icon: LandPlot },
   { href: "/dashboard/venues", label: "Venue Saya", icon: Building2 },
   { href: "/dashboard/analytics", label: "Analytics", icon: TrendingUp },
+  { href: "/dashboard/payouts", label: "Penarikan", icon: Wallet },
   { href: "/dashboard/settings", label: "Pengaturan", icon: Settings },
 ];
 

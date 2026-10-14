@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Zap, LandPlot } from "lucide-react";
 
 export default function OwnerLoginPage() {
   const router = useRouter();
@@ -65,7 +66,7 @@ export default function OwnerLoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
-            <span className="text-white font-black text-2xl">⚡</span>
+            <Zap aria-hidden={true} className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-2xl font-black text-white">
             Lapang<span className="text-emerald-300">in</span>
@@ -74,7 +75,7 @@ export default function OwnerLoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8 shadow-2xl">
-          <h2 className="text-xl font-bold text-white mb-6">🏟️ Masuk sebagai Owner</h2>
+          <h2 className="flex items-center gap-2 text-xl font-bold text-white mb-6"><LandPlot aria-hidden={true} className="h-6 w-6" /> Masuk sebagai Owner</h2>
 
           {error && (
             <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-300 text-sm">

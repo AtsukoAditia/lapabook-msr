@@ -362,6 +362,11 @@ function SuccessContent() {
       // Upload file to server
       const formData = new FormData();
       formData.append("file", proofFile);
+      // Guest tier: sertakan bookingCode + phone bila tidak login (Backend
+      // /api/uploads/proof menerima pasangan ini sebagai pengganti session.)
+      const phoneParam = new URLSearchParams(window.location.search).get("ph") || booking?.customerPhone || "";
+      formData.append("bookingCode", booking.bookingCode);
+      formData.append("phone", phoneParam);
 
       const uploadRes = await fetch("/api/uploads/proof", {
         method: "POST",

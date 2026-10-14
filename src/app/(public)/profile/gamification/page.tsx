@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trophy, Medal, Gem, Coins, CheckCircle2, Lock, Check, Pencil, type LucideIcon } from "lucide-react";
+import { Trophy, Medal, Gem, Coins, CheckCircle2, Lock, Check, type LucideIcon } from "lucide-react";
 
 interface Achievement {
   id: string;
@@ -35,30 +35,6 @@ const TIER_ICON: Record<string, LucideIcon> = {
   gold: Medal,
   platinum: Gem,
 };
-
-const ACHIEVEMENT_ICONS: Record<string, LucideIcon> = {
-  "🎯": Trophy,
-  "🏸": Trophy,
-  "👑": Trophy,
-  "🏆": Trophy,
-  "💰": Coins,
-  "💎": Gem,
-  "⭐": Trophy,
-  "🔥": Trophy,
-  "🪙": Coins,
-  "🏅": Medal,
-  "🎖️": Medal,
-  "🤝": Trophy,
-  "🦋": Trophy,
-  "🌟": Trophy,
-  "✍️": Pencil,
-  "📣": Trophy,
-  "📝": Trophy,
-};
-
-function achievementIcon(icon: string): LucideIcon {
-  return ACHIEVEMENT_ICONS[icon] ?? Trophy;
-}
 
 export default function GamificationPage() {
   const [achievements, setAchievements] = useState<{ unlocked: Achievement[]; locked: Achievement[] }>({ unlocked: [], locked: [] });
@@ -149,10 +125,7 @@ export default function GamificationPage() {
               {achievements.unlocked.map((a) => (
                 <div key={a.id} className="flex items-center gap-3 p-3 rounded-xl bg-white border border-emerald-200 shadow-sm">
                   <div className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br ${TIER_COLORS[a.tier]} shadow-md`}>
-                    {(() => {
-                      const Icon = achievementIcon(a.icon);
-                      return <Icon className="h-6 w-6 text-white" aria-hidden={true} />;
-                    })()}
+                    <Trophy className="h-6 w-6 text-white" aria-hidden={true} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -182,10 +155,7 @@ export default function GamificationPage() {
                 return (
                   <div key={a.id} className="flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-200 opacity-70">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-                      {(() => {
-                        const Icon = achievementIcon(a.icon);
-                        return <Icon className="h-6 w-6 text-gray-500" aria-hidden={true} />;
-                      })()}
+                      <Trophy className="h-6 w-6 text-gray-500" aria-hidden={true} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-700">{a.name}</p>

@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import {
+  CreditCard, RefreshCw, CheckCircle2, Tag, User, Building2,
+  Calendar, Coins, Paperclip, XCircle, Loader2,
+} from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 type AdminPayment = {
@@ -89,13 +93,15 @@ export default function AdminPaymentsPage() {
       <div className="mb-6 overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 p-6 shadow-xl sm:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-black text-white sm:text-3xl">💳 Konfirmasi Pembayaran</h1>
+            <h1 className="flex items-center gap-2 text-2xl font-black text-white sm:text-3xl">
+              <CreditCard aria-hidden={true} className="h-6 w-6" /> Konfirmasi Pembayaran
+            </h1>
             <p className="mt-1 text-sm text-emerald-100">
               {payments.length} pembayaran menunggu konfirmasi
             </p>
           </div>
           <div className="flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 backdrop-blur-sm">
-            <span className="text-lg">🔄</span>
+            <RefreshCw aria-hidden={true} className="h-5 w-5 text-white" />
             <button
               onClick={async () => {
                 setLoading(true);
@@ -118,7 +124,7 @@ export default function AdminPaymentsPage() {
         </div>
       ) : payments.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-white py-16 text-center">
-          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-4xl">✅</div>
+          <CheckCircle2 aria-hidden={true} className="h-8 w-8 text-emerald-400" />
           <p className="text-lg font-bold text-slate-700">Tidak ada pembayaran menunggu konfirmasi</p>
           <p className="mt-1 text-sm text-slate-500">Semua pembayaran sudah diproses</p>
         </div>
@@ -137,7 +143,7 @@ export default function AdminPaymentsPage() {
                   <div className="min-w-0 flex-1">
                     <div className="mb-2 flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-xs font-bold text-slate-700">
-                        🏷️ {p.booking_code}
+                        <Tag aria-hidden={true} className="h-3.5 w-3.5" /> {p.booking_code}
                       </span>
                       <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">
                         Menunggu Konfirmasi
@@ -146,7 +152,7 @@ export default function AdminPaymentsPage() {
 
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       <div className="flex items-center gap-2">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-sm">👤</span>
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50"><User aria-hidden={true} className="h-4 w-4 text-blue-600" /></span>
                         <div>
                           <p className="text-xs text-slate-500">Pelanggan</p>
                           <p className="text-sm font-semibold text-slate-800">
@@ -156,7 +162,7 @@ export default function AdminPaymentsPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-50 text-sm">🏟️</span>
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-50"><Building2 aria-hidden={true} className="h-4 w-4 text-orange-600" /></span>
                         <div>
                           <p className="text-xs text-slate-500">Venue / Court</p>
                           <p className="text-sm font-semibold text-slate-800">
@@ -165,7 +171,7 @@ export default function AdminPaymentsPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-50 text-sm">📅</span>
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-50"><Calendar aria-hidden={true} className="h-4 w-4 text-purple-600" /></span>
                         <div>
                           <p className="text-xs text-slate-500">Jadwal</p>
                           <p className="text-sm font-semibold text-slate-800">
@@ -174,7 +180,7 @@ export default function AdminPaymentsPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-sm">💰</span>
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50"><Coins aria-hidden={true} className="h-4 w-4 text-emerald-600" /></span>
                         <div>
                           <p className="text-xs text-slate-500">Total</p>
                           <p className="text-sm font-extrabold text-emerald-600">
@@ -187,7 +193,7 @@ export default function AdminPaymentsPage() {
                     {/* Payment proof */}
                     {p.payment_proof_url && (
                       <div className="mt-3 flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2">
-                        <span className="text-sm">📎</span>
+                        <Paperclip aria-hidden={true} className="h-4 w-4 text-blue-600" />
                         <span className="text-xs font-medium text-blue-700">Bukti transfer sudah diupload</span>
                         <a
                           href={p.payment_proof_url}
@@ -208,14 +214,18 @@ export default function AdminPaymentsPage() {
                       onClick={() => doAction(p.id, "confirm", p.booking_code)}
                       className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50"
                     >
-                      {updatingId === p.id ? "⏳" : "✅"} Konfirmasi
+                      {updatingId === p.id ? (
+                        <Loader2 aria-hidden={true} className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <CheckCircle2 aria-hidden={true} className="h-3.5 w-3.5" />
+                      )} Konfirmasi
                     </button>
                     <button
                       disabled={updatingId === p.id}
                       onClick={() => doAction(p.id, "reject", p.booking_code)}
                       className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:from-red-600 hover:to-rose-600 disabled:opacity-50"
                     >
-                      ❌ Tolak
+                      <XCircle aria-hidden={true} className="h-3.5 w-3.5" /> Tolak
                     </button>
                   </div>
                 </div>

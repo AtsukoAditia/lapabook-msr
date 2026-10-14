@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { CheckCircle2, XCircle, MapPin, Phone, User } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import Pagination from "@/components/admin/Pagination";
 
@@ -87,7 +88,7 @@ export default function AdminVenuesPage() {
           </div>
         ) : venues.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">
-            <p className="text-5xl mb-4">✅</p>
+            <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto mb-4" aria-hidden={true} />
             <p className="text-lg font-bold text-gray-700">Semua venue sudah diapprove!</p>
             <p className="text-gray-500 mt-1">Tidak ada venue yang menunggu review</p>
           </div>
@@ -110,10 +111,10 @@ export default function AdminVenuesPage() {
                           </span>
                         </div>
                         <p className="text-sm text-gray-500 mb-1">
-                          👤 {venue.pic_name} · {venue.business_name}
+                          <User className="inline h-3.5 w-3.5 mr-1" aria-hidden={true} /> {venue.pic_name} · {venue.business_name}
                         </p>
-                        <p className="text-sm text-gray-500">📍 {venue.address}</p>
-                        {venue.phone && <p className="text-sm text-gray-500">📞 {venue.phone}</p>}
+                        <p className="text-sm text-gray-500"><MapPin className="inline h-3.5 w-3.5 mr-1" aria-hidden={true} /> {venue.address}</p>
+                        {venue.phone && <p className="text-sm text-gray-500"><Phone className="inline h-3.5 w-3.5 mr-1" aria-hidden={true} /> {venue.phone}</p>}
                         {venue.description && (
                           <p className="text-sm text-gray-600 mt-2">{venue.description}</p>
                         )}
@@ -138,7 +139,7 @@ export default function AdminVenuesPage() {
                           disabled={updatingId === venue.id}
                           className="px-4 py-2 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-500 transition-colors disabled:opacity-50"
                         >
-                          ✅ Approve
+                          <CheckCircle2 className="inline h-4 w-4 mr-1" aria-hidden={true} /> Approve
                         </button>
                         <button
                           onClick={() =>
@@ -147,7 +148,7 @@ export default function AdminVenuesPage() {
                           disabled={updatingId === venue.id}
                           className="px-4 py-2 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-500 transition-colors disabled:opacity-50"
                         >
-                          ❌ Tolak
+                          <XCircle className="inline h-4 w-4 mr-1" aria-hidden={true} /> Tolak
                         </button>
                         <button
                           onClick={() =>

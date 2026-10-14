@@ -29,7 +29,7 @@ export function getRainPricingFactor(
     return {
       factor: 1.0,
       label: "Indoor",
-      icon: "🏟️",
+      icon: "",
       color: "text-gray-500",
       description: "Lapangan indoor — tidak terpengaruh cuaca",
     };
@@ -56,7 +56,7 @@ export function getRainPricingFactor(
     return {
       factor: 1.0,
       label: "Cerah",
-      icon: "☀️",
+      icon: "",
       color: "text-yellow-600",
       description: "Cuaca cerah — harga normal",
     };
@@ -68,7 +68,7 @@ export function getRainPricingFactor(
     return {
       factor: 1 - d / 100,
       label: "Hujan Ringan",
-      icon: "🌦️",
+      icon: "",
       color: "text-blue-400",
       description: `Hujan ringan — diskon ${d}%`,
     };
@@ -80,7 +80,7 @@ export function getRainPricingFactor(
     return {
       factor: 1 - d / 100,
       label: "Hujan Sedang",
-      icon: "🌧️",
+      icon: "",
       color: "text-blue-600",
       description: `Hujan sedang — diskon ${d}%`,
     };
@@ -91,7 +91,7 @@ export function getRainPricingFactor(
   return {
     factor: 1 - d / 100,
     label: "Hujan Deras",
-    icon: "⛈️",
+    icon: "",
     color: "text-blue-800",
     description: `Hujan deras — diskon ${d}%`,
   };

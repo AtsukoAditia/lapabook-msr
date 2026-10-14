@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { FileText, Printer, Trophy } from "lucide-react";
 
 interface InvoiceData {
   bookingId: string;
@@ -94,7 +95,7 @@ export default function InvoicePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <p className="text-4xl mb-3">📄</p>
+          <FileText className="mx-auto mb-3 h-10 w-10 text-gray-300" aria-hidden={true} />
           <p className="text-gray-600">{error || "Invoice tidak ditemukan."}</p>
         </div>
       </div>
@@ -126,7 +127,7 @@ export default function InvoicePage() {
               onClick={() => window.print()}
               className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700"
             >
-              🖨️ Cetak Invoice
+              <Printer className="h-4 w-4" aria-hidden={true} /> Cetak Invoice
             </button>
           </div>
         </div>
@@ -138,7 +139,9 @@ export default function InvoicePage() {
             <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-5 text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold">⚽ Lapabook</h1>
+                  <h1 className="flex items-center gap-2 text-2xl font-bold">
+                    <Trophy className="h-6 w-6" aria-hidden={true} /> Lapabook
+                  </h1>
                   <p className="text-emerald-100 text-sm mt-1">Invoice Pembayaran</p>
                 </div>
                 <div className="text-right">

@@ -3,6 +3,34 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  Trophy,
+  Medal,
+  Gem,
+  ClipboardList,
+  Handshake,
+  Wallet,
+  Star,
+  Heart,
+  MessageSquare,
+  Bell,
+  Pencil,
+  Gift,
+  BarChart3,
+  Smartphone,
+  Lightbulb,
+  Calendar,
+  PartyPopper,
+  Flame,
+  Award,
+  Tag,
+  Coins,
+  Clock,
+  Building2,
+  Plus,
+  Minus,
+  type LucideIcon,
+} from "lucide-react";
 
 interface Reward {
   id: string;
@@ -46,11 +74,26 @@ interface UserProfile {
   memberSince: string;
 }
 
-const TIER_CONFIG: Record<string, { label: string; color: string; icon: string; next?: string; minPoints: number }> = {
-  bronze: { label: "Bronze", color: "from-amber-700 to-amber-500", icon: "🥉", next: "Silver", minPoints: 0 },
-  silver: { label: "Silver", color: "from-gray-400 to-gray-300", icon: "🥈", next: "Gold", minPoints: 500 },
-  gold: { label: "Gold", color: "from-yellow-500 to-yellow-300", icon: "🥇", next: "Platinum", minPoints: 2000 },
-  platinum: { label: "Platinum", color: "from-primary-500 to-primary-300", icon: "💎", minPoints: 5000 },
+const TIER_CONFIG: Record<string, { label: string; color: string; icon: LucideIcon; next?: string; minPoints: number }> = {
+  bronze: { label: "Bronze", color: "from-amber-700 to-amber-500", icon: Medal, next: "Silver", minPoints: 0 },
+  silver: { label: "Silver", color: "from-gray-400 to-gray-300", icon: Medal, next: "Gold", minPoints: 500 },
+  gold: { label: "Gold", color: "from-yellow-500 to-yellow-300", icon: Medal, next: "Platinum", minPoints: 2000 },
+  platinum: { label: "Platinum", color: "from-primary-500 to-primary-300", icon: Gem, minPoints: 5000 },
+};
+
+const REWARD_ICONS: Record<string, LucideIcon> = {
+  discount_percentage: Tag,
+  discount_amount: Coins,
+  free_hour: Clock,
+  free_session: Building2,
+};
+
+const TX_ICONS: Record<string, LucideIcon> = {
+  earned: Plus,
+  redeemed: Minus,
+  bonus: Gift,
+  expired: Clock,
+  adjusted: Pencil,
 };
 
 function getTier(points: number) {
@@ -125,7 +168,7 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (res.ok) {
-        alert("Berhasil menukarkan poin! 🎉");
+        alert("Berhasil menukarkan poin!");
         // Reload data
         const loyaltyRes = await fetch("/api/customer/loyalty");
         if (loyaltyRes.ok) {
@@ -166,6 +209,7 @@ export default function ProfilePage() {
 
   const tier = loyalty?.tier || getTier(profile.loyaltyPoints);
   const tierConfig = TIER_CONFIG[tier];
+  const TierIcon = tierConfig.icon;
   const points = loyalty?.points ?? profile.loyaltyPoints;
 
   // Calculate progress to next tier
@@ -177,15 +221,15 @@ export default function ProfilePage() {
       {/* Profile Header */}
       <div className={`bg-gradient-to-br ${tierConfig.color} text-white`}>
         <div className="max-w-lg mx-auto px-4 py-8 text-center">
-          <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-full mx-auto mb-4 flex items-center justify-center text-4xl">
-            {tierConfig.icon}
+          <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-full mx-auto mb-4 flex items-center justify-center">
+            <TierIcon className="h-10 w-10 text-white" aria-hidden={true} />
           </div>
           <h1 className="text-2xl font-bold">{profile.name}</h1>
           <p className="text-white/80 text-sm mt-1">{profile.email}</p>
           
           {/* Tier Badge */}
           <div className="inline-flex items-center gap-2 mt-4 px-4 py-1.5 bg-white/20 backdrop-blur rounded-full">
-            <span className="text-lg">{tierConfig.icon}</span>
+            <TierIcon className="h-5 w-5 text-white" aria-hidden={true} />
             <span className="font-semibold">Member {tierConfig.label}</span>
           </div>
 
@@ -225,25 +269,28 @@ export default function ProfilePage() {
         <div className="bg-white rounded-2xl shadow-lg p-3">
           <div className="grid grid-cols-4 gap-2 text-center">
             {[
-              { href: "/profile/bookings", icon: "📋", label: "Booking" },
-              { href: "/profile/mabar", icon: "🤝", label: "Mabar" },
-              { href: "/profile/wallet", icon: "💰", label: "Wallet" },
-              { href: "/profile/reviews", icon: "⭐", label: "Ulasan" },
-              { href: "/profile/favorites", icon: "❤️", label: "Favorit" },
-              { href: "/support", icon: "💬", label: "Bantuan" },
-              { href: "/profile/notifications", icon: "🔔", label: "Notifikasi" },
-              { href: "/profile/edit", icon: "✏️", label: "Edit" },
-              { href: "/profile/referral", icon: "🎁", label: "Referral" },
-            ].map((link) => (
+              { href: "/profile/bookings", icon: ClipboardList, label: "Booking" },
+              { href: "/profile/mabar", icon: Handshake, label: "Mabar" },
+              { href: "/profile/wallet", icon: Wallet, label: "Wallet" },
+              { href: "/profile/reviews", icon: Star, label: "Ulasan" },
+              { href: "/profile/favorites", icon: Heart, label: "Favorit" },
+              { href: "/support", icon: MessageSquare, label: "Bantuan" },
+              { href: "/profile/notifications", icon: Bell, label: "Notifikasi" },
+              { href: "/profile/edit", icon: Pencil, label: "Edit" },
+              { href: "/profile/referral", icon: Gift, label: "Referral" },
+            ].map((link) => {
+              const LinkIcon = link.icon;
+              return (
               <Link
                 key={link.href}
                 href={link.href}
                 className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-gray-50 transition"
               >
-                <span className="text-xl">{link.icon}</span>
+                <LinkIcon className="h-5 w-5 text-gray-700" aria-hidden={true} />
                 <span className="text-xs font-medium text-gray-700">{link.label}</span>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -252,10 +299,12 @@ export default function ProfilePage() {
       <div className="max-w-lg mx-auto px-4 -mt-4 relative z-10">
         <div className="bg-white rounded-2xl shadow-lg flex overflow-hidden">
           {[
-            { key: "overview" as const, label: "Overview", icon: "📊" },
-            { key: "rewards" as const, label: "Rewards", icon: "🎁" },
-            { key: "history" as const, label: "Riwayat", icon: "📋" },
-          ].map((tab) => (
+            { key: "overview" as const, label: "Overview", icon: BarChart3 },
+            { key: "rewards" as const, label: "Rewards", icon: Gift },
+            { key: "history" as const, label: "Riwayat", icon: ClipboardList },
+          ].map((tab) => {
+            const TabIcon = tab.icon;
+            return (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
@@ -265,10 +314,11 @@ export default function ProfilePage() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              <span className="mr-1">{tab.icon}</span>
+              <span className="mr-1 inline-flex items-center align-middle"><TabIcon className="h-4 w-4" aria-hidden={true} /></span>
               {tab.label}
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -279,12 +329,12 @@ export default function ProfilePage() {
             {/* Quick Stats */}
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-white rounded-xl p-4 shadow-sm">
-                <div className="text-2xl mb-1">🏆</div>
+                <Trophy className="mb-1 h-6 w-6 text-amber-500" aria-hidden={true} />
                 <div className="text-sm text-gray-500">Member Sejak</div>
                 <div className="font-semibold">{formatDate(profile.memberSince)}</div>
               </div>
               <div className="bg-white rounded-xl p-4 shadow-sm">
-                <div className="text-2xl mb-1">📱</div>
+                <Smartphone className="mb-1 h-6 w-6 text-blue-500" aria-hidden={true} />
                 <div className="text-sm text-gray-500">No. HP</div>
                 <div className="font-semibold">{profile.phone}</div>
               </div>
@@ -292,39 +342,49 @@ export default function ProfilePage() {
 
             {/* How to Earn */}
             <div className="bg-white rounded-xl p-5 shadow-sm">
-              <h3 className="font-bold text-gray-800 mb-3">💡 Cara Mendapatkan Poin</h3>
+              <h3 className="flex items-center gap-1.5 font-bold text-gray-800 mb-3">
+                <Lightbulb className="h-5 w-5 text-amber-500" aria-hidden={true} /> Cara Mendapatkan Poin
+              </h3>
               <div className="space-y-3">
                 {[
-                  { icon: "📅", text: "Setiap booking mendapat 1 poin per Rp 10.000" },
-                  { icon: "⭐", text: "Bonus 2x poin di hari weekend" },
-                  { icon: "🎉", text: "Bonus 50 poin untuk member baru" },
-                  { icon: "🔥", text: "Bonus tier multiplier: Silver 1.2x, Gold 1.5x, Platinum 2x" },
-                ].map((item, i) => (
+                  { icon: Calendar, text: "Setiap booking mendapat 1 poin per Rp 10.000" },
+                  { icon: Star, text: "Bonus 2x poin di hari weekend" },
+                  { icon: PartyPopper, text: "Bonus 50 poin untuk member baru" },
+                  { icon: Flame, text: "Bonus tier multiplier: Silver 1.2x, Gold 1.5x, Platinum 2x" },
+                ].map((item, i) => {
+                  const ItemIcon = item.icon;
+                  return (
                   <div key={i} className="flex items-start gap-3">
-                    <span className="text-lg">{item.icon}</span>
+                    <ItemIcon className="h-5 w-5 shrink-0 text-emerald-600" aria-hidden={true} />
                     <span className="text-sm text-gray-600">{item.text}</span>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
             {/* Tier Benefits */}
             <div className="bg-white rounded-xl p-5 shadow-sm">
-              <h3 className="font-bold text-gray-800 mb-3">🎖️ Benefit Tier</h3>
+              <h3 className="flex items-center gap-1.5 font-bold text-gray-800 mb-3">
+                <Award className="h-5 w-5 text-indigo-500" aria-hidden={true} /> Benefit Tier
+              </h3>
               <div className="space-y-2">
-                {Object.entries(TIER_CONFIG).map(([key, config]) => (
+                {Object.entries(TIER_CONFIG).map(([key, config]) => {
+                  const BenefitIcon = config.icon;
+                  return (
                   <div
                     key={key}
                     className={`flex items-center gap-3 p-2 rounded-lg ${key === tier ? "bg-emerald-50 ring-2 ring-emerald-400" : ""}`}
                   >
-                    <span className="text-xl">{config.icon}</span>
+                    <BenefitIcon className="h-5 w-5 text-gray-600" aria-hidden={true} />
                     <div className="flex-1">
                       <span className="font-medium text-sm">{config.label}</span>
                       <span className="text-xs text-gray-500 ml-2">({config.minPoints.toLocaleString()}+ poin)</span>
                     </div>
                     {key === tier && <span className="text-xs bg-emerald-500 text-white px-2 py-0.5 rounded-full">Aktif</span>}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -340,7 +400,7 @@ export default function ProfilePage() {
 
             {(loyalty?.rewards || []).length === 0 ? (
               <div className="bg-white rounded-xl p-8 text-center shadow-sm">
-                <div className="text-4xl mb-3">🎁</div>
+                <Gift className="mx-auto mb-3 h-10 w-10 text-emerald-300" aria-hidden={true} />
                 <p className="text-gray-500">Belum ada reward tersedia</p>
               </div>
             ) : (
@@ -351,11 +411,10 @@ export default function ProfilePage() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xl">
-                            {reward.type === "discount_percentage" ? "🏷️" :
-                             reward.type === "discount_amount" ? "💰" :
-                             reward.type === "free_hour" ? "⏰" : "🏟️"}
-                          </span>
+                          {(() => {
+                            const RewardIcon = REWARD_ICONS[reward.type] ?? Building2;
+                            return <RewardIcon className="h-5 w-5 text-emerald-600" aria-hidden={true} />;
+                          })()}
                           <h4 className="font-bold text-gray-800">{reward.name}</h4>
                         </div>
                         <p className="text-sm text-gray-600 mb-2">{reward.description}</p>
@@ -397,7 +456,9 @@ export default function ProfilePage() {
             {/* Redemption History */}
             {(loyalty?.redemptions || []).length > 0 && (
               <div className="bg-white rounded-xl p-5 shadow-sm">
-                <h3 className="font-bold text-gray-800 mb-3">📋 Riwayat Penukaran</h3>
+                <h3 className="flex items-center gap-1.5 font-bold text-gray-800 mb-3">
+                  <ClipboardList className="h-5 w-5 text-gray-600" aria-hidden={true} /> Riwayat Penukaran
+                </h3>
                 <div className="space-y-2">
                   {(loyalty?.redemptions || []).map((r) => (
                     <div key={r.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
@@ -425,7 +486,7 @@ export default function ProfilePage() {
           <div className="space-y-4">
             {(loyalty?.transactions || []).length === 0 ? (
               <div className="bg-white rounded-xl p-8 text-center shadow-sm">
-                <div className="text-4xl mb-3">📋</div>
+                <ClipboardList className="mx-auto mb-3 h-10 w-10 text-gray-300" aria-hidden={true} />
                 <p className="text-gray-500">Belum ada transaksi poin</p>
                 <Link href="/booking/futsal" className="inline-block mt-3 text-emerald-600 font-medium text-sm hover:underline">
                   Mulai Booking →
@@ -435,16 +496,16 @@ export default function ProfilePage() {
               <div className="bg-white rounded-xl shadow-sm divide-y divide-gray-100">
                 {(loyalty?.transactions || []).map((tx) => (
                   <div key={tx.id} className="flex items-center gap-3 p-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                       tx.type === "earned" ? "bg-emerald-100" :
                       tx.type === "redeemed" ? "bg-red-100" :
                       tx.type === "bonus" ? "bg-amber-100" :
                       "bg-gray-100"
                     }`}>
-                      {tx.type === "earned" ? "➕" :
-                       tx.type === "redeemed" ? "➖" :
-                       tx.type === "bonus" ? "🎁" :
-                       tx.type === "expired" ? "⏰" : "✏️"}
+                      {(() => {
+                        const TxIcon = TX_ICONS[tx.type] ?? Pencil;
+                        return <TxIcon className="h-5 w-5 text-gray-600" aria-hidden={true} />;
+                      })()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm text-gray-800 truncate">{tx.description}</p>

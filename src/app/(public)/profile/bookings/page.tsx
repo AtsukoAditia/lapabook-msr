@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ClipboardList, Calendar, Clock } from "lucide-react";
 
 interface BookingItem {
   id: string;
@@ -114,7 +115,7 @@ export default function MyBookingsPage() {
       <div className="max-w-2xl mx-auto px-4 py-4 space-y-3">
         {bookings.length === 0 ? (
           <div className="text-center py-16 text-gray-500">
-            <p className="text-4xl mb-3">📋</p>
+            <ClipboardList className="mx-auto mb-3 h-10 w-10 text-gray-300" aria-hidden={true} />
             <p className="font-medium">Belum ada booking</p>
             <Link href="/booking" className="text-emerald-600 text-sm hover:underline mt-2 inline-block">
               Booking sekarang
@@ -136,8 +137,8 @@ export default function MyBookingsPage() {
               <p className="font-semibold text-gray-900">{b.venue_name} — {b.court_name}</p>
               <p className="text-sm text-gray-600">{b.sport_name}</p>
               <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                <span>📅 {formatDate(b.booking_date)}</span>
-                <span>🕐 {b.start_time?.slice(0, 5)} - {b.end_time?.slice(0, 5)}</span>
+                <span className="inline-flex items-center gap-1"><Calendar className="h-4 w-4" aria-hidden={true} /> {formatDate(b.booking_date)}</span>
+                <span className="inline-flex items-center gap-1"><Clock className="h-4 w-4" aria-hidden={true} /> {b.start_time?.slice(0, 5)} - {b.end_time?.slice(0, 5)}</span>
               </div>
               <p className="text-emerald-600 font-bold mt-2">{formatPrice(b.total_price)}</p>
             </Link>

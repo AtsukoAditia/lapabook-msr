@@ -304,11 +304,11 @@ export default function SearchPage({
                 className="rounded-lg border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none"
               >
                 <option value="">Semua Rating</option>
-                <option value="1">⭐ 1+</option>
-                <option value="2">⭐ 2+</option>
-                <option value="3">⭐ 3+</option>
-                <option value="4">⭐ 4+</option>
-                <option value="5">⭐ 5</option>
+                <option value="1">1+</option>
+                <option value="2">2+</option>
+                <option value="3">3+</option>
+                <option value="4">4+</option>
+                <option value="5">5</option>
               </select>
             </div>
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Zap } from "lucide-react";
 
 export default function CustomerLoginPage() {
   const router = useRouter();
@@ -46,7 +47,7 @@ export default function CustomerLoginPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
             <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-emerald-500/30">
-              <span className="text-white font-black text-2xl">⚡</span>
+              <Zap className="h-5 w-5 text-white" aria-hidden={true} />
             </div>
             <h1 className="text-3xl font-black text-white">
               Arena<span className="text-emerald-400">Book</span>
@@ -60,7 +61,7 @@ export default function CustomerLoginPage() {
           onSubmit={handleSubmit}
           className="bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-700 p-8"
         >
-          <h2 className="text-xl font-bold text-white mb-6">👋 Selamat Datang Kembali</h2>
+          <h2 className="text-xl font-bold text-white mb-6">Selamat Datang Kembali</h2>
 
           {error && (
             <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">

@@ -17,6 +17,7 @@ import {
   Camera,
   Trophy,
   Smartphone,
+  Star,
 } from "lucide-react";
 
 interface PricingRule {
@@ -255,7 +256,9 @@ export default function CourtDetailPage({ params }: { params: Promise<{ sport: s
         {data.reviews && data.reviews.length > 0 && (
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-slate-900">⭐ Ulasan Pelanggan</h2>
+              <h2 className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
+                <Star className="h-4 w-4 text-amber-400 fill-amber-400" aria-hidden={true} /> Ulasan Pelanggan
+              </h2>
               {data.rating && data.rating.reviewCount > 0 && (
                 <StarRating rating={data.rating.avgRating} count={data.rating.reviewCount} size="sm" />
               )}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Bell, Smartphone, Mail, MessageSquare } from "lucide-react";
 
 export default function NotificationPreferencesPage() {
   const [pushEnabled, setPushEnabled] = useState(false);
@@ -29,7 +30,9 @@ export default function NotificationPreferencesPage() {
       <div className="bg-white border-b px-6 py-4 sticky top-0 z-10">
         <div className="max-w-lg mx-auto">
           <Link href="/profile" className="text-emerald-600 text-sm hover:underline">← Profil</Link>
-          <h1 className="text-lg font-bold mt-1">🔔 Pengaturan Notifikasi</h1>
+          <h1 className="flex items-center gap-2 text-lg font-bold mt-1">
+            <Bell className="h-5 w-5" aria-hidden={true} /> Pengaturan Notifikasi
+          </h1>
         </div>
       </div>
 
@@ -44,7 +47,7 @@ export default function NotificationPreferencesPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900">📱 Push Notifications</p>
+                <p className="flex items-center gap-2 font-medium text-gray-900"><Smartphone className="h-4 w-4" aria-hidden={true} /> Push Notifications</p>
                 <p className="text-sm text-gray-500">Notifikasi langsung ke browser</p>
               </div>
               <button onClick={() => setPushEnabled(!pushEnabled)} className={`relative w-12 h-6 rounded-full transition-colors ${pushEnabled ? "bg-emerald-500" : "bg-gray-300"}`}>
@@ -54,7 +57,7 @@ export default function NotificationPreferencesPage() {
             <hr />
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900">📧 Email</p>
+                <p className="flex items-center gap-2 font-medium text-gray-900"><Mail className="h-4 w-4" aria-hidden={true} /> Email</p>
                 <p className="text-sm text-gray-500">Konfirmasi booking via email</p>
               </div>
               <button onClick={() => setEmailEnabled(!emailEnabled)} className={`relative w-12 h-6 rounded-full transition-colors ${emailEnabled ? "bg-emerald-500" : "bg-gray-300"}`}>
@@ -64,7 +67,7 @@ export default function NotificationPreferencesPage() {
             <hr />
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900">💬 WhatsApp</p>
+                <p className="flex items-center gap-2 font-medium text-gray-900"><MessageSquare className="h-4 w-4" aria-hidden={true} /> WhatsApp</p>
                 <p className="text-sm text-gray-500">Notifikasi via WhatsApp</p>
               </div>
               <button onClick={() => setWaEnabled(!waEnabled)} className={`relative w-12 h-6 rounded-full transition-colors ${waEnabled ? "bg-emerald-500" : "bg-gray-300"}`}>

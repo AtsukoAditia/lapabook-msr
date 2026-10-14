@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import Pagination from "@/components/admin/Pagination";
 
 interface Customer {
   id: string;
@@ -26,6 +27,28 @@ export default function AdminCustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+
+  const fetchCustomers = useCallback(async (p: number) => {
+    setLoading(true);
+    try {
+      const r = await fetch(`/api/admin/customers?page=${p}&limit=25`);
+      const d = await r.json();
+      setCustomers(d.data ?? []);
+      setTotalPages(d.pagination?.totalPages ?? 1);
+      setTotal(d.pagination?.total ?? 0);
+    } catch {
+      /* ignore */
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCustomers(page);
+  }, [page, fetchCustomers]);
 
   async function toggleBan(customer: Customer) {
     const action = customer.isActive ? "ban" : "unban";
@@ -50,22 +73,14 @@ export default function AdminCustomersPage() {
     }
   }
 
-  useEffect(() => {
-    fetch("/api/admin/customers")
-      .then((r) => r.json())
-      .then((d) => setCustomers(d.customers ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
   return (
     <AdminLayout>
       <div className="mb-6 overflow-hidden rounded-2xl bg-gradient-to-r from-primary-600 via-primary-700 to-blue-600 p-6 shadow-xl sm:p-8">
         <h1 className="text-2xl font-black text-white sm:text-3xl">👥 Pelanggan</h1>
-        <p className="mt-1 text-sm text-purple-100">{customers.length} total pelanggan terdaftar</p>
+        <p className="mt-1 text-sm text-purple-100">{total} total pelanggan terdaftar</p>
       </div>
 
-      {/* Stats */}
+      {/* Stats — ponytail: count dari halaman aktif; upgrade ke aggregate endpoint bila butuh global count */}
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
         {(["bronze", "silver", "gold", "platinum"] as const).map((tier) => {
           const count = customers.filter((c) => c.loyaltyTier === tier).length;
@@ -137,6 +152,7 @@ export default function AdminCustomersPage() {
           })}
         </div>
       )}
+      <Pagination page={page} totalPages={totalPages} total={total} onPageChange={setPage} />
     </AdminLayout>
   );
 }

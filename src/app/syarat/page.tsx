@@ -1,20 +1,17 @@
-import { readFile } from "fs/promises";
-import path from "path";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Zap } from "lucide-react";
+import { getCmsPage } from "@/lib/cms";
 
-const CMS_FILE = path.join(process.cwd(), "data", "cms-pages.json");
-
-async function getPage(slug: string) {
-  try { return JSON.parse(await readFile(CMS_FILE, "utf-8").catch(() => "{}"))[slug] || null; } catch { return null; }
+async function getPage() {
+  try { return await getCmsPage("syarat"); } catch { return null; }
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getPage("syarat");
+  const page = await getPage();
   return {
-    title: page?.metaTitle || "Syarat & Ketentuan — Lapabook",
-    description: page?.metaDescription || "Syarat dan ketentuan penggunaan platform Lapabook.",
+    title: page?.title ? `${page.title} — Lapabook` : "Syarat & Ketentuan — Lapabook",
+    description: "Syarat dan ketentuan penggunaan platform Lapabook.",
   };
 }
 
@@ -125,8 +122,8 @@ Pertanyaan tentang syarat & ketentuan: [legal@lapabook.id](mailto:legal@lapabook
 `;
 
 export default async function SyaratPage() {
-  const page = await getPage("syarat");
-  const content = page?.content || DEFAULT;
+  const page = await getPage();
+  const content = page?.body || DEFAULT;
 
   return (
     <div className="min-h-screen bg-gray-50">

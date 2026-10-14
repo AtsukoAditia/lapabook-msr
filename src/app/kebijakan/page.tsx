@@ -1,24 +1,17 @@
-import { readFile } from "fs/promises";
-import path from "path";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Zap } from "lucide-react";
+import { getCmsPage } from "@/lib/cms";
 
-const CMS_FILE = path.join(process.cwd(), "data", "cms-pages.json");
-const SETTINGS_FILE = path.join(process.cwd(), "data", "seo-settings.json");
-
-async function getPage(slug: string) {
-  try { return JSON.parse(await readFile(CMS_FILE, "utf-8").catch(() => "{}"))[slug] || null; } catch { return null; }
-}
-async function getSeo() {
-  try { return JSON.parse(await readFile(SETTINGS_FILE, "utf-8").catch(() => "{}")); } catch { return {}; }
+async function getPage() {
+  try { return await getCmsPage("kebijakan"); } catch { return null; }
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getPage("kebijakan");
+  const page = await getPage();
   return {
-    title: page?.metaTitle || "Kebijakan & Privasi — Lapabook",
-    description: page?.metaDescription || "Kebijakan privasi dan perlindungan data pengguna Lapabook.",
+    title: page?.title ? `${page.title} — Lapabook` : "Kebijakan & Privasi — Lapabook",
+    description: "Kebijakan privasi dan perlindungan data pengguna Lapabook.",
   };
 }
 
@@ -100,8 +93,8 @@ Kebijakan ini dapat berubah sewaktu-waktu. Perubahan signifikan akan diinformasi
 `;
 
 export default async function KebijakanPage() {
-  const page = await getPage("kebijakan");
-  const content = page?.content || DEFAULT;
+  const page = await getPage();
+  const content = page?.body || DEFAULT;
 
   return (
     <div className="min-h-screen bg-gray-50">

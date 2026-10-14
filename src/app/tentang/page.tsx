@@ -17,15 +17,6 @@ async function getPageContent(slug: string) {
   }
 }
 
-async function getSeoSettings() {
-  try {
-    const raw = await readFile(SETTINGS_FILE, "utf-8").catch(() => "{}");
-    return JSON.parse(raw);
-  } catch {
-    return {};
-  }
-}
-
 async function getSeo() {
   try { return JSON.parse(await readFile(SETTINGS_FILE, "utf-8").catch(() => "{}")); } catch { return {}; }
 }

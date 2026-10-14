@@ -1,20 +1,17 @@
-import { readFile } from "fs/promises";
-import path from "path";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Zap } from "lucide-react";
+import { getCmsPage } from "@/lib/cms";
 
-const CMS_FILE = path.join(process.cwd(), "data", "cms-pages.json");
-
-async function getPage(slug: string) {
-  try { return JSON.parse(await readFile(CMS_FILE, "utf-8").catch(() => "{}"))[slug] || null; } catch { return null; }
+async function getPage() {
+  try { return await getCmsPage("kontak"); } catch { return null; }
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getPage("kontak");
+  const page = await getPage();
   return {
-    title: page?.metaTitle || "Kontak — Lapabook",
-    description: page?.metaDescription || "Hubungi tim Lapabook untuk pertanyaan, saran, atau kerjasama.",
+    title: page?.title ? `${page.title} — Lapabook` : "Kontak — Lapabook",
+    description: "Hubungi tim Lapabook untuk pertanyaan, saran, atau kerjasama.",
   };
 }
 
@@ -65,8 +62,8 @@ A: Laporkan ke support@lapabook.id dengan screenshot dan langkah reproduksi.
 `;
 
 export default async function KontakPage() {
-  const page = await getPage("kontak");
-  const content = page?.content || DEFAULT;
+  const page = await getPage();
+  const content = page?.body || DEFAULT;
 
   return (
     <div className="min-h-screen bg-gray-50">

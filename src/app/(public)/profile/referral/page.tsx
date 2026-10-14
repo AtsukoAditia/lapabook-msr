@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Handshake, Check, ClipboardList, Copy, Target, Link as LinkIcon, BarChart3, Users, CheckCircle2, XCircle, Clock } from "lucide-react";
 
 interface ReferralData {
   referralCode: string | null;
@@ -71,7 +72,7 @@ export default function ReferralPage() {
       if (d.referralCode) {
         setData((prev) => prev ? { ...prev, referralCode: d.referralCode } : { referralCode: d.referralCode, referrals: [], transactions: [], stats: { completedReferrals: 0, totalPointsEarned: 0, currentBalance: 0, totalSpent: 0 } });
       } else if (d.error) {
-        setApplyResult(`❌ ${d.error}`);
+        setApplyResult(d.error || "");
       }
     } catch {}
     setGenerating(false);
@@ -89,16 +90,16 @@ export default function ReferralPage() {
       });
       const d = await res.json().catch(() => ({}));
       if (res.ok) {
-        setApplyResult(`✅ Berhasil! Kamu dapat ${d.refereePoints} poin 🎉`);
+        setApplyResult(`Berhasil! Kamu dapat ${d.refereePoints} poin`);
         // refresh data
         const r = await fetch(`/api/referrals?customerId=${customerId}`, { cache: "no-store" });
         const j = await r.json().catch(() => ({}));
         if (j && !j.error) setData({ referralCode: j.referralCode ?? null, referrals: j.referrals ?? [], transactions: j.transactions ?? [], stats: j.stats ?? { completedReferrals: 0, totalPointsEarned: 0, currentBalance: 0, totalSpent: 0 } });
       } else {
-        setApplyResult(`❌ ${d.error ?? "Gagal"}`);
+        setApplyResult(d.error ?? "Gagal");
       }
     } catch {
-      setApplyResult("❌ Gagal menggunakan kode referral");
+      setApplyResult("Gagal menggunakan kode referral");
     }
     setApplying(false);
   }
@@ -123,7 +124,7 @@ export default function ReferralPage() {
     return (
       <div className="page-enter min-h-screen bg-slate-50">
         <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 px-4 py-8 text-center">
-          <p className="text-4xl mb-2">🤝</p>
+          <Handshake className="mx-auto mb-2 h-10 w-10 text-white" aria-hidden={true} />
           <h1 className="text-2xl font-black text-white">Referral & Rewards</h1>
         </div>
         <div className="mx-auto max-w-lg px-4 py-10 text-center">
@@ -135,18 +136,18 @@ export default function ReferralPage() {
   }
 
   const TIER_LABELS: Record<string, string> = {
-    earned: "🟢 Earned",
-    redeemed: "🔴 Redeemed",
-    bonus: "🟡 Bonus",
-    expired: "⚫ Expired",
-    adjusted: "🔵 Adjusted",
+    earned: "Earned",
+    redeemed: "Redeemed",
+    bonus: "Bonus",
+    expired: "Expired",
+    adjusted: "Adjusted",
   };
 
   return (
     <div className="page-enter page-enter-slide-up min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 px-4 py-8 text-center">
-        <p className="text-4xl mb-2">🤝</p>
+        <Handshake className="mx-auto mb-2 h-10 w-10 text-white" aria-hidden={true} />
         <h1 className="text-2xl font-black text-white">Referral & Rewards</h1>
         <p className="text-emerald-100 text-sm mt-1">Ajak teman, dapatkan poin!</p>
       </div>
@@ -163,7 +164,7 @@ export default function ReferralPage() {
                   onClick={copyCode}
                   className="rounded-lg bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-200 transition"
                 >
-                  {copied ? "✅ Copied!" : "📋 Copy"}
+                  {copied ? <span className="inline-flex items-center gap-1"><Check className="h-3 w-3" aria-hidden={true} /> Copied!</span> : <span className="inline-flex items-center gap-1"><Copy className="h-3 w-3" aria-hidden={true} /> Copy</span>}
                 </button>
               </div>
               <p className="mt-3 text-xs text-gray-500">
@@ -178,7 +179,7 @@ export default function ReferralPage() {
                 disabled={generating}
                 className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-sm font-bold text-white shadow-lg hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50"
               >
-                {generating ? "Membuat..." : "🎯 Buat Kode Referral"}
+                {generating ? "Membuat..." : <span className="inline-flex items-center gap-1.5"><Target className="h-4 w-4" aria-hidden={true} /> Buat Kode Referral</span>}
               </button>
             </>
           )}
@@ -186,7 +187,7 @@ export default function ReferralPage() {
 
         {/* Apply Referral Code */}
         <div className="mb-6 rounded-2xl border bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-bold text-gray-900 mb-3">🔗 Punya Kode Referral?</h2>
+          <h2 className="flex items-center gap-1.5 text-sm font-bold text-gray-900 mb-3"><LinkIcon className="h-4 w-4" aria-hidden={true} /> Punya Kode Referral?</h2>
           <div className="flex gap-2">
             <input
               type="text"
@@ -228,7 +229,7 @@ export default function ReferralPage() {
 
         {/* Transaction History */}
         <div className="mb-6">
-          <h2 className="text-sm font-bold text-gray-900 mb-3">📊 Riwayat Poin</h2>
+          <h2 className="flex items-center gap-1.5 text-sm font-bold text-gray-900 mb-3"><BarChart3 className="h-4 w-4" aria-hidden={true} /> Riwayat Poin</h2>
           {data?.transactions && data.transactions.length > 0 ? (
             <div className="space-y-2">
               {data.transactions.map((tx) => (
@@ -252,7 +253,7 @@ export default function ReferralPage() {
         {/* Referral History */}
         {data?.referrals && data.referrals.length > 0 && (
           <div>
-            <h2 className="text-sm font-bold text-gray-900 mb-3">👥 Riwayat Referral</h2>
+            <h2 className="flex items-center gap-1.5 text-sm font-bold text-gray-900 mb-3"><Users className="h-4 w-4" aria-hidden={true} /> Riwayat Referral</h2>
             <div className="space-y-2">
               {data.referrals.map((ref) => (
                 <div key={ref.id} className="flex items-center justify-between p-3 rounded-xl bg-white border">
@@ -266,7 +267,13 @@ export default function ReferralPage() {
                       ref.status === "pending" ? "bg-amber-100 text-amber-700" :
                       "bg-gray-100 text-gray-700"
                     }`}>
-                      {ref.status === "completed" ? "✅ Selesai" : ref.status === "pending" ? "⏳ Menunggu" : "❌ Expired"}
+                    <span className="inline-flex items-center gap-1">
+                      {ref.status === "completed"
+                        ? <><CheckCircle2 className="h-3 w-3" aria-hidden={true} /> Selesai</>
+                        : ref.status === "pending"
+                        ? <><Clock className="h-3 w-3" aria-hidden={true} /> Menunggu</>
+                        : <><XCircle className="h-3 w-3" aria-hidden={true} /> Expired</>}
+                    </span>
                     </span>
                     {ref.points_awarded > 0 && (
                       <p className="text-xs text-emerald-600 mt-1">+{ref.points_awarded.toLocaleString("id-ID")} poin</p>

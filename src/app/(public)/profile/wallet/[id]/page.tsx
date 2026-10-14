@@ -64,6 +64,24 @@ interface PlayerResult {
   preferred_sport: string | null;
 }
 
+interface SplitMember {
+  customerId: string;
+  customerName: string | null;
+  amount: string | number;
+  status: string;
+  paidAt: string | null;
+}
+
+interface Split {
+  id: string;
+  totalAmount: string | number;
+  splitType: string;
+  status: string;
+  createdAt: string;
+  bookingId: string | null;
+  members: SplitMember[];
+}
+
 type Tab = "members" | "deposits" | "transactions" | "split";
 
 /* ---------- Helpers ---------- */
@@ -89,6 +107,11 @@ const DEPOSIT_STATUS: Record<string, { label: string; cls: string }> = {
   rejected: { label: "Ditolak", cls: "bg-red-100 text-red-700" },
 };
 
+const SPLIT_STATUS: Record<string, { label: string; cls: string }> = {
+  pending: { label: "Pending", cls: "bg-yellow-100 text-yellow-700" },
+  completed: { label: "Selesai", cls: "bg-green-100 text-green-700" },
+};
+
 /* ---------- Page ---------- */
 
 export default function WalletDetailPage() {
@@ -101,6 +124,7 @@ export default function WalletDetailPage() {
   const [error, setError] = useState("");
   const [tab, setTab] = useState<Tab>("members");
   const [toast, setToast] = useState("");
+  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
 
   const loadWallet = useCallback(async () => {
     const res = await fetch(`/api/team-wallets/${walletId}`);
@@ -118,9 +142,19 @@ export default function WalletDetailPage() {
 
   useEffect(() => {
     // Auth check (detail GET is open, mutations are not)
-    fetch("/api/auth/session").then((r) => {
-      if (!r.ok) router.push("/login");
-    });
+    fetch("/api/auth/session")
+      .then((r) => {
+        if (!r.ok) {
+          router.push("/login");
+          return null;
+        }
+        return r.json();
+      })
+      .then((d) => {
+        if (!d?.user?.userId) router.push("/login");
+        else setSessionUserId(d.user.userId as string);
+      })
+      .catch(() => {});
     loadWallet()
       .catch(() => setError("Gagal memuat wallet"))
       .finally(() => setLoading(false));
@@ -214,9 +248,22 @@ export default function WalletDetailPage() {
         {tab === "members" && (
           <MembersTab wallet={wallet} onChanged={loadWallet} showToast={showToast} />
         )}
-        {tab === "deposits" && <DepositsTab walletId={wallet.id} showToast={showToast} />}
+        {tab === "deposits" && (
+          <DepositsTab
+            walletId={wallet.id}
+            isOwner={sessionUserId !== null && wallet.owner_customer_id === sessionUserId}
+            onChanged={loadWallet}
+            showToast={showToast}
+          />
+        )}
         {tab === "transactions" && <TransactionsTab walletId={wallet.id} />}
-        {tab === "split" && <SplitTab wallet={wallet} showToast={showToast} />}
+        {tab === "split" && (
+          <SplitTab
+            wallet={wallet}
+            isOwner={sessionUserId !== null && wallet.owner_customer_id === sessionUserId}
+            showToast={showToast}
+          />
+        )}
       </div>
     </div>
   );
@@ -388,13 +435,24 @@ function MembersTab({
 
 /* ---------- Deposits Tab ---------- */
 
-function DepositsTab({ walletId, showToast }: { walletId: string; showToast: (m: string) => void }) {
+function DepositsTab({
+  walletId,
+  isOwner,
+  onChanged,
+  showToast,
+}: {
+  walletId: string;
+  isOwner: boolean;
+  onChanged: () => Promise<void>;
+  showToast: (m: string) => void;
+}) {
   const [deposits, setDeposits] = useState<Deposit[]>([]);
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [confirming, setConfirming] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/team-wallets/${walletId}/deposits`);
@@ -406,6 +464,26 @@ function DepositsTab({ walletId, showToast }: { walletId: string; showToast: (m:
   useEffect(() => {
     load().catch(() => {}).finally(() => setLoading(false));
   }, [load]);
+
+  async function confirmDeposit(depositId: string) {
+    setConfirming(depositId);
+    try {
+      const res = await fetch(`/api/team-wallets/${walletId}/deposits/${depositId}/confirm`, {
+        method: "POST",
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        showToast(d.error || "Gagal konfirmasi deposit");
+        return;
+      }
+      showToast("Deposit dikonfirmasi");
+      await Promise.all([load(), onChanged()]);
+    } catch {
+      showToast("Terjadi kesalahan jaringan");
+    } finally {
+      setConfirming(null);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -497,14 +575,25 @@ function DepositsTab({ walletId, showToast }: { walletId: string; showToast: (m:
             {deposits.map((d) => {
               const st = DEPOSIT_STATUS[d.status] ?? { label: d.status, cls: "bg-gray-100 text-gray-700" };
               return (
-                <div key={d.id} className="flex items-center justify-between p-4">
+                <div key={d.id} className="flex items-center justify-between gap-3 p-4">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-gray-800">{formatIDR(Number(d.amount) || 0)}</p>
                     <p className="text-xs text-gray-400">
                       {d.from_customer_name ?? "Member"} • {formatDate(d.created_at)}
                     </p>
                   </div>
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 ${st.cls}`}>{st.label}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${st.cls}`}>{st.label}</span>
+                    {isOwner && d.status === "pending" && (
+                      <button
+                        onClick={() => confirmDeposit(d.id)}
+                        disabled={confirming !== null}
+                        className="text-xs font-semibold bg-accent-600 hover:bg-accent-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded-lg transition"
+                      >
+                        {confirming === d.id ? "Memproses..." : "Konfirmasi"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -589,7 +678,15 @@ function TransactionsTab({ walletId }: { walletId: string }) {
 
 /* ---------- Split Tab ---------- */
 
-function SplitTab({ wallet, showToast }: { wallet: WalletDetail; showToast: (m: string) => void }) {
+function SplitTab({
+  wallet,
+  isOwner,
+  showToast,
+}: {
+  wallet: WalletDetail;
+  isOwner: boolean;
+  showToast: (m: string) => void;
+}) {
   const members = useMemo(() => wallet.members ?? [], [wallet.members]);
   const [bookingId, setBookingId] = useState("");
   const [total, setTotal] = useState("");
@@ -598,6 +695,48 @@ function SplitTab({ wallet, showToast }: { wallet: WalletDetail; showToast: (m: 
   const [customAmounts, setCustomAmounts] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [splits, setSplits] = useState<Split[]>([]);
+  const [splitsLoading, setSplitsLoading] = useState(true);
+  const [marking, setMarking] = useState<string | null>(null);
+
+  async function markPaid(splitId: string, customerId: string) {
+    const key = `${splitId}:${customerId}`;
+    setMarking(key);
+    try {
+      const res = await fetch(`/api/team-wallets/${wallet.id}/splits/${splitId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "mark_paid", customerId }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (res.status === 409) {
+        showToast("Sudah lunas");
+        await loadSplits();
+        return;
+      }
+      if (!res.ok) {
+        showToast(d.error || "Gagal menandai lunas");
+        return;
+      }
+      showToast("Ditandai lunas");
+      await loadSplits();
+    } catch {
+      showToast("Terjadi kesalahan jaringan");
+    } finally {
+      setMarking(null);
+    }
+  }
+
+  const loadSplits = useCallback(async () => {
+    const res = await fetch(`/api/team-wallets/${wallet.id}/splits`);
+    const d = await res.json();
+    const list = (Array.isArray(d) ? d : (d.data ?? [])) as Split[];
+    setSplits(Array.isArray(list) ? list : []);
+  }, [wallet.id]);
+
+  useEffect(() => {
+    loadSplits().catch(() => {}).finally(() => setSplitsLoading(false));
+  }, [loadSplits]);
 
   const totalNum = parseInt(total.replace(/\D/g, ""), 10) || 0;
 
@@ -664,6 +803,7 @@ function SplitTab({ wallet, showToast }: { wallet: WalletDetail; showToast: (m: 
       setTotal("");
       setSelected(new Set());
       setCustomAmounts({});
+      await loadSplits();
     } catch {
       setFormError("Terjadi kesalahan jaringan");
     } finally {
@@ -672,7 +812,8 @@ function SplitTab({ wallet, showToast }: { wallet: WalletDetail; showToast: (m: 
   }
 
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm">
+    <div className="space-y-4">
+      <div className="bg-white rounded-2xl p-5 shadow-sm">
       <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
         <Scissors className="w-4 h-4 text-primary-500" />
         Buat Split Bill
@@ -781,6 +922,75 @@ function SplitTab({ wallet, showToast }: { wallet: WalletDetail; showToast: (m: 
           {submitting ? "Memproses..." : "Buat Split Bill"}
         </button>
       </form>
+      </div>
+
+      {/* Existing splits */}
+      <div className="bg-white rounded-2xl shadow-sm">
+        <h3 className="font-bold text-gray-800 px-5 pt-4 pb-2">Daftar Split Bill</h3>
+        {splitsLoading ? (
+          <div className="p-5 space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="animate-pulse flex justify-between">
+                <div className="h-4 w-32 bg-gray-200 rounded" />
+                <div className="h-4 w-20 bg-gray-200 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : splits.length === 0 ? (
+          <p className="text-sm text-gray-500 text-center pb-6">Belum ada split bill</p>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {splits.map((s) => {
+              const st = SPLIT_STATUS[s.status] ?? { label: s.status, cls: "bg-gray-100 text-gray-700" };
+              return (
+                <div key={s.id} className="p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-800">
+                        {formatIDR(Number(s.totalAmount) || 0)}
+                        <span className="text-xs font-normal text-gray-400"> • {s.splitType === "equal" ? "Rata" : "Custom"}</span>
+                      </p>
+                      <p className="text-xs text-gray-400">{formatDate(s.createdAt)}</p>
+                    </div>
+                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 ${st.cls}`}>{st.label}</span>
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    {(s.members ?? []).map((m) => (
+                      <div key={m.customerId} className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm text-gray-700 truncate">{m.customerName ?? "Member"}</p>
+                          {m.status === "paid" && m.paidAt && (
+                            <p className="text-xs text-gray-400">Lunas {formatDate(m.paidAt)}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-sm font-medium text-gray-800">{formatIDR(Number(m.amount) || 0)}</span>
+                          <span
+                            className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                              m.status === "paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                            }`}
+                          >
+                            {m.status === "paid" ? "Lunas" : "Pending"}
+                          </span>
+                          {isOwner && m.status === "pending" && (
+                            <button
+                              onClick={() => markPaid(s.id, m.customerId)}
+                              disabled={marking !== null}
+                              className="text-xs font-semibold bg-accent-600 hover:bg-accent-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded-lg transition"
+                            >
+                              {marking === `${s.id}:${m.customerId}` ? "Memproses..." : "Tandai Lunas"}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

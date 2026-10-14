@@ -21,6 +21,8 @@ interface Booking {
   bookingStatus: string;
   paymentStatus: string;
   notes?: string;
+  downPaymentAmount?: number;
+  paidAmount?: number;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: LucideIcon }> = {
@@ -191,7 +193,7 @@ export default function OwnerBookingsPage() {
                       Rp {booking.totalPrice.toLocaleString("id-ID")}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {booking.paymentStatus === "paid" ? "Lunas" : "Belum Lunas"}
+                      {booking.paymentStatus === "paid" ? "Lunas" : booking.paymentStatus === "dp_paid" ? `DP — Sisa Rp ${Math.max(0, booking.totalPrice - (booking.paidAmount ?? 0)).toLocaleString("id-ID")}` : "Belum Lunas"}
                     </p>
                   </div>
                 </div>

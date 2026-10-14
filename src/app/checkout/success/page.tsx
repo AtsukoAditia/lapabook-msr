@@ -362,9 +362,8 @@ function SuccessContent() {
       // Upload file to server
       const formData = new FormData();
       formData.append("file", proofFile);
-      // Guest tier: sertakan bookingCode + phone bila tidak login (Backend
-      // /api/uploads/proof menerima pasangan ini sebagai pengganti session.)
-      const phoneParam = new URLSearchParams(window.location.search).get("ph") || booking?.customerPhone || "";
+      // Guest tier: kirim bookingCode + phone bila tidak login —
+      // /api/uploads/proof menerima pasangan ini sebagai pengganti session.
       formData.append("bookingCode", booking.bookingCode);
       formData.append("phone", phoneParam);
 

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import Pagination from "@/components/admin/Pagination";
 
 interface PendingVenue {
   id: string;
@@ -24,14 +25,28 @@ export default function AdminVenuesPage() {
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+
+  const fetchVenues = useCallback(async (p: number) => {
+    setLoading(true);
+    try {
+      const r = await fetch(`/api/admin/venues?page=${p}&limit=25`);
+      const d = await r.json();
+      setVenues(d.venues ?? d.data ?? []);
+      setTotalPages(d.pagination?.totalPages ?? 1);
+      setTotal(d.pagination?.total ?? 0);
+    } catch {
+      /* ignore */
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    fetch("/api/admin/venues")
-      .then((r) => r.json())
-      .then((d) => setVenues(d.venues ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+    fetchVenues(page);
+  }, [page, fetchVenues]);
 
   async function updateStatus(id: string, status: "active" | "rejected") {
     setUpdatingId(id);
@@ -61,7 +76,7 @@ export default function AdminVenuesPage() {
           <div>
             <h1 className="text-2xl font-black text-gray-900">Venue Menunggu Approval</h1>
             <p className="text-gray-500 text-sm mt-1">
-              {venues.length} venue menunggu review
+              {total} venue menunggu review
             </p>
           </div>
         </div>
@@ -190,6 +205,8 @@ export default function AdminVenuesPage() {
             })}
           </div>
         )}
+
+        <Pagination page={page} totalPages={totalPages} total={total} onPageChange={setPage} />
       </div>
     </AdminLayout>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Info, Lock, ClipboardList, Phone, CheckCircle2, FileText, Save, Pencil, type LucideIcon } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 interface CmsPage {
@@ -11,11 +12,11 @@ interface CmsPage {
   updatedBy: string | null;
 }
 
-const AVAILABLE_PAGES = [
-  { key: "tentang", label: "Tentang", icon: "ℹ️", description: "Halaman tentang Lapabook" },
-  { key: "kebijakan", label: "Kebijakan & Privasi", icon: "🔒", description: "Kebijakan privasi pengguna" },
-  { key: "syarat", label: "Syarat & Ketentuan", icon: "📋", description: "Syarat ketentuan penggunaan" },
-  { key: "kontak", label: "Kontak", icon: "📞", description: "Informasi kontak" },
+const AVAILABLE_PAGES: { key: string; label: string; icon: LucideIcon; description: string }[] = [
+  { key: "tentang", label: "Tentang", icon: Info, description: "Halaman tentang Lapabook" },
+  { key: "kebijakan", label: "Kebijakan & Privasi", icon: Lock, description: "Kebijakan privasi pengguna" },
+  { key: "syarat", label: "Syarat & Ketentuan", icon: ClipboardList, description: "Syarat ketentuan penggunaan" },
+  { key: "kontak", label: "Kontak", icon: Phone, description: "Informasi kontak" },
 ];
 
 export default function AdminCmsPage() {
@@ -92,17 +93,23 @@ export default function AdminCmsPage() {
                   className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-left hover:shadow-md transition-all group"
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-2xl">{p.icon}</span>
+                    <p.icon aria-hidden={true} className="h-6 w-6 text-emerald-600 flex-shrink-0" />
                     <div>
                       <h3 className="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">{p.label}</h3>
                       <p className="text-xs text-gray-500">{p.description}</p>
                     </div>
                     <span
-                      className={`ml-auto text-xs px-2 py-1 rounded-full ${
+                      className={`ml-auto inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
                         hasContent ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
                       }`}
                     >
-                      {hasContent ? "✅ Custom" : loading ? "…" : "📄 Default"}
+                      {hasContent ? (
+                        <><CheckCircle2 aria-hidden={true} className="h-3.5 w-3.5" /> Custom</>
+                      ) : loading ? (
+                        "…"
+                      ) : (
+                        <><FileText aria-hidden={true} className="h-3.5 w-3.5" /> Default</>
+                      )}
                     </span>
                   </div>
                   {page?.updatedAt && (
@@ -127,7 +134,13 @@ export default function AdminCmsPage() {
                 disabled={saving}
                 className="ml-auto px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 transition-colors disabled:opacity-50"
               >
-                {saving ? "Menyimpan..." : saved ? "✅ Tersimpan" : "💾 Simpan"}
+                <span className="flex items-center gap-2">
+                  {saving ? "Menyimpan..." : saved ? (
+                    <><CheckCircle2 aria-hidden={true} className="h-4 w-4" /> Tersimpan</>
+                  ) : (
+                    <><Save aria-hidden={true} className="h-4 w-4" /> Simpan</>
+                  )}
+                </span>
               </button>
             </div>
 
@@ -143,7 +156,9 @@ export default function AdminCmsPage() {
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <h3 className="font-bold text-gray-900 mb-4">📝 Konten Halaman</h3>
+              <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Pencil aria-hidden={true} className="h-5 w-5 text-emerald-600" /> Konten Halaman
+              </h3>
               <p className="text-xs text-gray-500 mb-3">
                 Format: Markdown. Gunakan # untuk heading, ## untuk subheading, - untuk list, **teks** untuk bold.
               </p>

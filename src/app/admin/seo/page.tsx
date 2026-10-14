@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CheckCircle2, Save, Tag, Smartphone, Bot, BarChart3, FileText } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 interface SeoSettings {
@@ -81,13 +82,25 @@ export default function AdminSeoPage() {
             disabled={saving}
             className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 transition-colors disabled:opacity-50"
           >
-            {saving ? "Menyimpan..." : saved ? "✅ Tersimpan" : "💾 Simpan"}
+            <span className="flex items-center gap-2">
+              {saving ? "Menyimpan..." : saved ? (
+                <>
+                  <CheckCircle2 aria-hidden={true} className="h-4 w-4" /> Tersimpan
+                </>
+              ) : (
+                <>
+                  <Save aria-hidden={true} className="h-4 w-4" /> Simpan
+                </>
+              )}
+            </span>
           </button>
         </div>
 
         {/* Meta Tags */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">🏷️ Meta Tags</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Tag aria-hidden={true} className="h-5 w-5 text-emerald-600" /> Meta Tags
+          </h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
@@ -134,7 +147,9 @@ export default function AdminSeoPage() {
 
         {/* Open Graph */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">📱 Open Graph (Social Media)</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Smartphone aria-hidden={true} className="h-5 w-5 text-emerald-600" /> Open Graph (Social Media)
+          </h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">OG Title</label>
@@ -171,7 +186,9 @@ export default function AdminSeoPage() {
 
         {/* Robots & Sitemap */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">🤖 Robots & Sitemap</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Bot aria-hidden={true} className="h-5 w-5 text-emerald-600" /> Robots & Sitemap
+          </h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">robots.txt</label>
@@ -199,7 +216,9 @@ export default function AdminSeoPage() {
 
         {/* Analytics */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">📊 Analytics</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <BarChart3 aria-hidden={true} className="h-5 w-5 text-emerald-600" /> Analytics
+          </h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Google Analytics ID</label>
@@ -226,7 +245,9 @@ export default function AdminSeoPage() {
 
         {/* Structured Data */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">📋 Structured Data (JSON-LD)</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <FileText aria-hidden={true} className="h-5 w-5 text-emerald-600" /> Structured Data (JSON-LD)
+          </h2>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Custom JSON-LD</label>
             <textarea

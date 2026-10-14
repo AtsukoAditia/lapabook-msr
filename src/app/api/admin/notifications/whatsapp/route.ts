@@ -24,15 +24,15 @@ function generateBookingConfirmMessage(booking: {
   venueName?: string; courtName?: string;
 }): string {
   return encodeURIComponent(
-    `Halo ${booking.customerName}! 👋\n\n` +
-    `Booking kamu sudah DIKONFIRMASI ✅\n\n` +
-    `📋 Kode: ${booking.bookingCode}\n` +
-    `🏟️ Venue: ${booking.venueName || "-"}\n` +
-    `🏸 Lapangan: ${booking.courtName || "-"}\n` +
-    `📅 Tanggal: ${formatDate(booking.bookingDate)}\n` +
-    `⏰ Jam: ${booking.startTime} - ${booking.endTime}\n` +
-    `💰 Total: ${formatPrice(booking.totalPrice)}\n\n` +
-    `Tunjukkan kode booking ini saat datang. Terima kasih! 🙏`
+    `Halo ${booking.customerName}!\n\n` +
+    `Booking kamu sudah DIKONFIRMASI\n\n` +
+    `Kode: ${booking.bookingCode}\n` +
+    `Venue: ${booking.venueName || "-"}\n` +
+    `Lapangan: ${booking.courtName || "-"}\n` +
+    `Tanggal: ${formatDate(booking.bookingDate)}\n` +
+    `Jam: ${booking.startTime} - ${booking.endTime}\n` +
+    `Total: ${formatPrice(booking.totalPrice)}\n\n` +
+    `Tunjukkan kode booking ini saat datang. Terima kasih!`
   );
 }
 
@@ -41,14 +41,14 @@ function generateReminderMessage(booking: {
   startTime: string; venueName?: string; courtName?: string;
 }): string {
   return encodeURIComponent(
-    `Halo ${booking.customerName}! 👋\n\n` +
-    `⏰ Reminder: Booking kamu BESOK!\n\n` +
-    `📋 Kode: ${booking.bookingCode}\n` +
-    `🏟️ Venue: ${booking.venueName || "-"}\n` +
-    `🏸 Lapangan: ${booking.courtName || "-"}\n` +
-    `📅 Tanggal: ${formatDate(booking.bookingDate)}\n` +
-    `⏰ Jam: ${booking.startTime}\n\n` +
-    `Jangan terlambat ya! See you there 🏃‍♂️`
+    `Halo ${booking.customerName}!\n\n` +
+    `Reminder: Booking kamu BESOK!\n\n` +
+    `Kode: ${booking.bookingCode}\n` +
+    `Venue: ${booking.venueName || "-"}\n` +
+    `Lapangan: ${booking.courtName || "-"}\n` +
+    `Tanggal: ${formatDate(booking.bookingDate)}\n` +
+    `Jam: ${booking.startTime}\n\n` +
+    `Jangan terlambat ya! See you there!`
   );
 }
 
@@ -56,10 +56,10 @@ function generateRatingMessage(booking: {
   bookingCode: string; customerName: string; venueName?: string;
 }): string {
   return encodeURIComponent(
-    `Halo ${booking.customerName}! 👋\n\n` +
-    `Gimana pengalaman main di ${booking.venueName || "venue"} kemarin? 🏸\n\n` +
-    `Kasih rating dan review yuk biar venue bisa makin bagus! ⭐\n\n` +
-    `Terima kasih! 🙏`
+    `Halo ${booking.customerName}!\n\n` +
+    `Gimana pengalaman main di ${booking.venueName || "venue"} kemarin?\n\n` +
+    `Kasih rating dan review yuk biar venue bisa makin bagus!\n\n` +
+    `Terima kasih!`
   );
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Star } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 interface ReviewItem {
@@ -49,8 +50,8 @@ export default function AdminReviewsPage() {
   return (
     <AdminLayout>
       <div className="mb-6 overflow-hidden rounded-2xl bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 p-6 shadow-xl sm:p-8">
-        <h1 className="text-2xl font-black text-white sm:text-3xl">
-          ⭐ Moderasi Ulasan
+        <h1 className="flex items-center gap-2 text-2xl font-black text-white sm:text-3xl">
+          <Star aria-hidden={true} className="h-6 w-6" fill="currentColor" /> Moderasi Ulasan
         </h1>
         <p className="mt-1 text-sm text-orange-100">
           {reviews.length} total ulasan · {reviews.filter((r) => !r.isVisible).length} disembunyikan

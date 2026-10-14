@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Building2, CheckCircle2, XCircle, Pause } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 interface VenueOwner {
@@ -84,7 +85,7 @@ export default function AdminOwnersPage() {
           </div>
         ) : owners.length === 0 ? (
           <div className="bg-white rounded-2xl p-8 text-center text-gray-500">
-            <p className="text-4xl mb-2">🏟️</p>
+            <Building2 aria-hidden={true} className="mx-auto h-10 w-10 text-gray-300" />
             <p>Belum ada pendaftaran owner</p>
           </div>
         ) : (
@@ -130,14 +131,18 @@ export default function AdminOwnersPage() {
                                   disabled={updatingId === owner.id}
                                   className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-500 transition-colors disabled:opacity-50"
                                 >
-                                  ✅ Setujui
+                                <span className="inline-flex items-center gap-1">
+                                  <CheckCircle2 aria-hidden={true} className="h-3.5 w-3.5" /> Setujui
+                                </span>
                                 </button>
                                 <button
                                   onClick={() => updateStatus(owner.id, "rejected")}
                                   disabled={updatingId === owner.id}
                                   className="px-3 py-1.5 bg-red-600 text-white text-xs font-bold rounded-lg hover:bg-red-500 transition-colors disabled:opacity-50"
                                 >
-                                  ❌ Tolak
+                                <span className="inline-flex items-center gap-1">
+                                  <XCircle aria-hidden={true} className="h-3.5 w-3.5" /> Tolak
+                                </span>
                                 </button>
                               </>
                             )}
@@ -147,7 +152,9 @@ export default function AdminOwnersPage() {
                                 disabled={updatingId === owner.id}
                                 className="px-3 py-1.5 bg-amber-600 text-white text-xs font-bold rounded-lg hover:bg-amber-500 transition-colors disabled:opacity-50"
                               >
-                                ⏸️ Suspend
+                                <span className="inline-flex items-center gap-1">
+                                  <Pause aria-hidden={true} className="h-3.5 w-3.5" /> Suspend
+                                </span>
                               </button>
                             )}
                             {owner.status === "suspended" && (
@@ -156,7 +163,9 @@ export default function AdminOwnersPage() {
                                 disabled={updatingId === owner.id}
                                 className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-500 transition-colors disabled:opacity-50"
                               >
-                                ✅ Aktifkan
+                                <span className="inline-flex items-center gap-1">
+                                  <CheckCircle2 aria-hidden={true} className="h-3.5 w-3.5" /> Aktifkan
+                                </span>
                               </button>
                             )}
                           </div>

@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  Building2, BarChart3, AlertTriangle, Calendar, ClipboardList,
+  Clock, Coins, CircleDot, CheckCircle2, Zap, Wallet, type LucideIcon,
+} from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 interface DashboardStats {
@@ -92,13 +96,15 @@ export default function AdminDashboard() {
       <div className="mb-6 overflow-hidden rounded-2xl bg-gradient-to-r from-primary-600 via-primary-700 to-blue-500 p-6 shadow-xl sm:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-black text-white sm:text-3xl">🏟️ Dashboard</h1>
+            <h1 className="flex items-center gap-2 text-2xl font-black text-white sm:text-3xl">
+              <Building2 aria-hidden={true} className="h-6 w-6" /> Dashboard
+            </h1>
             <p className="mt-1 text-sm text-indigo-100">
               Pantau performa venue olahraga kamu secara real-time
             </p>
           </div>
           <div className="flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 backdrop-blur-sm">
-            <span className="text-lg">📊</span>
+            <BarChart3 aria-hidden={true} className="h-5 w-5 text-white" />
             <span className="text-sm font-semibold text-white">Live Overview</span>
           </div>
         </div>
@@ -112,17 +118,19 @@ export default function AdminDashboard() {
         </div>
       ) : !stats ? (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
-          <span className="text-4xl">⚠️</span>
+          <AlertTriangle aria-hidden={true} className="mx-auto h-10 w-10 text-red-500" />
           <p className="mt-2 font-semibold text-red-700">Gagal memuat data dashboard</p>
           <p className="text-sm text-red-500">Coba refresh halaman</p>
         </div>
       ) : (
         <div className="page-enter page-enter-slide-up">
           {/* Today Stats */}
-          <h2 className="mb-3 text-lg font-bold text-slate-800">📅 Hari Ini</h2>
+          <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-slate-800">
+            <Calendar aria-hidden={true} className="h-5 w-5 text-slate-600" /> Hari Ini
+          </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
-              icon="📋"
+              icon={ClipboardList}
               label="Booking Hari Ini"
               value={stats.todayBookings.toString()}
               gradient="from-cyan-500 to-blue-500"
@@ -130,7 +138,7 @@ export default function AdminDashboard() {
               link="/admin/bookings"
             />
             <StatCard
-              icon="⏳"
+              icon={Clock}
               label="Pending Pembayaran"
               value={stats.todayPendingPayments.toString()}
               gradient="from-orange-500 to-red-500"
@@ -139,14 +147,14 @@ export default function AdminDashboard() {
               highlight={stats.todayPendingPayments > 0}
             />
             <StatCard
-              icon="💰"
+              icon={Coins}
               label="Pendapatan Hari Ini"
               value={`Rp ${stats.todayRevenue.toLocaleString("id-ID")}`}
               gradient="from-emerald-500 to-green-500"
               light="bg-emerald-50 text-emerald-700"
             />
             <StatCard
-              icon="🟢"
+              icon={CircleDot}
               label="Lapangan Aktif"
               value={stats.todayActiveCourts.toString()}
               gradient="from-teal-500 to-cyan-500"
@@ -156,10 +164,12 @@ export default function AdminDashboard() {
           </div>
 
           {/* Main Stats */}
-          <h2 className="mb-3 mt-8 text-lg font-bold text-slate-800">📊 Keseluruhan</h2>
+          <h2 className="mb-3 mt-8 flex items-center gap-2 text-lg font-bold text-slate-800">
+            <BarChart3 aria-hidden={true} className="h-5 w-5 text-slate-600" /> Keseluruhan
+          </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <StatCard
-              icon="📋"
+              icon={ClipboardList}
               label="Total Booking"
               value={stats.totalBookings.toString()}
               gradient="from-blue-500 to-blue-600"
@@ -167,7 +177,7 @@ export default function AdminDashboard() {
               link="/admin/bookings"
             />
             <StatCard
-              icon="⏳"
+              icon={Clock}
               label="Menunggu Konfirmasi"
               value={stats.pendingBookings.toString()}
               gradient="from-amber-500 to-orange-500"
@@ -176,21 +186,21 @@ export default function AdminDashboard() {
               highlight={stats.pendingBookings > 0}
             />
             <StatCard
-              icon="✅"
+              icon={CheckCircle2}
               label="Booking Dikonfirmasi"
               value={stats.confirmedBookings.toString()}
               gradient="from-emerald-500 to-teal-500"
               light="bg-emerald-50 text-emerald-700"
             />
             <StatCard
-              icon="💰"
+              icon={Coins}
               label="Total Pendapatan"
               value={`Rp ${stats.totalRevenue.toLocaleString("id-ID")}`}
               gradient="from-primary-500 to-primary-600"
               light="bg-primary-50 text-primary-700"
             />
             <StatCard
-              icon="🏟️"
+              icon={Building2}
               label="Total Lapangan"
               value={stats.totalCourts.toString()}
               gradient="from-slate-500 to-slate-600"
@@ -198,7 +208,7 @@ export default function AdminDashboard() {
               link="/admin/courts"
             />
             <StatCard
-              icon="🟢"
+              icon={CircleDot}
               label="Lapangan Aktif"
               value={stats.activeCourts.toString()}
               gradient="from-green-500 to-emerald-500"
@@ -209,12 +219,14 @@ export default function AdminDashboard() {
 
           {/* Quick Actions */}
           <div className="mt-8">
-            <h2 className="mb-4 text-lg font-bold text-slate-800">⚡ Aksi Cepat</h2>
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-slate-800">
+              <Zap aria-hidden={true} className="h-5 w-5 text-slate-600" /> Aksi Cepat
+            </h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <QuickAction href="/admin/bookings" icon="📋" label="Kelola Booking" color="from-blue-500 to-indigo-500" />
-              <QuickAction href="/admin/courts" icon="🏟️" label="Kelola Lapangan" color="from-emerald-500 to-teal-500" />
-              <QuickAction href="/admin/pricing" icon="💰" label="Atur Harga" color="from-amber-500 to-orange-500" />
-              <QuickAction href="/admin/commission" icon="🏦" label="Komisi" color="from-purple-500 to-indigo-500" />
+              <QuickAction href="/admin/bookings" icon={ClipboardList} label="Kelola Booking" color="from-blue-500 to-indigo-500" />
+              <QuickAction href="/admin/courts" icon={Building2} label="Kelola Lapangan" color="from-emerald-500 to-teal-500" />
+              <QuickAction href="/admin/pricing" icon={Coins} label="Atur Harga" color="from-amber-500 to-orange-500" />
+              <QuickAction href="/admin/commission" icon={Wallet} label="Komisi" color="from-purple-500 to-indigo-500" />
             </div>
           </div>
         </div>
@@ -224,7 +236,7 @@ export default function AdminDashboard() {
 }
 
 function StatCard({
-  icon,
+  icon: Icon,
   label,
   value,
   gradient,
@@ -232,7 +244,7 @@ function StatCard({
   link,
   highlight,
 }: {
-  icon: string;
+  icon: LucideIcon;
   label: string;
   value: string;
   gradient: string;
@@ -245,8 +257,8 @@ function StatCard({
       <div className={`h-1.5 bg-gradient-to-r ${gradient}`} />
       <div className="p-5">
         <div className="flex items-start justify-between">
-          <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-2xl ${light}`}>
-            {icon}
+          <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${light}`}>
+            <Icon aria-hidden={true} className="h-6 w-6" />
           </div>
           {highlight && (
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-xs text-white animate-pulse">!</span>
@@ -264,13 +276,15 @@ function StatCard({
   return card;
 }
 
-function QuickAction({ href, icon, label, color }: { href: string; icon: string; label: string; color: string }) {
+function QuickAction({ href, icon: Icon, label, color }: { href: string; icon: LucideIcon; label: string; color: string }) {
   return (
     <a
       href={href}
       className={`group flex items-center gap-3 rounded-xl bg-gradient-to-r ${color} p-4 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg`}
     >
-      <span className="text-2xl transition group-hover:scale-110">{icon}</span>
+      <span className="transition group-hover:scale-110">
+        <Icon aria-hidden={true} className="h-6 w-6" />
+      </span>
       <span className="text-sm font-bold">{label}</span>
     </a>
   );

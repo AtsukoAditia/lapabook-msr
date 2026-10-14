@@ -138,7 +138,7 @@ function CariContent() {
             className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             aria-label="Filter olahraga"
           >
-            <option value="">🏸 Semua Olahraga</option>
+            <option value="">Semua Olahraga</option>
             {sports.map((s) => (
               <option key={s.slug} value={s.slug}>{s.name}</option>
             ))}
@@ -149,7 +149,7 @@ function CariContent() {
             className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             aria-label="Filter lokasi"
           >
-            <option value="">📍 Semua Lokasi</option>
+            <option value="">Semua Lokasi</option>
             {areas.map((a) => (
               <option key={a.id} value={a.id}>{a.label}</option>
             ))}

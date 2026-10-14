@@ -26,6 +26,8 @@ interface BookingDetail {
   expiresAt?: string;
   paymentProofUrl?: string;
   notes?: string;
+  rescheduledFrom?: { bookingDate: string; startTime: string; endTime: string } | null;
+  rescheduleCount?: number;
 }
 
 const STATUS_STEPS: { status: string; label: string }[] = [
@@ -75,6 +77,12 @@ export default function BookingDetailPage() {
   const [phoneInput, setPhoneInput] = useState("");
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [showResched, setShowResched] = useState(false);
+  const [newDate, setNewDate] = useState("");
+  const [newStart, setNewStart] = useState("");
+  const [newEnd, setNewEnd] = useState("");
+  const [reschedMsg, setReschedMsg] = useState("");
+  const [reschedLoading, setReschedLoading] = useState(false);
 
   const fetchBooking = () => {
     fetch(`/api/bookings/${params.id}`)
@@ -99,6 +107,27 @@ export default function BookingDetailPage() {
           setError("");
         }
       });
+  };
+
+  const handleReschedule = async () => {
+    if (!booking || !newDate || !newStart || !newEnd) { setReschedMsg("Isi tanggal dan jam baru."); return; }
+    setReschedLoading(true);
+    setReschedMsg("");
+    try {
+      const res = await fetch(`/api/bookings/${booking.id}/reschedule`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingDate: newDate, startTime: newStart, endTime: newEnd }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setReschedMsg(data.error || "Gagal reschedule."); return; }
+      setShowResched(false);
+      fetchBooking();
+    } catch {
+      setReschedMsg("Gagal memindahkan jadwal.");
+    } finally {
+      setReschedLoading(false);
+    }
   };
 
   const handleCancel = async () => {
@@ -213,6 +242,43 @@ export default function BookingDetailPage() {
             <div className="flex justify-between"><span className="text-gray-500">Catatan</span><span>{booking.notes}</span></div>
           )}
         </div>
+
+        {/* Reschedule badge */}
+        {booking.rescheduleCount != null && booking.rescheduleCount > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-800">
+            <span className="font-bold">Di-reschedule 1x</span>
+            {booking.rescheduledFrom && (
+              <span> dari {booking.rescheduledFrom.bookingDate} {booking.rescheduledFrom.startTime?.slice(0, 5)}-{booking.rescheduledFrom.endTime?.slice(0, 5)}</span>
+            )}
+          </div>
+        )}
+
+        {/* Reschedule form */}
+        {["confirmed", "paid", "waiting_payment", "waiting_verification"].includes(booking.bookingStatus) && (
+          <div className="bg-white rounded-xl p-4 shadow-sm border">
+            {!showResched ? (
+              <button onClick={() => setShowResched(true)} className="w-full py-3 border border-emerald-600 text-emerald-700 rounded-lg font-medium hover:bg-emerald-50">
+                Pindah Jadwal (max 1x, H-3)
+              </button>
+            ) : (
+              <div className="space-y-2">
+                <p className="font-bold text-sm">Pindah Jadwal</p>
+                <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
+                <div className="flex gap-2">
+                  <input type="time" value={newStart} onChange={(e) => setNewStart(e.target.value)} className="flex-1 px-3 py-2 border rounded-lg" />
+                  <input type="time" value={newEnd} onChange={(e) => setNewEnd(e.target.value)} className="flex-1 px-3 py-2 border rounded-lg" />
+                </div>
+                {reschedMsg && <p className="text-sm text-red-600">{reschedMsg}</p>}
+                <div className="flex gap-2">
+                  <button onClick={handleReschedule} disabled={reschedLoading} className="flex-1 py-2.5 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 disabled:opacity-50">
+                    {reschedLoading ? "Menyimpan..." : "Simpan Jadwal Baru"}
+                  </button>
+                  <button onClick={() => setShowResched(false)} className="px-4 py-2.5 border rounded-lg text-gray-600">Batal</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Actions */}
         {booking.bookingStatus === "waiting_payment" && (

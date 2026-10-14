@@ -2,6 +2,7 @@ import { readFile } from "fs/promises";
 import path from "path";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Zap } from "lucide-react";
 
 const CMS_FILE = path.join(process.cwd(), "data", "cms-pages.json");
 const SETTINGS_FILE = path.join(process.cwd(), "data", "seo-settings.json");
@@ -108,7 +109,7 @@ export default async function KebijakanPage() {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">⚡</span>
+              <Zap className="h-4 w-4 text-white" aria-hidden={true} />
             </div>
             <span className="text-lg font-black text-gray-900">Lapang<span className="text-emerald-600">in</span></span>
           </Link>

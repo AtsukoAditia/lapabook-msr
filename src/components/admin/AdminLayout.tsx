@@ -48,6 +48,7 @@ const navItems: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/admin/cms", label: "CMS", icon: FileText },
   { href: "/admin/analytics", label: "Analytics", icon: TrendingUp },
   { href: "/admin/commission", label: "Komisi", icon: Landmark },
+  { href: "/admin/payouts", label: "Payout", icon: CreditCard },
   { href: "/admin/customers", label: "Pelanggan", icon: Users },
   { href: "/admin/settings", label: "Pengaturan", icon: Settings },
 ];

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Users, Medal, Gem, Ban, CheckCircle2, type LucideIcon } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import Pagination from "@/components/admin/Pagination";
 
@@ -16,11 +17,11 @@ interface Customer {
   isActive: boolean;
 }
 
-const TIER_LABELS: Record<string, { label: string; color: string; icon: string }> = {
-  bronze: { label: "Bronze", color: "bg-amber-100 text-amber-800", icon: "🥉" },
-  silver: { label: "Silver", color: "bg-gray-100 text-gray-800", icon: "🥈" },
-  gold: { label: "Gold", color: "bg-yellow-100 text-yellow-800", icon: "🥇" },
-  platinum: { label: "Platinum", color: "bg-indigo-100 text-indigo-800", icon: "💎" },
+const TIER_LABELS: Record<string, { label: string; color: string; icon: LucideIcon }> = {
+  bronze: { label: "Bronze", color: "bg-amber-100 text-amber-800", icon: Medal },
+  silver: { label: "Silver", color: "bg-gray-100 text-gray-800", icon: Medal },
+  gold: { label: "Gold", color: "bg-yellow-100 text-yellow-800", icon: Medal },
+  platinum: { label: "Platinum", color: "bg-indigo-100 text-indigo-800", icon: Gem },
 };
 
 export default function AdminCustomersPage() {
@@ -76,7 +77,9 @@ export default function AdminCustomersPage() {
   return (
     <AdminLayout>
       <div className="mb-6 overflow-hidden rounded-2xl bg-gradient-to-r from-primary-600 via-primary-700 to-blue-600 p-6 shadow-xl sm:p-8">
-        <h1 className="text-2xl font-black text-white sm:text-3xl">👥 Pelanggan</h1>
+        <h1 className="flex items-center gap-2 text-2xl font-black text-white sm:text-3xl">
+          <Users aria-hidden={true} className="h-6 w-6" /> Pelanggan
+        </h1>
         <p className="mt-1 text-sm text-purple-100">{total} total pelanggan terdaftar</p>
       </div>
 
@@ -87,7 +90,7 @@ export default function AdminCustomersPage() {
           const cfg = TIER_LABELS[tier];
           return (
             <div key={tier} className="rounded-xl border bg-white p-4 text-center shadow-sm">
-              <p className="text-2xl">{cfg.icon}</p>
+              <cfg.icon aria-hidden={true} className="mx-auto h-6 w-6 text-slate-400" />
               <p className="text-lg font-bold text-gray-900">{count}</p>
               <p className="text-xs text-gray-500">{cfg.label}</p>
             </div>
@@ -120,8 +123,8 @@ export default function AdminCustomersPage() {
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-bold text-gray-900">{customer.name}</p>
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${tier.color}`}>
-                            {tier.icon} {tier.label}
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${tier.color}`}>
+                            <tier.icon aria-hidden={true} className="h-3 w-3" /> {tier.label}
                           </span>
                         </div>
                         <p className="text-xs text-gray-500">{customer.email} · {customer.phone}</p>
@@ -142,7 +145,19 @@ export default function AdminCustomersPage() {
                         onClick={() => toggleBan(customer)}
                         className={`rounded-xl px-3 py-1.5 text-xs font-bold text-white shadow-sm transition disabled:opacity-50 ${customer.isActive ? "bg-red-500 hover:bg-red-600" : "bg-emerald-500 hover:bg-emerald-600"}`}
                       >
-                        {togglingId === customer.id ? "⏳" : customer.isActive ? "⛔ Ban" : "✅ Unban"}
+                        {togglingId === customer.id ? (
+                          <span className="inline-flex items-center gap-1">
+                            <Ban aria-hidden={true} className="h-3.5 w-3.5 animate-pulse" /> Ban...
+                          </span>
+                        ) : customer.isActive ? (
+                          <span className="inline-flex items-center gap-1">
+                            <Ban aria-hidden={true} className="h-3.5 w-3.5" /> Ban
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1">
+                            <CheckCircle2 aria-hidden={true} className="h-3.5 w-3.5" /> Unban
+                          </span>
+                        )}
                       </button>
                     </div>
                   </div>

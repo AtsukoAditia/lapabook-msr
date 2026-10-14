@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { MessageSquare } from "lucide-react";
 
 interface Conversation {
   id: string;
@@ -96,7 +97,9 @@ export default function AdminSupportPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b px-6 py-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-bold">💬 Support Center</h1>
+          <h1 className="text-lg font-bold flex items-center gap-2">
+            <MessageSquare aria-hidden={true} className="h-5 w-5 text-emerald-600" /> Support Center
+          </h1>
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setActiveConv(null); setLoading(true); }}

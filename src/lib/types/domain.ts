@@ -185,6 +185,8 @@ export interface Booking {
   midtransTransactionId?: string;
   notes?: string;
   userId?: string;
+  rescheduledFrom?: { bookingDate: string; startTime: string; endTime: string } | null;
+  rescheduleCount?: number;
   expiresAt?: string;
   commissionAmount?: number;
   ownerPayout?: number;

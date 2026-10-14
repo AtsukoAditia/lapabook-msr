@@ -141,6 +141,8 @@ function mapBooking(row: Record<string, unknown>): Booking {
     paymentRejectionReason: (r.paymentRejectionReason as string) || undefined,
     notes: (r.notes as string) || undefined,
     userId: (r.userId as string) || undefined,
+    rescheduledFrom: (r.rescheduledFrom as Booking["rescheduledFrom"]) || undefined,
+    rescheduleCount: (r.rescheduleCount as number) ?? 0,
     expiresAt: r.expiresAt ? fmtTs(r.expiresAt) : undefined,
     commissionAmount: (r.commissionAmount as number) || 0,
     ownerPayout: (r.ownerPayout as number) || 0,

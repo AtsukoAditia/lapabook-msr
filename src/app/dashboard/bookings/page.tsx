@@ -23,6 +23,7 @@ interface Booking {
   notes?: string;
   downPaymentAmount?: number;
   paidAmount?: number;
+  rescheduleCount?: number;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: LucideIcon }> = {
@@ -180,6 +181,9 @@ export default function OwnerBookingsPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-bold text-gray-900">{booking.bookingCode}</h3>
+                      {booking.rescheduleCount != null && booking.rescheduleCount > 0 && (
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">Reschedule 1x</span>
+                      )}
                       <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${statusInfo.color}`}>
                         <statusInfo.icon aria-hidden={true} className="h-3 w-3" /> {statusInfo.label}
                       </span>

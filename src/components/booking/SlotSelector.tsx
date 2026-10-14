@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRealtimeAvailability, type TimeSlot } from "@/hooks/useRealtimeAvailability";
+import { Lightbulb } from "lucide-react";
 
 type Slot = TimeSlot;
 
@@ -346,8 +347,8 @@ export default function SlotSelector({
       )}
 
       {/* Help text */}
-      <p className="mb-4 text-xs text-slate-500 text-center">
-        💡 Pilih beberapa jam berurutan untuk booking lebih lama
+      <p className="mb-4 flex items-center justify-center gap-1 text-xs text-slate-500 text-center">
+        <Lightbulb aria-hidden={true} className="h-3.5 w-3.5" /> Pilih beberapa jam berurutan untuk booking lebih lama
       </p>
 
       {/* Continue button — sembunyikan jika parent render CTA sendiri */}

@@ -144,6 +144,8 @@ function mapBooking(row: Record<string, unknown>): Booking {
     expiresAt: r.expiresAt ? fmtTs(r.expiresAt) : undefined,
     commissionAmount: (r.commissionAmount as number) || 0,
     ownerPayout: (r.ownerPayout as number) || 0,
+    downPaymentAmount: (r.downPaymentAmount as number) || 0,
+    paidAmount: (r.paidAmount as number) || 0,
     createdAt: fmtTs(r.createdAt),
     updatedAt: fmtTs(r.updatedAt),
   };
@@ -429,11 +431,14 @@ export class PostgresAdapter implements DatabaseAdapter {
     const commissionAmount = feeType === "fixed" ? feeValue : Math.round(input.totalPrice * (rate / 100));
     const ownerPayout = input.totalPrice - commissionAmount;
 
+    // DP: dp50 → uang muka setengah total (ceil); full/legacy → 0 (flow lunas biasa).
+    const downPaymentAmount = input.downPaymentType === "dp50" ? Math.ceil(input.totalPrice / 2) : 0;
+
     const { rows } = await pool.query(
-      `INSERT INTO bookings (id, booking_code, customer_name, customer_phone, customer_email, user_id, venue_id, court_id, sport_id, booking_date, start_time, end_time, duration_minutes, total_price, booking_status, payment_status, notes, expires_at, commission_amount, owner_payout, voucher_code)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,'waiting_payment','unpaid',$15,(NOW() + INTERVAL '15 minutes'),$16,$17,$18)
+      `INSERT INTO bookings (id, booking_code, customer_name, customer_phone, customer_email, user_id, venue_id, court_id, sport_id, booking_date, start_time, end_time, duration_minutes, total_price, booking_status, payment_status, notes, expires_at, commission_amount, owner_payout, voucher_code, down_payment_amount, paid_amount)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,'waiting_payment','unpaid',$15,(NOW() + INTERVAL '15 minutes'),$16,$17,$18,$19,0)
        RETURNING *`,
-      [id, code, input.customerName, input.customerPhone, input.customerEmail || null, input.userId || null, input.venueId, input.courtId, input.sportId, input.bookingDate, input.startTime, input.endTime, input.durationMinutes, input.totalPrice, input.notes || null, commissionAmount, ownerPayout, input.voucherCode || null],
+      [id, code, input.customerName, input.customerPhone, input.customerEmail || null, input.userId || null, input.venueId, input.courtId, input.sportId, input.bookingDate, input.startTime, input.endTime, input.durationMinutes, input.totalPrice, input.notes || null, commissionAmount, ownerPayout, input.voucherCode || null, downPaymentAmount],
     );
     return mapBooking(rows[0]);
   }
@@ -573,13 +578,31 @@ export class PostgresAdapter implements DatabaseAdapter {
 
   // ── Payment Proof ──
   async submitPaymentProof(bookingId: string, proofUrl: string): Promise<Booking> {
-    const r = await queryOne<Record<string, unknown>>("UPDATE bookings SET payment_proof_url = $1, payment_status = 'waiting_confirmation', booking_status = 'waiting_verification', expires_at = NULL, payment_submitted_at = NOW(), updated_at = NOW() WHERE id = $2 RETURNING *", [proofUrl, bookingId]);
+    // DP-aware: pelunasan (confirmed/dp_paid) → slot tetap confirmed, hanya payment menunggu verifikasi.
+    const current = await this.getBookingById(bookingId);
+    if (!current) throw new Error(`Booking not found: ${bookingId}`);
+    const isSettlement = current.bookingStatus === "confirmed" && current.paymentStatus === "dp_paid";
+    const r = isSettlement
+      ? await queryOne<Record<string, unknown>>("UPDATE bookings SET payment_proof_url = $1, payment_status = 'waiting_confirmation', payment_submitted_at = NOW(), updated_at = NOW() WHERE id = $2 RETURNING *", [proofUrl, bookingId])
+      : await queryOne<Record<string, unknown>>("UPDATE bookings SET payment_proof_url = $1, payment_status = 'waiting_confirmation', booking_status = 'waiting_verification', expires_at = NULL, payment_submitted_at = NOW(), updated_at = NOW() WHERE id = $2 RETURNING *", [proofUrl, bookingId]);
     if (!r) throw new Error(`Booking not found: ${bookingId}`);
     return mapBooking(r);
   }
 
-  async confirmPayment(bookingId: string, _actorId?: string): Promise<Booking> {
-    const r = await queryOne<Record<string, unknown>>("UPDATE bookings SET payment_status = 'paid', booking_status = 'confirmed', payment_verified_at = NOW(), updated_at = NOW() WHERE id = $1 RETURNING *", [bookingId]);
+  async confirmPayment(bookingId: string, _actorId?: string, amount?: number): Promise<Booking> {
+    // DP-aware: expected = DP (first verify) atau sisa (pelunasan). Legacy/full → total.
+    const booking = await this.getBookingById(bookingId);
+    if (!booking) throw new Error(`Booking not found: ${bookingId}`);
+    const paid = booking.paidAmount ?? 0;
+    const down = booking.downPaymentAmount ?? 0;
+    const expected = amount ?? (down > 0 && paid === 0 ? down : booking.totalPrice - paid);
+    if (expected <= 0) throw new Error("Tidak ada sisa tagihan.");
+    const newPaid = Math.min(booking.totalPrice, paid + expected);
+    const full = newPaid >= booking.totalPrice;
+    const r = await queryOne<Record<string, unknown>>(
+      "UPDATE bookings SET paid_amount = $2, payment_status = $3, booking_status = 'confirmed', payment_verified_at = NOW(), updated_at = NOW() WHERE id = $1 RETURNING *",
+      [bookingId, newPaid, full ? "paid" : "dp_paid"],
+    );
     if (!r) throw new Error(`Booking not found: ${bookingId}`);
     return mapBooking(r);
   }

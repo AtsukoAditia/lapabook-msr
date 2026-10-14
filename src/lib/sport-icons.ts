@@ -1,6 +1,4 @@
-// Sport icon mapping.
-// - New UI: `getSportVisual()` → lucide SVG component (no emoji).
-// - Legacy: `sportEmoji` / `sportColor` kept for older pages still rendering emoji strings.
+// Sport icon mapping — `getSportVisual()` → lucide SVG component (no emoji).
 import type { LucideIcon } from "lucide-react";
 import { Trophy, Dumbbell, Volleyball } from "lucide-react";
 
@@ -38,25 +36,3 @@ export function getSportVisual(slugOrId: string | undefined | null): SportVisual
   if (!slugOrId) return FALLBACK;
   return VISUALS[slugOrId] ?? FALLBACK;
 }
-
-// Legacy emoji map — phased out; migrate callers to getSportVisual().
-export const sportEmoji: Record<string, string> = {
-  "sport-futsal": "⚽",
-  "sport-mini-soccer": "🥅",
-  "sport-bulu-tangkis": "🏸",
-  "sport-padel": "🎾",
-  "sport-tenis": "🎾",
-  "sport-basket": "🏀",
-  futsal: "⚽",
-  minisoccer: "🥅",
-  "mini-soccer": "🥅",
-  badminton: "🏸",
-  "bulu-tangkis": "🏸",
-  padel: "🎾",
-  tenis: "🎾",
-  basket: "🏀",
-};
-
-export const sportColor: Record<string, string> = Object.fromEntries(
-  Object.entries(VISUALS).map(([k, v]) => [k, v.colorClass]),
-);

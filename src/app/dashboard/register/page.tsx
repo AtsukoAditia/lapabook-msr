@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { PartyPopper, Zap } from "lucide-react";
 
 export default function OwnerRegisterPage() {
   const [form, setForm] = useState({
@@ -75,7 +76,7 @@ export default function OwnerRegisterPage() {
       <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-800 to-emerald-900 flex items-center justify-center p-4">
         <div className="w-full max-w-md text-center">
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8 shadow-2xl">
-            <div className="text-6xl mb-4">🎉</div>
+            <PartyPopper aria-hidden={true} className="h-16 w-16 text-emerald-300 mx-auto mb-4" />
             <h2 className="text-2xl font-black text-white mb-4">Registrasi Berhasil!</h2>
             <p className="text-emerald-200/80 mb-6">
               Akun Anda sedang dalam review tim Lapabook. Kami akan menghubungi Anda setelah akun disetujui.
@@ -97,7 +98,7 @@ export default function OwnerRegisterPage() {
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
-            <span className="text-white font-black text-2xl">⚡</span>
+            <Zap aria-hidden={true} className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-2xl font-black text-white">
             Daftar sebagai <span className="text-emerald-300">Owner</span>

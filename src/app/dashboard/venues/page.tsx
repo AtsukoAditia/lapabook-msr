@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { LandPlot, MapPin, Camera } from "lucide-react";
 
 interface Venue {
   id: string;
@@ -68,7 +69,7 @@ export default function OwnerVenuesPage() {
 
       {venues.length === 0 ? (
         <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">
-          <p className="text-5xl mb-4">🏟️</p>
+          <LandPlot aria-hidden={true} className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <p className="text-lg font-bold text-gray-700 mb-2">Belum ada venue</p>
           <p className="text-gray-500 mb-6">Mulai dengan menambahkan venue pertama Anda</p>
           <Link
@@ -95,14 +96,14 @@ export default function OwnerVenuesPage() {
                         {statusInfo.label}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500">📍 {venue.address}</p>
+                    <p className="flex items-center gap-1.5 text-sm text-gray-500"><MapPin aria-hidden={true} className="h-4 w-4" /> {venue.address}</p>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
                     <Link
                       href={`/dashboard/venues/photos/${venue.id}`}
-                      className="px-4 py-2 bg-blue-100 text-blue-700 text-sm font-medium rounded-lg hover:bg-blue-200 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-100 text-blue-700 text-sm font-medium rounded-lg hover:bg-blue-200 transition-colors"
                     >
-                      📸 Foto
+                      <Camera aria-hidden={true} className="h-4 w-4" /> Foto
                     </Link>
                     {venue.approvalStatus === "draft" && (
                       <Link

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
+import { Clock, CreditCard, Search, CheckCircle2, X, Ban, AlarmClock, UserX, ClipboardList, User, Phone } from "lucide-react";
 
 interface Booking {
   id: string;
@@ -21,17 +23,17 @@ interface Booking {
   notes?: string;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-  pending: { label: "Pending", color: "bg-gray-100 text-gray-700", icon: "⏳" },
-  waiting_payment: { label: "Menunggu Pembayaran", color: "bg-amber-100 text-amber-800", icon: "💳" },
-  waiting_verification: { label: "Menunggu Verifikasi", color: "bg-blue-100 text-blue-800", icon: "🔍" },
-  paid: { label: "Sudah Dibayar", color: "bg-emerald-100 text-emerald-800", icon: "✅" },
-  confirmed: { label: "Dikonfirmasi", color: "bg-emerald-100 text-emerald-800", icon: "✓" },
-  rejected: { label: "Ditolak", color: "bg-red-100 text-red-700", icon: "✗" },
-  cancelled: { label: "Dibatalkan", color: "bg-gray-100 text-gray-600", icon: "⊘" },
-  expired: { label: "Kedaluwarsa", color: "bg-gray-100 text-gray-500", icon: "⏰" },
-  completed: { label: "Selesai", color: "bg-green-100 text-green-800", icon: "✔" },
-  no_show: { label: "Tidak Hadir", color: "bg-orange-100 text-orange-700", icon: "👻" },
+const STATUS_CONFIG: Record<string, { label: string; color: string; icon: LucideIcon }> = {
+  pending: { label: "Pending", color: "bg-gray-100 text-gray-700", icon: Clock },
+  waiting_payment: { label: "Menunggu Pembayaran", color: "bg-amber-100 text-amber-800", icon: CreditCard },
+  waiting_verification: { label: "Menunggu Verifikasi", color: "bg-blue-100 text-blue-800", icon: Search },
+  paid: { label: "Sudah Dibayar", color: "bg-emerald-100 text-emerald-800", icon: CheckCircle2 },
+  confirmed: { label: "Dikonfirmasi", color: "bg-emerald-100 text-emerald-800", icon: CheckCircle2 },
+  rejected: { label: "Ditolak", color: "bg-red-100 text-red-700", icon: X },
+  cancelled: { label: "Dibatalkan", color: "bg-gray-100 text-gray-600", icon: Ban },
+  expired: { label: "Kedaluwarsa", color: "bg-gray-100 text-gray-500", icon: AlarmClock },
+  completed: { label: "Selesai", color: "bg-green-100 text-green-800", icon: CheckCircle2 },
+  no_show: { label: "Tidak Hadir", color: "bg-orange-100 text-orange-700", icon: UserX },
 };
 
 export default function OwnerBookingsPage() {
@@ -153,7 +155,7 @@ export default function OwnerBookingsPage() {
       {/* Booking List */}
       {bookings.length === 0 ? (
         <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">
-          <p className="text-5xl mb-4">📋</p>
+          <ClipboardList aria-hidden={true} className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <p className="text-lg font-bold text-gray-700 mb-2">
             {filterStatus !== "all" || search ? "Tidak ada booking" : "Belum ada booking"}
           </p>
@@ -176,12 +178,12 @@ export default function OwnerBookingsPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-bold text-gray-900">{booking.bookingCode}</h3>
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${statusInfo.color}`}>
-                        {statusInfo.icon} {statusInfo.label}
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${statusInfo.color}`}>
+                        <statusInfo.icon aria-hidden={true} className="h-3 w-3" /> {statusInfo.label}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600">
-                      👤 {booking.customerName} • 📱 {booking.customerPhone}
+                    <p className="flex items-center gap-1.5 text-sm text-gray-600">
+                      <User aria-hidden={true} className="h-4 w-4" /> {booking.customerName} <span className="text-gray-400">•</span> <Phone aria-hidden={true} className="h-4 w-4" /> {booking.customerPhone}
                     </p>
                   </div>
                   <div className="text-right">
@@ -189,7 +191,7 @@ export default function OwnerBookingsPage() {
                       Rp {booking.totalPrice.toLocaleString("id-ID")}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {booking.paymentStatus === "paid" ? "✓ Lunas" : "○ Belum Lunas"}
+                      {booking.paymentStatus === "paid" ? "Lunas" : "Belum Lunas"}
                     </p>
                   </div>
                 </div>

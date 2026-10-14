@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Wallet, BookOpen, Lightbulb, CalendarDays, LandPlot, X } from "lucide-react";
 
 interface Court {
   id: string;
@@ -159,7 +160,7 @@ export default function OwnerPricingPage() {
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/dashboard" className="text-gray-500 hover:text-gray-700">← Dashboard</Link>
-            <h1 className="text-lg font-black text-gray-900">💰 Kelola Harga Lapangan</h1>
+            <h1 className="flex items-center gap-2 text-lg font-black text-gray-900"><Wallet aria-hidden={true} className="h-5 w-5" /> Kelola Harga Lapangan</h1>
           </div>
         </div>
       </header>
@@ -167,19 +168,19 @@ export default function OwnerPricingPage() {
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         {/* Education Section */}
         <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
-          <h2 className="text-lg font-bold text-blue-900 mb-2">📚 Tentang Sistem Harga</h2>
+          <h2 className="flex items-center gap-2 text-lg font-bold text-blue-900 mb-2"><BookOpen aria-hidden={true} className="h-5 w-5" /> Tentang Sistem Harga</h2>
           <div className="text-sm text-blue-800 space-y-2">
             <p><strong>Weekday:</strong> Senin - Jumat (hari kerja normal)</p>
             <p><strong>Weekend:</strong> Sabtu - Minggu</p>
             <p><strong>Holiday (Tanggal Merah):</strong> Hari libur nasional dan cuti bersama (lihat daftar di bawah)</p>
-            <p className="mt-3"><strong>💡 Tips:</strong> Anda bisa mengatur harga berbeda untuk jam sibuk (peak hours) dan jam sepi. Sistem akan otomatis menggunakan harga yang sesuai dengan hari dan jam booking.</p>
+            <p className="mt-3 flex items-start gap-1"><Lightbulb aria-hidden={true} className="h-4 w-4 mt-0.5 shrink-0" /> <span><strong>Tips:</strong> Anda bisa mengatur harga berbeda untuk jam sibuk (peak hours) dan jam sepi. Sistem akan otomatis menggunakan harga yang sesuai dengan hari dan jam booking.</span></p>
           </div>
         </div>
 
         {/* Upcoming Holidays */}
         {upcomingHolidays.length > 0 && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">🗓️ Tanggal Merah Mendatang</h2>
+            <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900 mb-4"><CalendarDays aria-hidden={true} className="h-5 w-5" /> Tanggal Merah Mendatang</h2>
             <div className="space-y-2">
               {upcomingHolidays.map((h) => (
                 <div key={h.id} className="flex items-center gap-3 p-3 bg-red-50 rounded-lg">
@@ -199,7 +200,7 @@ export default function OwnerPricingPage() {
 
         {/* Courts Pricing */}
         <div className="space-y-4">
-          <h2 className="text-lg font-bold text-gray-900">🏟️ Atur Harga per Lapangan</h2>
+          <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900"><LandPlot aria-hidden={true} className="h-5 w-5" /> Atur Harga per Lapangan</h2>
           
           {courts.length === 0 ? (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center text-gray-500">
@@ -237,7 +238,7 @@ export default function OwnerPricingPage() {
                             rule.dayType === "weekend" ? "bg-blue-100 text-blue-700" :
                             "bg-gray-100 text-gray-700"
                           }`}>
-                            {rule.dayType === "holiday" ? "🔴 Holiday" : rule.dayType === "weekend" ? "🔵 Weekend" : "⚪ Weekday"}
+                            {rule.dayType === "holiday" ? "Holiday" : rule.dayType === "weekend" ? "Weekend" : "Weekday"}
                           </span>
                           <span className="text-sm text-gray-700">{rule.startTime} - {rule.endTime}</span>
                           <span className="ml-auto font-bold text-gray-900">{formatRupiah(rule.pricePerHour)}/jam</span>
@@ -245,7 +246,7 @@ export default function OwnerPricingPage() {
                             onClick={() => handleDeleteRule(rule.id)}
                             className="text-red-600 hover:text-red-700 text-sm"
                           >
-                            ✕
+                            <X aria-hidden={true} className="h-4 w-4" />
                           </button>
                         </div>
                       ))}

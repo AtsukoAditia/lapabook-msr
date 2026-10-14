@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { LucideIcon } from "lucide-react";
+import { ClipboardList, Clock, CheckCircle2, Wallet, LandPlot, Activity, Settings, CloudRain, BarChart3 } from "lucide-react";
 
 interface OwnerStats {
   totalBookings: number;
@@ -53,13 +55,13 @@ export default function OwnerDashboard() {
     );
   }
 
-  const cards = [
-    { label: "Total Booking", value: stats?.totalBookings ?? 0, icon: "📋", color: "from-blue-500 to-blue-600" },
-    { label: "Menunggu Konfirmasi", value: stats?.pendingBookings ?? 0, icon: "⏳", color: "from-amber-500 to-orange-500" },
-    { label: "Dikonfirmasi", value: stats?.confirmedBookings ?? 0, icon: "✅", color: "from-emerald-500 to-teal-500" },
-    { label: "Total Pendapatan", value: `Rp${(stats?.totalRevenue ?? 0).toLocaleString("id-ID")}`, icon: "💰", color: "from-purple-500 to-pink-500" },
-    { label: "Total Lapangan", value: stats?.totalCourts ?? 0, icon: "🏟️", color: "from-cyan-500 to-blue-500" },
-    { label: "Lapangan Aktif", value: stats?.activeCourts ?? 0, icon: "🟢", color: "from-emerald-400 to-emerald-600" },
+  const cards: { label: string; value: string | number; icon: LucideIcon; color: string }[] = [
+    { label: "Total Booking", value: stats?.totalBookings ?? 0, icon: ClipboardList, color: "from-blue-500 to-blue-600" },
+    { label: "Menunggu Konfirmasi", value: stats?.pendingBookings ?? 0, icon: Clock, color: "from-amber-500 to-orange-500" },
+    { label: "Dikonfirmasi", value: stats?.confirmedBookings ?? 0, icon: CheckCircle2, color: "from-emerald-500 to-teal-500" },
+    { label: "Total Pendapatan", value: `Rp${(stats?.totalRevenue ?? 0).toLocaleString("id-ID")}`, icon: Wallet, color: "from-purple-500 to-pink-500" },
+    { label: "Total Lapangan", value: stats?.totalCourts ?? 0, icon: LandPlot, color: "from-cyan-500 to-blue-500" },
+    { label: "Lapangan Aktif", value: stats?.activeCourts ?? 0, icon: Activity, color: "from-emerald-400 to-emerald-600" },
   ];
 
   return (
@@ -73,8 +75,8 @@ export default function OwnerDashboard() {
         {cards.map((card) => (
           <div key={card.label} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3 mb-3">
-              <div className={`w-10 h-10 bg-gradient-to-br ${card.color} rounded-xl flex items-center justify-center text-white text-lg`}>
-                {card.icon}
+              <div className={`w-10 h-10 bg-gradient-to-br ${card.color} rounded-xl flex items-center justify-center text-white`}>
+                <card.icon aria-hidden={true} className="h-5 w-5" />
               </div>
               <span className="text-sm font-medium text-gray-500">{card.label}</span>
             </div>
@@ -87,35 +89,35 @@ export default function OwnerDashboard() {
         <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <a href="/dashboard/bookings" className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-emerald-50 hover:border-emerald-200 border border-transparent transition-all">
-            <span className="text-2xl">📋</span>
+            <ClipboardList aria-hidden={true} className="h-6 w-6 text-emerald-600" />
             <div>
               <p className="font-medium text-gray-900 text-sm">Kelola Booking</p>
               <p className="text-xs text-gray-500">Lihat & konfirmasi</p>
             </div>
           </a>
           <a href="/dashboard/courts" className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-emerald-50 hover:border-emerald-200 border border-transparent transition-all">
-            <span className="text-2xl">🏟️</span>
+            <LandPlot aria-hidden={true} className="h-6 w-6 text-emerald-600" />
             <div>
               <p className="font-medium text-gray-900 text-sm">Kelola Lapangan</p>
               <p className="text-xs text-gray-500">Tambah & edit</p>
             </div>
           </a>
           <a href="/dashboard/settings" className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-emerald-50 hover:border-emerald-200 border border-transparent transition-all">
-            <span className="text-2xl">⚙️</span>
+            <Settings aria-hidden={true} className="h-6 w-6 text-emerald-600" />
             <div>
               <p className="font-medium text-gray-900 text-sm">Pengaturan</p>
               <p className="text-xs text-gray-500">Venue & akun</p>
             </div>
           </a>
           <a href="/dashboard/settings/rain" className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-emerald-50 hover:border-emerald-200 border border-transparent transition-all">
-            <span className="text-2xl">🌧️</span>
+            <CloudRain aria-hidden={true} className="h-6 w-6 text-emerald-600" />
             <div>
               <p className="font-medium text-gray-900 text-sm">Diskon Cuaca</p>
               <p className="text-xs text-gray-500">Atur diskon hujan</p>
             </div>
           </a>
           <a href="/dashboard/bookings" className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-emerald-50 hover:border-emerald-200 border border-transparent transition-all">
-            <span className="text-2xl">📊</span>
+            <BarChart3 aria-hidden={true} className="h-6 w-6 text-emerald-600" />
             <div>
               <p className="font-medium text-gray-900 text-sm">Lihat Statistik</p>
               <p className="text-xs text-gray-500">Analytics detail</p>

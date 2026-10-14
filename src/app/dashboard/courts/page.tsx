@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
+import { Trophy, LandPlot, Building2, Wallet } from "lucide-react";
 
 interface Court {
   id: string;
@@ -25,16 +27,16 @@ interface Venue {
   address: string;
 }
 
-const SPORT_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-  futsal: { label: "Futsal", icon: "⚽", color: "bg-emerald-100 text-emerald-700" },
-  basket: { label: "Basket", icon: "🏀", color: "bg-orange-100 text-orange-700" },
-  volleyball: { label: "Voli", icon: "🏐", color: "bg-blue-100 text-blue-700" },
-  badminton: { label: "Badminton", icon: "🏸", color: "bg-purple-100 text-purple-700" },
-  tennis: { label: "Tenis", icon: "🎾", color: "bg-yellow-100 text-yellow-700" },
-  soccer: { label: "Sepakbola", icon: "⚽", color: "bg-green-100 text-green-700" },
-  padel: { label: "Padel", icon: "🎾", color: "bg-teal-100 text-teal-700" },
-  "bulu-tangkis": { label: "Bulu Tangkis", icon: "🏸", color: "bg-purple-100 text-purple-700" },
-  "mini-soccer": { label: "Mini Soccer", icon: "⚽", color: "bg-green-100 text-green-700" },
+const SPORT_CONFIG: Record<string, { label: string; icon: LucideIcon; color: string }> = {
+  futsal: { label: "Futsal", icon: Trophy, color: "bg-emerald-100 text-emerald-700" },
+  basket: { label: "Basket", icon: Trophy, color: "bg-orange-100 text-orange-700" },
+  volleyball: { label: "Voli", icon: Trophy, color: "bg-blue-100 text-blue-700" },
+  badminton: { label: "Badminton", icon: Trophy, color: "bg-purple-100 text-purple-700" },
+  tennis: { label: "Tenis", icon: Trophy, color: "bg-yellow-100 text-yellow-700" },
+  soccer: { label: "Sepakbola", icon: Trophy, color: "bg-green-100 text-green-700" },
+  padel: { label: "Padel", icon: Trophy, color: "bg-teal-100 text-teal-700" },
+  "bulu-tangkis": { label: "Bulu Tangkis", icon: Trophy, color: "bg-purple-100 text-purple-700" },
+  "mini-soccer": { label: "Mini Soccer", icon: Trophy, color: "bg-green-100 text-green-700" },
 };
 
 export default function OwnerCourtsPage() {
@@ -143,15 +145,15 @@ export default function OwnerCourtsPage() {
     }
   };
 
-  const getSportInfo = (sportId: string): { label: string; icon: string; color: string } => {
+  const getSportInfo = (sportId: string): { label: string; icon: LucideIcon; color: string } => {
     const sport = sports.find((s) => s.id === sportId);
     if (sport?.slug && sport.slug in SPORT_CONFIG) {
       return SPORT_CONFIG[sport.slug];
     }
     if (sport) {
-      return { label: sport.name, icon: sport.icon || "🏅", color: "bg-gray-100 text-gray-700" };
+      return { label: sport.name, icon: Trophy, color: "bg-gray-100 text-gray-700" };
     }
-    return { label: sportId, icon: "🏅", color: "bg-gray-100 text-gray-700" };
+    return { label: sportId, icon: Trophy, color: "bg-gray-100 text-gray-700" };
   };
 
   const filteredCourts = courts.filter((c) => {
@@ -250,7 +252,7 @@ export default function OwnerCourtsPage() {
             const sportInfo = getSportInfo(sportId);
             return (
               <option key={sportId} value={sportId}>
-                {sportInfo.icon} {sportInfo.label} ({count})
+                {sportInfo.label} ({count})
               </option>
             );
           })}
@@ -260,7 +262,7 @@ export default function OwnerCourtsPage() {
       {/* Court List */}
       {filteredCourts.length === 0 ? (
         <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">
-          <p className="text-5xl mb-4">🏟️</p>
+          <LandPlot aria-hidden={true} className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <p className="text-lg font-bold text-gray-700 mb-2">
             {courts.length === 0 ? "Belum ada lapangan" : "Tidak ada lapangan"}
           </p>
@@ -292,8 +294,8 @@ export default function OwnerCourtsPage() {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${sportInfo.color}`}>
-                        {sportInfo.icon} {sportInfo.label}
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${sportInfo.color}`}>
+                        <sportInfo.icon aria-hidden={true} className="h-3 w-3" /> {sportInfo.label}
                       </span>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${court.isActive ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"}`}>
                         {court.isActive ? "Aktif" : "Nonaktif"}
@@ -304,8 +306,8 @@ export default function OwnerCourtsPage() {
                 </div>
 
                 <div className="space-y-1 text-sm text-gray-600 mb-4">
-                  <p>🏢 {venueName}</p>
-                  <p>💰 Rp {court.basePrice.toLocaleString("id-ID")} / jam</p>
+                  <p className="flex items-center gap-1.5"><Building2 aria-hidden={true} className="h-4 w-4" /> {venueName}</p>
+                  <p className="flex items-center gap-1.5"><Wallet aria-hidden={true} className="h-4 w-4" /> Rp {court.basePrice.toLocaleString("id-ID")} / jam</p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -356,7 +358,7 @@ export default function OwnerCourtsPage() {
               >
                 <option value="">Pilih olahraga</option>
                 {sports.map((s) => (
-                  <option key={s.id} value={s.id}>{s.icon ? `${s.icon} ` : ""}{s.name}</option>
+                  <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
               </select>
             </div>

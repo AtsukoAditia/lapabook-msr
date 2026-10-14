@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { CloudRain, CloudDrizzle, CloudLightning, CheckCircle2, Save, BookOpen, HelpCircle, Lightbulb, Settings, FileText, BarChart3, AlertTriangle } from "lucide-react";
 
 interface RainLevel {
   discountPercent: number;
@@ -54,18 +55,18 @@ const DEFAULT_CONFIG: RainDiscountConfig = {
 const EDUCATION = {
   what: "Diskon cuaca adalah fitur yang memberikan potongan harga otomatis kepada pelanggan saat booking lapangan outdoor di hari dengan prediksi hujan. Ini meningkatkan kepercayaan pelanggan dan mengurangi pembatalan mendadak.",
   why: [
-    "🏟️ Lapangan outdoor lebih rentan terhadap cuaca — pelanggan sering ragu booking saat prediksi hujan",
-    "💰 Diskon kecil (10-30%) jauh lebih murah daripada lapangan kosong total",
-    "📊 Data menunjukkan venue dengan diskon cuaca punya 40% lebih banyak booking saat musim hujan",
-    "⭐ Meningkatkan review positif — pelanggan merasa diperlakukan adil",
-    "🔄 Mengurangi no-show dan pembatalan last-minute",
+    "Lapangan outdoor lebih rentan terhadap cuaca — pelanggan sering ragu booking saat prediksi hujan",
+    "Diskon kecil (10-30%) jauh lebih murah daripada lapangan kosong total",
+    "Data menunjukkan venue dengan diskon cuaca punya 40% lebih banyak booking saat musim hujan",
+    "Meningkatkan review positif — pelanggan merasa diperlakukan adil",
+    "Mengurangi no-show dan pembatalan last-minute",
   ],
   how: "Sistem akan otomatis mengecek prediksi cuaca (dari WeatherAPI.com) saat pelanggan booking lapangan outdoor. Jika prediksi hujan, sistem otomatis menerapkan diskon sesuai persentase yang Anda atur. Diskon hanya berlaku untuk lapangan outdoor — lapangan indoor tidak terpengaruh.",
   tips: [
-    "💡 Mulai dengan diskon kecil (5-10%) untuk hujan ringan — ini sudah cukup menarik bagi pelanggan",
-    "💡 Diskon 20-30% untuk hujan deras wajar karena risiko lapangan tidak bisa dipakai",
-    "💡 Jangan setting diskon terlalu tinggi (>40%) karena bisa merugikan bisnis",
-    "💡 Fitur ini bekerja otomatis — Anda tidak perlu cek cuaca manual setiap hari",
+    "Mulai dengan diskon kecil (5-10%) untuk hujan ringan — ini sudah cukup menarik bagi pelanggan",
+    "Diskon 20-30% untuk hujan deras wajar karena risiko lapangan tidak bisa dipakai",
+    "Jangan setting diskon terlalu tinggi (>40%) karena bisa merugikan bisnis",
+    "Fitur ini bekerja otomatis — Anda tidak perlu cek cuaca manual setiap hari",
   ],
 };
 
@@ -147,14 +148,18 @@ export default function OwnerRainDiscountPage() {
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/dashboard" className="text-gray-500 hover:text-gray-700">← Dashboard</Link>
-            <h1 className="text-lg font-black text-gray-900">🌧️ Diskon Cuaca</h1>
+            <h1 className="flex items-center gap-2 text-lg font-black text-gray-900"><CloudRain aria-hidden={true} className="h-5 w-5" /> Diskon Cuaca</h1>
           </div>
           <button
             onClick={handleSave}
             disabled={saving || !selectedVenue}
             className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 transition-colors disabled:opacity-50"
           >
-            {saving ? "Menyimpan..." : saved ? "✅ Tersimpan" : "💾 Simpan"}
+            {saving ? "Menyimpan..." : saved ? (
+              <span className="inline-flex items-center gap-1"><CheckCircle2 aria-hidden={true} className="h-4 w-4" /> Tersimpan</span>
+            ) : (
+              <span className="inline-flex items-center gap-1"><Save aria-hidden={true} className="h-4 w-4" /> Simpan</span>
+            )}
           </button>
         </div>
       </header>
@@ -191,7 +196,7 @@ export default function OwnerRainDiscountPage() {
             </button>
           </div>
           {config.enabled && (
-            <p className="text-xs text-emerald-600 mt-2">✅ Aktif — pelanggan akan mendapat diskon otomatis saat booking lapangan outdoor di hari hujan</p>
+            <p className="flex items-center gap-1 text-xs text-emerald-600 mt-2"><CheckCircle2 aria-hidden={true} className="h-3 w-3" /> Aktif — pelanggan akan mendapat diskon otomatis saat booking lapangan outdoor di hari hujan</p>
           )}
         </div>
 
@@ -202,7 +207,7 @@ export default function OwnerRainDiscountPage() {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-xl">📚</span>
+              <BookOpen aria-hidden={true} className="h-5 w-5 text-blue-600" />
               <span className="font-bold text-blue-900">Pelajari tentang Diskon Cuaca</span>
             </div>
             <span className="text-blue-500">{showEducation ? "▲" : "▼"}</span>
@@ -212,11 +217,11 @@ export default function OwnerRainDiscountPage() {
         {showEducation && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
             <div>
-              <h3 className="font-bold text-gray-900 mb-2">🤔 Apa itu Diskon Cuaca?</h3>
+              <h3 className="flex items-center gap-2 font-bold text-gray-900 mb-2"><HelpCircle aria-hidden={true} className="h-4 w-4" /> Apa itu Diskon Cuaca?</h3>
               <p className="text-sm text-gray-600 leading-relaxed">{EDUCATION.what}</p>
             </div>
             <div>
-              <h3 className="font-bold text-gray-900 mb-2">💡 Kenapa Perlu?</h3>
+              <h3 className="flex items-center gap-2 font-bold text-gray-900 mb-2"><Lightbulb aria-hidden={true} className="h-4 w-4" /> Kenapa Perlu?</h3>
               <ul className="space-y-2">
                 {EDUCATION.why.map((item, i) => (
                   <li key={i} className="text-sm text-gray-600">{item}</li>
@@ -224,11 +229,11 @@ export default function OwnerRainDiscountPage() {
               </ul>
             </div>
             <div>
-              <h3 className="font-bold text-gray-900 mb-2">⚙️ Cara Kerja</h3>
+              <h3 className="flex items-center gap-2 font-bold text-gray-900 mb-2"><Settings aria-hidden={true} className="h-4 w-4" /> Cara Kerja</h3>
               <p className="text-sm text-gray-600 leading-relaxed">{EDUCATION.how}</p>
             </div>
             <div>
-              <h3 className="font-bold text-gray-900 mb-2">📝 Tips Pengaturan</h3>
+              <h3 className="flex items-center gap-2 font-bold text-gray-900 mb-2"><FileText aria-hidden={true} className="h-4 w-4" /> Tips Pengaturan</h3>
               <ul className="space-y-1">
                 {EDUCATION.tips.map((item, i) => (
                   <li key={i} className="text-sm text-gray-600">{item}</li>
@@ -247,7 +252,13 @@ export default function OwnerRainDiscountPage() {
               return (
                 <div key={level} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="text-2xl">{level === "light" ? "🌦️" : level === "moderate" ? "🌧️" : "⛈️"}</span>
+                    {level === "light" ? (
+                      <CloudDrizzle aria-hidden={true} className="h-6 w-6 text-blue-500" />
+                    ) : level === "moderate" ? (
+                      <CloudRain aria-hidden={true} className="h-6 w-6 text-blue-600" />
+                    ) : (
+                      <CloudLightning aria-hidden={true} className="h-6 w-6 text-indigo-600" />
+                    )}
                     <div>
                       <h3 className="font-bold text-gray-900">{l.label}</h3>
                       <p className="text-xs text-gray-500">{l.minMm}–{l.maxMm >= 999 ? "999+" : l.maxMm} mm curah hujan</p>
@@ -300,13 +311,13 @@ export default function OwnerRainDiscountPage() {
         {/* Summary */}
         {config.enabled && (
           <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6">
-            <h3 className="font-bold text-emerald-900 mb-2">📊 Ringkasan Konfigurasi</h3>
+            <h3 className="flex items-center gap-2 font-bold text-emerald-900 mb-2"><BarChart3 aria-hidden={true} className="h-4 w-4" /> Ringkasan Konfigurasi</h3>
             <ul className="space-y-1 text-sm text-emerald-700">
               <li>• Hujan ringan ({config.levels.light.minMm}-{config.levels.light.maxMm}mm): diskon {config.levels.light.discountPercent}%</li>
               <li>• Hujan sedang ({config.levels.moderate.minMm}-{config.levels.moderate.maxMm}mm): diskon {config.levels.moderate.discountPercent}%</li>
               <li>• Hujan deras ({config.levels.heavy.minMm}mm+): diskon {config.levels.heavy.discountPercent}%</li>
             </ul>
-            <p className="text-xs text-emerald-600 mt-3">⚠️ Diskon hanya berlaku untuk lapangan outdoor. Lapangan indoor tidak terpengaruh.</p>
+            <p className="flex items-center gap-1 text-xs text-emerald-600 mt-3"><AlertTriangle aria-hidden={true} className="h-3 w-3" /> Diskon hanya berlaku untuk lapangan outdoor. Lapangan indoor tidak terpengaruh.</p>
           </div>
         )}
       </main>

@@ -64,6 +64,24 @@ interface PlayerResult {
   preferred_sport: string | null;
 }
 
+interface SplitMember {
+  customerId: string;
+  customerName: string | null;
+  amount: string | number;
+  status: string;
+  paidAt: string | null;
+}
+
+interface Split {
+  id: string;
+  totalAmount: string | number;
+  splitType: string;
+  status: string;
+  createdAt: string;
+  bookingId: string | null;
+  members: SplitMember[];
+}
+
 type Tab = "members" | "deposits" | "transactions" | "split";
 
 /* ---------- Helpers ---------- */
@@ -87,6 +105,11 @@ const DEPOSIT_STATUS: Record<string, { label: string; cls: string }> = {
   confirmed: { label: "Dikonfirmasi", cls: "bg-green-100 text-green-700" },
   approved: { label: "Dikonfirmasi", cls: "bg-green-100 text-green-700" },
   rejected: { label: "Ditolak", cls: "bg-red-100 text-red-700" },
+};
+
+const SPLIT_STATUS: Record<string, { label: string; cls: string }> = {
+  pending: { label: "Pending", cls: "bg-yellow-100 text-yellow-700" },
+  completed: { label: "Selesai", cls: "bg-green-100 text-green-700" },
 };
 
 /* ---------- Page ---------- */
@@ -658,6 +681,19 @@ function SplitTab({ wallet, showToast }: { wallet: WalletDetail; showToast: (m: 
   const [customAmounts, setCustomAmounts] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [splits, setSplits] = useState<Split[]>([]);
+  const [splitsLoading, setSplitsLoading] = useState(true);
+
+  const loadSplits = useCallback(async () => {
+    const res = await fetch(`/api/team-wallets/${wallet.id}/splits`);
+    const d = await res.json();
+    const list = (Array.isArray(d) ? d : (d.data ?? [])) as Split[];
+    setSplits(Array.isArray(list) ? list : []);
+  }, [wallet.id]);
+
+  useEffect(() => {
+    loadSplits().catch(() => {}).finally(() => setSplitsLoading(false));
+  }, [loadSplits]);
 
   const totalNum = parseInt(total.replace(/\D/g, ""), 10) || 0;
 
@@ -724,6 +760,7 @@ function SplitTab({ wallet, showToast }: { wallet: WalletDetail; showToast: (m: 
       setTotal("");
       setSelected(new Set());
       setCustomAmounts({});
+      await loadSplits();
     } catch {
       setFormError("Terjadi kesalahan jaringan");
     } finally {
@@ -732,7 +769,8 @@ function SplitTab({ wallet, showToast }: { wallet: WalletDetail; showToast: (m: 
   }
 
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm">
+    <div className="space-y-4">
+      <div className="bg-white rounded-2xl p-5 shadow-sm">
       <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
         <Scissors className="w-4 h-4 text-primary-500" />
         Buat Split Bill
@@ -841,6 +879,66 @@ function SplitTab({ wallet, showToast }: { wallet: WalletDetail; showToast: (m: 
           {submitting ? "Memproses..." : "Buat Split Bill"}
         </button>
       </form>
+      </div>
+
+      {/* Existing splits */}
+      <div className="bg-white rounded-2xl shadow-sm">
+        <h3 className="font-bold text-gray-800 px-5 pt-4 pb-2">Daftar Split Bill</h3>
+        {splitsLoading ? (
+          <div className="p-5 space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="animate-pulse flex justify-between">
+                <div className="h-4 w-32 bg-gray-200 rounded" />
+                <div className="h-4 w-20 bg-gray-200 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : splits.length === 0 ? (
+          <p className="text-sm text-gray-500 text-center pb-6">Belum ada split bill</p>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {splits.map((s) => {
+              const st = SPLIT_STATUS[s.status] ?? { label: s.status, cls: "bg-gray-100 text-gray-700" };
+              return (
+                <div key={s.id} className="p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-800">
+                        {formatIDR(Number(s.totalAmount) || 0)}
+                        <span className="text-xs font-normal text-gray-400"> • {s.splitType === "equal" ? "Rata" : "Custom"}</span>
+                      </p>
+                      <p className="text-xs text-gray-400">{formatDate(s.createdAt)}</p>
+                    </div>
+                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 ${st.cls}`}>{st.label}</span>
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    {(s.members ?? []).map((m) => (
+                      <div key={m.customerId} className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm text-gray-700 truncate">{m.customerName ?? "Member"}</p>
+                          {m.status === "paid" && m.paidAt && (
+                            <p className="text-xs text-gray-400">Lunas {formatDate(m.paidAt)}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-sm font-medium text-gray-800">{formatIDR(Number(m.amount) || 0)}</span>
+                          <span
+                            className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                              m.status === "paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                            }`}
+                          >
+                            {m.status === "paid" ? "Lunas" : "Pending"}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

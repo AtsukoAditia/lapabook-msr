@@ -97,6 +97,7 @@ export async function GET(
 }
 
 function toPublicBooking(b: Booking) {
+  const paid = b.paidAmount ?? 0;
   return {
     id: b.id,
     bookingCode: b.bookingCode,
@@ -111,6 +112,9 @@ function toPublicBooking(b: Booking) {
     totalPrice: b.totalPrice,
     bookingStatus: b.bookingStatus,
     paymentStatus: b.paymentStatus,
+    downPaymentAmount: b.downPaymentAmount ?? 0,
+    paidAmount: paid,
+    remaining: Math.max(0, b.totalPrice - paid),
     expiresAt: b.expiresAt,
     createdAt: b.createdAt,
     updatedAt: b.updatedAt,

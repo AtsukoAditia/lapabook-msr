@@ -43,6 +43,8 @@ type PublicBooking = Pick<
   | "totalPrice"
   | "bookingStatus"
   | "paymentStatus"
+  | "downPaymentAmount"
+  | "paidAmount"
   | "expiresAt"
   | "createdAt"
   | "updatedAt"
@@ -385,6 +387,7 @@ function SuccessContent() {
         body: JSON.stringify({
           bookingCode: booking.bookingCode,
           proofUrl,
+          isSettlement: canSubmitSettlement,
         }),
       });
 
@@ -460,6 +463,9 @@ function SuccessContent() {
   const header = getHeader(booking);
   const statusCard = getStatusCard(booking, countdown);
   const canSubmitProof = booking.bookingStatus === "waiting_payment";
+  const isDpBooking = (booking.paymentStatus === "dp_paid") || ((booking.downPaymentAmount ?? 0) > 0);
+  const canSubmitSettlement = booking.bookingStatus === "confirmed" && booking.paymentStatus === "dp_paid";
+  const dpRemaining = Math.max(0, booking.totalPrice - (booking.paidAmount ?? 0));
   const isFinalOrInactive = [
     "confirmed",
     "completed",
@@ -618,6 +624,22 @@ function SuccessContent() {
                 Rp {booking.totalPrice.toLocaleString("id-ID")}
               </strong>
             </div>
+            {isDpBooking && (
+              <>
+                <div className="flex justify-between gap-4">
+                  <span className="text-slate-500">Sudah Dibayar (DP)</span>
+                  <strong className="text-right text-slate-900">
+                    Rp {(booking.paidAmount ?? 0).toLocaleString("id-ID")}
+                  </strong>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-slate-500">Sisa Tagihan</span>
+                  <strong className="text-right font-extrabold text-amber-600">
+                    Rp {dpRemaining.toLocaleString("id-ID")}
+                  </strong>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Unique Code Explanation */}
@@ -629,12 +651,12 @@ function SuccessContent() {
           </div>
         </section>
 
-        {canSubmitProof && (
+        {(canSubmitProof || canSubmitSettlement) && (
           <section className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-3">
               <h2 className="flex items-center gap-2 text-sm font-bold text-white">
                 <CreditCard className="h-4 w-4" aria-hidden="true" />
-                Instruksi Pembayaran
+                {canSubmitSettlement ? `Pelunasan — Sisa Rp ${dpRemaining.toLocaleString("id-ID")}` : "Instruksi Pembayaran"}
               </h2>
             </div>
 

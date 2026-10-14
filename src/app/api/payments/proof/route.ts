@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
     const bookingId = sanitizeHTML(String(body.bookingId || "")).slice(0, 50);
     const phone = String(body.phone || "").replace(/[^0-9+]/g, "").slice(0, 20);
     const proofUrl = sanitizeHTML(String(body.proofUrl || "")).slice(0, 2000);
+    const isSettlement = body.isSettlement === true;
 
     if (!proofUrl) {
       return NextResponse.json(
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest) {
       bookingCode,
       phone,
       proofUrl,
+      isSettlement,
     });
 
     return NextResponse.json({ success: true, booking: toPublicPaymentBooking(booking) });
@@ -55,11 +57,16 @@ export async function POST(request: NextRequest) {
 }
 
 function toPublicPaymentBooking(booking: Booking) {
+  const paid = booking.paidAmount ?? 0;
   return {
     id: booking.id,
     bookingCode: booking.bookingCode,
     bookingStatus: booking.bookingStatus,
     paymentStatus: booking.paymentStatus,
+    totalPrice: booking.totalPrice,
+    downPaymentAmount: booking.downPaymentAmount ?? 0,
+    paidAmount: paid,
+    remaining: Math.max(0, booking.totalPrice - paid),
     expiresAt: booking.expiresAt,
     updatedAt: booking.updatedAt,
   };

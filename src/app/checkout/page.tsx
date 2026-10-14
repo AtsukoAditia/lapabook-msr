@@ -62,6 +62,7 @@ function CheckoutContent() {
   const [voucherChecking, setVoucherChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isConflict, setIsConflict] = useState(false);
+  const [downPaymentType, setDownPaymentType] = useState<"full" | "dp50">("full");
   const [snapToken, setSnapToken] = useState<string | null>(null);
   const [pendingBookingCode, setPendingBookingCode] = useState<string | null>(null);
 
@@ -173,6 +174,7 @@ function CheckoutContent() {
         durationMinutes,
         notes: notes.trim() || undefined,
         voucherCode: appliedVoucher?.code || undefined,
+        downPaymentType,
       }),
     });
 
@@ -399,6 +401,41 @@ function CheckoutContent() {
             <TriangleAlert className="h-3.5 w-3.5" aria-hidden="true" /> {voucherError}
           </p>
         )}
+      </div>
+
+      {/* Pilihan pembayaran: Lunas / DP 50% */}
+      <div>
+        <span className="mb-1.5 block text-sm font-semibold text-slate-700">
+          Pilihan Pembayaran
+        </span>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setDownPaymentType("full")}
+            className={`rounded-xl border-2 p-3 text-left transition ${
+              downPaymentType === "full"
+                ? "border-orange-500 bg-orange-50"
+                : "border-slate-200 hover:border-orange-300"
+            }`}
+          >
+            <p className="text-sm font-bold text-slate-900">Lunas (100%)</p>
+            <p className="mt-0.5 text-xs font-semibold text-orange-600">{formatPrice(totalPrice)}</p>
+            <p className="text-[11px] text-slate-500">Bayar penuh sekarang</p>
+          </button>
+          <button
+            type="button"
+            onClick={() => setDownPaymentType("dp50")}
+            className={`rounded-xl border-2 p-3 text-left transition ${
+              downPaymentType === "dp50"
+                ? "border-orange-500 bg-orange-50"
+                : "border-slate-200 hover:border-orange-300"
+            }`}
+          >
+            <p className="text-sm font-bold text-slate-900">DP 50%</p>
+            <p className="mt-0.5 text-xs font-semibold text-orange-600">{formatPrice(Math.ceil(totalPrice / 2))}</p>
+            <p className="text-[11px] text-slate-500">Sisa dibayar di venue / nanti</p>
+          </button>
+        </div>
       </div>
 
       {/* CTA */}

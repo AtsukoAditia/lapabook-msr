@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
 
     const rawBody = await request.json();
     const { customerName, customerPhone, customerEmail, courtId, venueId, sportId, bookingDate, startTime, endTime, durationMinutes, notes, voucherCode } = sanitizeBookingInput(rawBody);
+    const downPaymentType = rawBody.downPaymentType === "dp50" ? "dp50" : "full";
 
     let userId: string | undefined;
     try {
@@ -85,6 +86,7 @@ export async function POST(request: NextRequest) {
       notes: notes?.trim(),
       userId,
       voucherCode: voucherCode?.trim().toUpperCase() || undefined,
+      downPaymentType,
     });
 
     return NextResponse.json(booking, { status: 201 });

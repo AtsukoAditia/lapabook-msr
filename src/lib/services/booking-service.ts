@@ -175,6 +175,7 @@ export class BookingService {
     bookingCode: string;
     phone?: string;
     proofUrl: string;
+    isSettlement?: boolean;
   }): Promise<Booking> {
     const booking = await this.adapter.getBookingByCode(input.bookingCode);
 
@@ -189,7 +190,7 @@ export class BookingService {
       throw new Error("Nomor telepon tidak sesuai dengan data booking.");
     }
 
-    this.assertCanSubmitPaymentProof(booking);
+    this.assertCanSubmitPaymentProof(booking, input.isSettlement);
 
     const result = await this.adapter.submitPaymentProof(booking.id, input.proofUrl);
 
@@ -294,7 +295,14 @@ export class BookingService {
     return booking;
   }
 
-  private assertCanSubmitPaymentProof(booking: Booking): void {
+  private assertCanSubmitPaymentProof(booking: Booking, isSettlement?: boolean): void {
+    // Pelunasan: hanya untuk booking DP yang sudah dikonfirmasi sebagian.
+    if (isSettlement) {
+      if (booking.bookingStatus !== "confirmed" || booking.paymentStatus !== "dp_paid") {
+        throw new Error("Pelunasan hanya untuk booking DP yang sudah terverifikasi sebagian.");
+      }
+      return;
+    }
     if (booking.bookingStatus !== "waiting_payment") {
       throw new Error(`Booking dalam status ${booking.bookingStatus}, tidak bisa upload bukti bayar.`);
     }

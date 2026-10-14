@@ -36,6 +36,7 @@ export async function GET(
       }
     }
 
+    const paid = booking.paidAmount ?? 0;
     return NextResponse.json({
       bookingId: booking.id,
       bookingCode: booking.bookingCode,
@@ -43,6 +44,9 @@ export async function GET(
       paymentMethod: booking.paymentMethod ?? "manual",
       midtransOrderId: booking.midtransOrderId ?? null,
       totalPrice: booking.totalPrice,
+      downPaymentAmount: booking.downPaymentAmount ?? 0,
+      paidAmount: paid,
+      remaining: Math.max(0, booking.totalPrice - paid),
     });
   } catch (error) {
     const message =

@@ -169,6 +169,8 @@ export interface Booking {
     | "expired"
     | "completed"
     | "no_show";
+  downPaymentAmount?: number;
+  paidAmount?: number;
   paymentStatus:
     | "unpaid"
     | "waiting_confirmation"

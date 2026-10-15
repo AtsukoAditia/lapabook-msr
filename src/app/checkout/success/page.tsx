@@ -322,6 +322,32 @@ function SuccessContent() {
     return () => clearInterval(intervalId);
   }, [booking?.expiresAt, booking?.bookingStatus, fetchBooking]);
 
+  // Fetch venue info for ICS location
+  useEffect(() => {
+    if (!booking?.venueId) return;
+    fetch("/api/venues")
+      .then((r) => r.json())
+      .then((d) => {
+        const venues: VenueInfo[] = d.venues ?? d.data ?? [];
+        const found = venues.find((v) => v.id === booking.venueId);
+        if (found) setVenueInfo(found);
+      })
+      .catch(() => {});
+  }, [booking?.venueId]);
+
+  // Fetch sport name for ICS summary
+  useEffect(() => {
+    if (!booking?.sportId) return;
+    fetch("/api/sports")
+      .then((r) => r.json())
+      .then((d) => {
+        const sports: SportInfo[] = d.sports ?? d.data ?? [];
+        const found = sports.find((s) => s.id === booking.sportId);
+        if (found) setSportName(found.name);
+      })
+      .catch(() => {});
+  }, [booking?.sportId]);
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -473,32 +499,6 @@ function SuccessContent() {
     "rejected",
     "cancelled",
   ].includes(booking.bookingStatus);
-
-  // Fetch venue info for ICS location
-  useEffect(() => {
-    if (!booking?.venueId) return;
-    fetch("/api/venues")
-      .then((r) => r.json())
-      .then((d) => {
-        const venues: VenueInfo[] = d.venues ?? d.data ?? [];
-        const found = venues.find((v) => v.id === booking.venueId);
-        if (found) setVenueInfo(found);
-      })
-      .catch(() => {});
-  }, [booking?.venueId]);
-
-  // Fetch sport name for ICS summary
-  useEffect(() => {
-    if (!booking?.sportId) return;
-    fetch("/api/sports")
-      .then((r) => r.json())
-      .then((d) => {
-        const sports: SportInfo[] = d.sports ?? d.data ?? [];
-        const found = sports.find((s) => s.id === booking.sportId);
-        if (found) setSportName(found.name);
-      })
-      .catch(() => {});
-  }, [booking?.sportId]);
 
   function handleDownloadICS() {
     if (!booking) return;
